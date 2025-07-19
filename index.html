@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGE: Secondary Academy Generator of Exercises ✨</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX CSS for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" xintegrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+    <!-- KaTeX JS for math rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Georgia', serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
+            color: #374151;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .main-container {
+            background: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(60, 72, 88, 0.12);
+            border: 1px solid #e5e7eb;
+            max-width: 48rem;
+            width: 100%;
+            margin-top: 3rem;
+            padding: 2.5rem 2rem;
+        }
+        .logo {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 18px;
+            display: block;
+            border-radius: 50%;
+            border: 2px solid #6366f1;
+            background: #e0e7ff;
+            object-fit: cover;
+        }
+        h1 {
+            color: #2d3748;
+            font-family: 'Georgia', serif;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #4b5563;
+            font-family: 'Georgia', serif;
+            font-size: 1.15rem;
+            margin-bottom: 2rem;
+            font-weight: normal;
+        }
+        .subtitle span {
+            font-weight: bold;
+            color: #6366f1;
+        }
+        label {
+            color: #374151;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="password"], textarea, select {
+            background: #f3f4f6;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #6366f1;
+            outline: none;
+        }
+        .action-btn {
+            background: #6366f1;
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .action-btn:hover {
+            background: #4338ca;
+        }
+        .action-btn:focus {
+            outline: 2px solid #6366f1;
+            outline-offset: 2px;
+        }
+        .api-key-container {
+            background: #f3f4f6;
+            border: 1px solid #cbd5e1;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .question-item {
+            background: #f9fafb;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.06);
+        }
+        .answer-content {
+            background: #eef2ff;
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .latex-view {
+            font-family: 'Courier New', monospace;
+            background: #f3f4f6;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: #374151;
+            display: none;
+            overflow-x: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            background: none;
+        }
+        .footer p {
+            font-size: 0.95rem;
+        }
+        @media (max-width: 640px) {
+            .main-container {
+                padding: 1.25rem;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="main-container">
+        <main id="main-content">
+            <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
+            <h1>SAGE</h1>
+            <div class="subtitle">
+                <span>S</span>econdary <span>A</span>cademy <span>G</span>enerator of <span>E</span>xercises ✨
+            </div>
+
+            <!-- API Key Configuration -->
+            <div id="apiKeyContainer" class="api-key-container">
+                <label for="apiKeyInput" class="block text-sm font-semibold text-gray-200 mb-2">
+                    Gemini API Key (required):
+                </label>
+                <div class="flex gap-2">
+                    <input type="password" id="apiKeyInput" class="flex-1" placeholder="Enter your Gemini API key" aria-label="Gemini API Key">
+                    <button id="saveApiKeyBtn" class="action-btn bg-red-600 hover:bg-red-700" aria-label="Save API Key">
+                        Save
+                    </button>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">
+                    Your API key is stored locally and never sent to our servers.
+                </p>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <label for="mathTopic" class="block text-lg font-semibold mb-2">
+                        Maths Topic & Grade Level <span class="text-gray-400 text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
+                    </label>
+                    <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
+                </div>
+
+                <div>
+                    <label for="difficulty" class="block text-lg font-semibold mb-2">
+                        Difficulty Level:
+                    </label>
+                    <select id="difficulty" class="w-full p-3 shadow-sm" aria-label="Difficulty Level">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                        <option value="Challenging">Challenging</option>
+                    </select>
+                </div>
+
+                <button id="generateQuestionsBtn" class="w-full bg-red-600 text-white font-extrabold py-4 px-6 rounded-xl hover:bg-red-700 transition-all duration-300 ease-in-out shadow-lg transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-400 flex items-center justify-center text-xl" aria-label="Generate Math Questions">
+                    Generate Maths Questions! ➕
+                </button>
+
+                <div id="loadingIndicator" class="hidden text-center text-red-400 text-lg font-semibold mt-4" role="status" aria-live="polite">
+                    <span class="spinner"></span> Crunching numbers... Please wait.
+                </div>
+
+                <div id="questionsContainer" class="hidden mt-10 border-t-2 border-gray-700 pt-10">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                        <h2 class="text-3xl font-bold text-white text-center sm:text-left flex-grow">Your Generated Questions</h2>
+                        <div class="flex gap-2 flex-wrap">
+                            <button id="exportQuestionsBtn" class="action-btn bg-red-500 hover:bg-red-600 text-sm sm:text-base" aria-label="Export questions to text file">
+                                Export Questions
+                            </button>
+                            <button id="toggleMathViewBtn" class="action-btn bg-gray-500 hover:bg-gray-600 text-sm sm:text-base" aria-label="Toggle between rendered math and raw LaTeX view">
+                                Toggle Maths View (Rendered)
+                            </button>
+                        </div>
+                    </div>
+                    <div id="mathQuestionsList" class="space-y-8" role="list">
+                        <!-- Math questions will be inserted here -->
+                    </div>
+                    <button id="resetBtn" class="hidden w-full bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-400 mt-8" aria-label="Generate New Questions">
+                        Generate New Questions
+                    </button>
+                </div>
+
+                <div id="messageContainer" class="mt-8" role="alert" aria-live="polite">
+                    <p class="text-gray-400 text-center" id="initialMessage">Your generated maths questions will appear here.</p>
+                </div>
+            </div>
+        </main>
+        <footer class="footer">
+            <p>&copy; 2025 MathConcept Secondary Academy. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // NOTE: Javascript logic remains the same, only styling was updated.
+        // Configuration constants
+        const CONFIG = {
+            API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+            MAX_RETRIES: 3,
+            RETRY_DELAY: 1000,
+            STORAGE_KEY: 'sage_api_key',
+            MESSAGE_TIMEOUT: 3000
+        };
+
+        // Get references to DOM elements
+        const mathTopicInput = document.getElementById('mathTopic');
+        const difficultySelect = document.getElementById('difficulty');
+        const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const questionsContainer = document.getElementById('questionsContainer');
+        const mathQuestionsList = document.getElementById('mathQuestionsList');
+        const resetBtn = document.getElementById('resetBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        const initialMessage = document.getElementById('initialMessage');
+        const toggleMathViewBtn = document.getElementById('toggleMathViewBtn');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        const apiKeyContainer = document.getElementById('apiKeyContainer');
+        const exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
+
+        let isMathRendered = true; // Default state: math is rendered
+        let isKaTeXLoaded = false;
+        let currentQuestions = []; // Store current questions for export
+        let mathRenderCache = new Map(); // Cache for rendered math content
+
+        // Initialize the application
+        function initializeApp() {
+            // Load saved API key
+            const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+                apiKeyContainer.style.display = 'none';
+            }
+
+            // Check if KaTeX is loaded
+            checkKaTeXLoaded();
+        }
+
+        // Check if KaTeX is properly loaded
+        function checkKaTeXLoaded() {
+            if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
+                isKaTeXLoaded = true;
+                console.log('KaTeX loaded successfully');
+            } else {
+                isKaTeXLoaded = false;
+                displayMessage('Warning: Math rendering library failed to load. Math expressions may not display correctly.', 'text-amber-400');
+                console.error('KaTeX failed to load');
+            }
+        }
+
+        // Event listeners
+        generateQuestionsBtn.addEventListener('click', generateMathQuestions);
+        resetBtn.addEventListener('click', resetGenerator);
+        toggleMathViewBtn.addEventListener('click', toggleMathView);
+        saveApiKeyBtn.addEventListener('click', saveApiKey);
+        exportQuestionsBtn.addEventListener('click', exportQuestions);
+
+        // Keyboard navigation support
+        document.addEventListener('keydown', handleKeyboardNavigation);
+        
+        // Enter key support for API key input
+        apiKeyInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveApiKey();
+            }
+        });
+
+        // Enter key support for topic input
+        mathTopicInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                e.preventDefault();
+                generateMathQuestions();
+            }
+        });
+
+        function handleKeyboardNavigation(e) {
+            // ESC key to close revealed answers
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.answer-content').forEach(content => {
+                    if (content.style.display === 'block') {
+                        content.style.display = 'none';
+                        const revealBtn = content.parentElement.querySelector('.action-btn:last-child');
+                        if (revealBtn) {
+                            revealBtn.textContent = 'Show Answer & Steps';
+                            revealBtn.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Export questions to text file
+        function exportQuestions() {
+            if (currentQuestions.length === 0) {
+                displayMessage('No questions to export. Generate some questions first.', 'text-orange-400');
+                return;
+            }
+
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const topic = mathTopicInput.value.trim() || 'Math Questions';
+            const difficulty = difficultySelect.value;
+            
+            let exportContent = `Math Questions Export\n`;
+            exportContent += `Generated on: ${new Date().toLocaleString()}\n`;
+            exportContent += `Topic: ${topic}\n`;
+            exportContent += `Difficulty: ${difficulty}\n`;
+            exportContent += `\n${'='.repeat(50)}\n\n`;
+
+            currentQuestions.forEach((problem, index) => {
+                exportContent += `Problem ${index + 1}:\n`;
+                exportContent += `${problem.question}\n\n`;
+                exportContent += `Answer:\n${problem.correctAnswer}\n\n`;
+                exportContent += `Solution:\n${problem.stepByStepSolution.replace(/\\n/g, '\n')}\n\n`;
+                exportContent += `${'-'.repeat(30)}\n\n`;
+            });
+
+            // Create and download file
+            const blob = new Blob([exportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sage-questions-${timestamp}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            displayMessage('Questions exported successfully!', 'text-green-400');
+        }
+
+        // Performance optimization: Debounced input validation
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Enhanced input validation
+        function validateInput(topic) {
+            if (!topic || topic.trim().length < 3) {
+                return 'Please enter a maths topic with at least 3 characters.';
+            }
+            if (topic.length > 500) {
+                return 'Maths topic is too long. Please keep it under 500 characters.';
+            }
+            
+            // Check for potentially harmful content
+            const suspiciousPatterns = [
+                /<script/i,
+                /javascript:/i,
+                /on\w+\s*=/i,
+                /data:text\/html/i
+            ];
+            
+            if (suspiciousPatterns.some(pattern => pattern.test(topic))) {
+                return 'Invalid characters detected in input. Please use only text and mathematical expressions.';
+            }
+            
+            return null;
+        }
+
+        // Validate API key format
+        function validateApiKey(apiKey) {
+            if (!apiKey || apiKey.trim().length < 10) {
+                return 'API key appears to be too short. Please check your Gemini API key.';
+            }
+            if (!/^[A-Za-z0-9_-]+$/.test(apiKey)) {
+                return 'API key contains invalid characters. Please check your Gemini API key.';
+            }
+            return null;
+        }
+
+        // Sanitize HTML content
+        function sanitizeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Save API key with validation
+        function saveApiKey() {
+            const apiKey = apiKeyInput.value.trim();
+            
+            const validationError = validateApiKey(apiKey);
+            if (validationError) {
+                displayMessage(validationError, 'text-red-500');
+                apiKeyInput.focus();
+                return;
+            }
+            
+            localStorage.setItem(CONFIG.STORAGE_KEY, apiKey);
+            apiKeyContainer.style.display = 'none';
+            displayMessage('API key saved successfully!', 'text-green-400');
+        }
+
+        // Function to render math when content is added to the DOM
+        function renderMathContent(element) {
+            if (!isKaTeXLoaded) {
+                console.warn('KaTeX not loaded, skipping math rendering');
+                return;
+            }
+
+            const mathElements = element.querySelectorAll('.math-rendered');
+            mathElements.forEach(mathEl => {
+                const content = mathEl.textContent;
+                const cacheKey = content;
+                
+                if (mathRenderCache.has(cacheKey)) {
+                    mathEl.innerHTML = mathRenderCache.get(cacheKey);
+                } else {
+                    try {
+                        renderMathInElement(mathEl, {
+                            delimiters: [
+                                {left: "$$", right: "$$", display: true},
+                                {left: "$", right: "$", display: false}
+                            ],
+                            throwOnError: false,
+                            errorColor: '#ef4444'
+                        });
+                        mathRenderCache.set(cacheKey, mathEl.innerHTML);
+                    } catch (error) {
+                        console.error('Error rendering math:', error);
+                        displayMessage('Error rendering mathematical expressions.', 'text-red-500');
+                    }
+                }
+            });
+        }
+
+        // Function to toggle between rendered math and raw LaTeX
+        function toggleMathView() {
+            isMathRendered = !isMathRendered;
+            toggleMathViewBtn.textContent = isMathRendered ? 'Toggle Math View (Rendered)' : 'Toggle Math View (Raw LaTeX)';
+
+            document.querySelectorAll('.math-rendered').forEach(renderedDiv => {
+                renderedDiv.style.display = isMathRendered ? 'block' : 'none';
+            });
+            document.querySelectorAll('.latex-view').forEach(latexDiv => {
+                latexDiv.style.display = isMathRendered ? 'none' : 'block';
+            });
+        }
+
+        // Modern clipboard API with fallback
+        async function copyToClipboard(text) {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    displayMessage("Copied to clipboard!", "text-green-400");
+                } else {
+                    // Fallback for older browsers or non-secure contexts
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    
+                    if (successful) {
+                        displayMessage("Copied to clipboard!", "text-green-400");
+                    } else {
+                        throw new Error('Copy command failed');
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                displayMessage("Failed to copy text. Please copy manually.", "text-red-500");
+            }
+            
+            // Hide message after timeout
+            setTimeout(() => { 
+                if (messageContainer.innerHTML.includes('Copied to clipboard') || messageContainer.innerHTML.includes('Failed to copy')) {
+                    messageContainer.innerHTML = ''; 
+                }
+            }, CONFIG.MESSAGE_TIMEOUT);
+        }
+
+        // Retry mechanism for API calls
+        async function makeAPICallWithRetry(url, payload, retries = CONFIG.MAX_RETRIES) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API call attempt ${i + 1} failed:`, error);
+                    
+                    if (i === retries - 1) {
+                        throw error; // Last attempt failed
+                    }
+                    
+                    // Wait before retrying
+                    await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * (i + 1)));
+                }
+            }
+        }
+
+        async function generateMathQuestions() {
+            const mathTopic = mathTopicInput.value.trim();
+            const difficulty = difficultySelect.value;
+            const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+
+            // Validation
+            if (!apiKey) {
+                apiKeyContainer.style.display = 'block';
+                displayMessage("Please enter your Gemini API key first.", "text-red-500");
+                return;
+            }
+
+            const validationError = validateInput(mathTopic);
+            if (validationError) {
+                displayMessage(validationError, "text-red-500");
+                return;
+            }
+
+            // Hide previous messages/questions, show loading
+            initialMessage.classList.add('hidden');
+            questionsContainer.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            generateQuestionsBtn.disabled = true;
+            mathQuestionsList.innerHTML = ''; // Clear previous questions
+            messageContainer.innerHTML = ''; // Clear any previous error messages
+
+            // Construct the prompt for the Gemini API
+            const prompt = `
+                Generate 3 math problems for the following topic and grade level, with a difficulty level of "${difficulty}".
+                For each problem, provide:
+                - A "question" in LaTeX format (use $$ for display math, $ for inline math).
+                - A "correctAnswer" in LaTeX format.
+                - A "stepByStepSolution" in LaTeX format, explaining how to solve the problem.
+
+                Math Topic & Grade Level: ${sanitizeHTML(mathTopic)}
+                Difficulty: ${difficulty}
+
+                Provide the output as a JSON array of objects. Each object in the array represents one problem.
+                Example JSON structure:
+                [
+                  {
+                    "question": "$$2x + 5 = 11$$ Solve for x.",
+                    "correctAnswer": "$$x = 3$$",
+                    "stepByStepSolution": "To solve $2x + 5 = 11$: \\n 1. Subtract 5 from both sides: $2x = 11 - 5 \\implies 2x = 6$. \\n 2. Divide by 2: $x = 6 / 2 \\implies x = 3$."
+                  },
+                  {
+                    "question": "What is the area of a rectangle with length $l = 5$ cm and width $w = 3$ cm?",
+                    "correctAnswer": "$$15 \\text{ cm}^2$$",
+                    "stepByStepSolution": "The area of a rectangle is given by the formula $A = l \\times w$. \\n Given $l=5$ cm and $w=3$ cm, \\n $A = 5 \\times 3 = 15 \\text{ cm}^2$."
+                  }
+                ]
+                Ensure the LaTeX is correctly escaped for JSON strings.
+            `;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "question": { "type": "STRING" },
+                                    "correctAnswer": { "type": "STRING" },
+                                    "stepByStepSolution": { "type": "STRING" }
+                                },
+                                "propertyOrdering": ["question", "correctAnswer", "stepByStepSolution"]
+                            }
+                        }
+                    }
+                };
+
+                const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
+                const result = await makeAPICallWithRetry(apiUrl, payload);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    try {
+                        const mathProblems = JSON.parse(jsonText);
+                        if (Array.isArray(mathProblems) && mathProblems.length > 0) {
+                            displayMathQuestions(mathProblems);
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    } catch (parseError) {
+                        console.error("Error parsing JSON response:", parseError);
+                        displayMessage("Sorry, I received an invalid response format. Please try again.", "text-red-500");
+                    }
+                } else {
+                    displayMessage("Sorry, I couldn't generate math problems. Please check your API key and try again.", "text-red-500");
+                    console.error("Gemini API response structure unexpected:", result);
+                }
+
+            } catch (error) {
+                console.error("Error generating math questions:", error);
+                
+                if (error.message.includes('401') || error.message.includes('403')) {
+                    displayMessage("Invalid API key. Please check your Gemini API key and try again.", "text-red-500");
+                    apiKeyContainer.style.display = 'block';
+                } else if (error.message.includes('429')) {
+                    displayMessage("Rate limit exceeded. Please wait a moment and try again.", "text-red-500");
+                } else {
+                    displayMessage("An error occurred while generating questions. Please try again later.", "text-red-500");
+                }
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                generateQuestionsBtn.disabled = false;
+            }
+        }
+
+        function displayMathQuestions(problems) {
+            mathQuestionsList.innerHTML = ''; // Clear previous questions
+            currentQuestions = problems; // Store for export functionality
+            
+            if (!Array.isArray(problems) || problems.length === 0) {
+                displayMessage("No math problems were generated. Please try with a different topic.", "text-orange-400");
+                return;
+            }
+
+            problems.forEach((problem, index) => {
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'question-item';
+                problemDiv.style.animationDelay = `${index * 0.1}s`; // Staggered animation
+                problemDiv.setAttribute('role', 'listitem');
+
+                const questionHeader = document.createElement('h3');
+                questionHeader.className = 'text-xl font-semibold text-white mb-4';
+                questionHeader.textContent = `Problem ${index + 1}:`;
+                problemDiv.appendChild(questionHeader);
+
+                // Container for rendered math
+                const questionRenderedDiv = document.createElement('div');
+                questionRenderedDiv.className = 'text-lg text-gray-200 mb-4 math-rendered';
+                questionRenderedDiv.textContent = problem.question; // KaTeX will render this
+                problemDiv.appendChild(questionRenderedDiv);
+
+                // Container for raw LaTeX
+                const questionLatexDiv = document.createElement('div');
+                questionLatexDiv.className = 'latex-view'; // Hidden by default initially
+                questionLatexDiv.textContent = problem.question;
+                problemDiv.appendChild(questionLatexDiv);
+
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'flex flex-wrap gap-2 mt-4';
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'action-btn bg-gray-600 hover:bg-gray-700';
+                copyBtn.textContent = 'Copy Question';
+                copyBtn.setAttribute('aria-label', `Copy question ${index + 1}`);
+                copyBtn.addEventListener('click', () => copyToClipboard(problem.question));
+                buttonContainer.appendChild(copyBtn);
+
+                const revealBtn = document.createElement('button');
+                revealBtn.className = 'action-btn bg-red-600 hover:bg-red-700';
+                revealBtn.textContent = 'Show Answer & Steps';
+                revealBtn.setAttribute('aria-label', `Show answer and steps for question ${index + 1}`);
+                buttonContainer.appendChild(revealBtn);
+
+                problemDiv.appendChild(buttonContainer);
+
+                const answerContentDiv = document.createElement('div');
+                answerContentDiv.className = 'answer-content text-gray-300';
+                answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(problem.correctAnswer)}</div>` +
+                                             `<div class="latex-view">${sanitizeHTML(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
+                                             `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>` +
+                                             `<div class="latex-view">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`; // Raw LaTeX for solution
+                problemDiv.appendChild(answerContentDiv);
+
+                revealBtn.addEventListener('click', () => {
+                    const isVisible = answerContentDiv.style.display === 'block';
+                    answerContentDiv.style.display = isVisible ? 'none' : 'block';
+                    revealBtn.textContent = isVisible ? 'Show Answer & Steps' : 'Hide Answer & Steps';
+                    revealBtn.setAttribute('aria-expanded', !isVisible);
+                    
+                    // Re-render math in the revealed section if it's currently rendered view
+                    if (!isVisible && isMathRendered && isKaTeXLoaded) {
+                         renderMathContent(answerContentDiv);
+                    }
+                });
+
+                mathQuestionsList.appendChild(problemDiv);
+            });
+
+            questionsContainer.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+            
+            // Initial rendering of math after questions are added to DOM
+            if (isKaTeXLoaded) {
+                renderMathContent(mathQuestionsList); // Trigger KaTeX rendering for newly added content
+            }
+            
+            // Ensure initial view state is applied based on isMathRendered
+            document.querySelectorAll('.math-rendered').forEach(renderedDiv => {
+                renderedDiv.style.display = isMathRendered ? 'block' : 'none';
+            });
+            document.querySelectorAll('.latex-view').forEach(latexDiv => {
+                latexDiv.style.display = isMathRendered ? 'none' : 'block';
+            });
+        }
+
+        function resetGenerator() {
+            mathTopicInput.value = ''; // Clear input
+            difficultySelect.value = 'Medium'; // Reset difficulty
+            mathQuestionsList.innerHTML = ''; // Clear questions
+            currentQuestions = []; // Clear stored questions
+            questionsContainer.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            initialMessage.classList.remove('hidden'); // Show initial message again
+            messageContainer.innerHTML = ''; // Clear any messages
+        }
+
+        function displayMessage(message, colorClass) {
+            const messageElement = document.createElement('p');
+            messageElement.className = `text-center ${colorClass} font-medium py-4`;
+            messageElement.textContent = message;
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(messageElement);
+            
+            initialMessage.classList.add('hidden');
+            loadingIndicator.classList.add('hidden');
+            
+            if (colorClass.includes('red') || colorClass.includes('amber')) {
+                questionsContainer.classList.add('hidden'); // Hide questions if error
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Check KaTeX loading after a delay
+        setTimeout(checkKaTeXLoaded, 1000);
+    </script>
+</body>
+</html>
