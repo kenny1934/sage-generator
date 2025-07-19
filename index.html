@@ -15,8 +15,8 @@
     <style>
         body {
             font-family: 'Inter', 'Georgia', serif;
-            background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%);
-            color: #374151;
+            background: radial-gradient(ellipse at top left, #23272f 60%, #18181b 100%);
+            color: #e5e7eb;
             min-height: 100vh;
             margin: 0;
             padding: 0;
@@ -25,97 +25,128 @@
             align-items: flex-start;
         }
         .main-container {
-            background: #fff;
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 32px rgba(60, 72, 88, 0.12);
-            border: 1px solid #e5e7eb;
-            max-width: 48rem;
+            background: rgba(44, 46, 56, 0.98);
+            border-radius: 2rem;
+            box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
+            border: none;
+            max-width: 44rem;
             width: 100%;
-            margin-top: 3rem;
-            padding: 2.5rem 2rem;
+            margin-top: 3.5rem;
+            padding: 3rem 2.2rem 2.5rem 2.2rem;
         }
         .logo {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 18px;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
             display: block;
             border-radius: 50%;
-            border: 2px solid #6366f1;
-            background: #e0e7ff;
+            border: 2px solid #f87171;
+            background: #23272f;
             object-fit: cover;
+            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.10);
         }
-        h1 {
-            color: #2d3748;
+        .sage-title {
+            color: #fff;
             font-family: 'Georgia', serif;
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
+            font-size: 2.4rem;
+            font-weight: 900;
+            margin-bottom: 0.2rem;
+            margin-top: 0.5rem;
+            letter-spacing: 1.5px;
+            text-align: center;
+            line-height: 1.1;
         }
-        .subtitle {
-            color: #4b5563;
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+            border-radius: 2px;
+            margin: 0.5rem auto 1.2rem auto;
+        }
+        .full-name {
+            color: #f87171;
             font-family: 'Georgia', serif;
-            font-size: 1.15rem;
-            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            margin-bottom: 1.7rem;
             font-weight: normal;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
-        .subtitle span {
+        .full-name .em {
+            color: #ef4444;
             font-weight: bold;
-            color: #6366f1;
+            font-size: 1.15em;
+            font-family: 'Georgia', serif;
+            margin-right: 2px;
+        }
+        .subtitle-edu {
+            color: #e5e7eb;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 2.2rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            letter-spacing: 0.2px;
         }
         label {
-            color: #374151;
+            color: #e5e7eb;
             font-weight: 500;
+            font-size: 1.08rem;
         }
         input[type="text"], input[type="password"], textarea, select {
-            background: #f3f4f6;
-            border: 1px solid #cbd5e1;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
+            background: #23272f;
+            border: 1px solid #f87171;
+            padding: 0.85rem 1.1rem;
+            border-radius: 0.85rem;
             width: 100%;
-            color: #374151;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
+            color: #e5e7eb;
+            margin-bottom: 0.7rem;
+            font-size: 1.08rem;
             transition: border-color 0.2s;
         }
         input:focus, textarea:focus, select:focus {
-            border-color: #6366f1;
+            border-color: #ef4444;
             outline: none;
         }
         .action-btn {
-            background: #6366f1;
+            background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
             color: #fff;
-            padding: 0.5rem 1.25rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
+            padding: 0.7rem 1.5rem;
+            border-radius: 0.7rem;
+            font-weight: 600;
             border: none;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.10);
         }
         .action-btn:hover {
-            background: #4338ca;
+            background: linear-gradient(90deg, #f87171 0%, #ef4444 100%);
+            transform: translateY(-2px) scale(1.04);
         }
         .action-btn:focus {
-            outline: 2px solid #6366f1;
+            outline: 2px solid #f87171;
             outline-offset: 2px;
         }
         .api-key-container {
-            background: #f3f4f6;
-            border: 1px solid #cbd5e1;
-            padding: 1rem;
+            background: #23272f;
+            border: 1px solid #f87171;
+            padding: 0.7rem 1rem;
             border-radius: 0.75rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
+            font-size: 0.98rem;
+            opacity: 0.85;
         }
         .question-item {
-            background: #f9fafb;
+            background: #23272f;
             border-radius: 1rem;
-            border: 1px solid #e5e7eb;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
+            border: 1px solid #f87171;
+            padding: 1.15rem;
+            margin-bottom: 1.2rem;
             box-shadow: 0 2px 8px rgba(60, 72, 88, 0.06);
         }
         .answer-content {
-            background: #eef2ff;
-            border-left: 4px solid #6366f1;
+            background: #23272f;
+            border-left: 4px solid #ef4444;
             padding: 1rem;
             border-radius: 0.5rem;
             margin-top: 1rem;
@@ -123,12 +154,12 @@
         }
         .latex-view {
             font-family: 'Courier New', monospace;
-            background: #f3f4f6;
+            background: #18181b;
             padding: 0.75rem;
             border-radius: 0.5rem;
             margin-top: 0.5rem;
             font-size: 0.95rem;
-            color: #374151;
+            color: #e5e7eb;
             display: none;
             overflow-x: auto;
         }
@@ -136,8 +167,8 @@
             text-align: center;
             margin-top: 4rem;
             padding-top: 2rem;
-            border-top: 1px solid #e5e7eb;
-            color: #6b7280;
+            border-top: 1px solid #ef4444;
+            color: #f87171;
             background: none;
         }
         .footer p {
@@ -147,23 +178,23 @@
             .main-container {
                 padding: 1.25rem;
             }
-            h1 {
-                font-size: 1.3rem;
+            .sage-title {
+                font-size: 1.7rem;
             }
-            .subtitle {
+            .full-name {
                 font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div class="main-container">
         <main id="main-content">
             <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
-            <h1>SAGE</h1>
-            <div class="subtitle">
-                <span>S</span>econdary <span>A</span>cademy <span>G</span>enerator of <span>E</span>xercises ✨
+            <h1 class="sage-title">SAGE</h1>
+            <div class="divider"></div>
+            <div class="full-name">
+                <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
             </div>
 
             <!-- API Key Configuration -->
