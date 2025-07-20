@@ -620,6 +620,9 @@
                             <button id="exportQuestionsBtn" class="action-btn bg-red-500 hover:bg-red-600 text-sm sm:text-base" aria-label="Export questions to text file">
                                 Export Questions
                             </button>
+                            <button id="showFavoritesBtn" class="action-btn bg-yellow-600 hover:bg-yellow-700 text-sm sm:text-base" aria-label="View your favorite questions" onclick="showFavoritesPanel()">
+                                ⭐ Favorites
+                            </button>
                             <button id="toggleMathViewBtn" class="action-btn bg-gray-500 hover:bg-gray-600 text-sm sm:text-base" aria-label="Toggle between rendered math and raw LaTeX view">
                                 Toggle Maths View (Rendered)
                             </button>
@@ -665,7 +668,12 @@
             MAX_RETRIES: 3,
             RETRY_DELAY: 1000,
             STORAGE_KEY: 'sage_api_key',
-            MESSAGE_TIMEOUT: 3000
+            MESSAGE_TIMEOUT: 3000,
+            // New storage keys for Phase 3 features
+            PREFERENCES_KEY: 'sage_preferences',
+            HISTORY_KEY: 'sage_history',
+            FAVORITES_KEY: 'sage_favorites',
+            STATS_KEY: 'sage_stats'
         };
 
         // Get references to DOM elements
@@ -693,6 +701,195 @@
         let currentQuestionIndex = 0;
         let totalQuestions = 0;
 
+        // Phase 3: Data Management and Personalization
+        class DataManager {
+            static loadPreferences() {
+                try {
+                    const preferences = localStorage.getItem(CONFIG.PREFERENCES_KEY);
+                    return preferences ? JSON.parse(preferences) : {
+                        preferredDifficulty: 'Medium',
+                        preferredTopics: [],
+                        lastUsedTopic: '',
+                        autoSaveHistory: true,
+                        maxHistoryItems: 50
+                    };
+                } catch (error) {
+                    console.error('Error loading preferences:', error);
+                    return this.getDefaultPreferences();
+                }
+            }
+
+            static savePreferences(preferences) {
+                try {
+                    localStorage.setItem(CONFIG.PREFERENCES_KEY, JSON.stringify(preferences));
+                } catch (error) {
+                    console.error('Error saving preferences:', error);
+                }
+            }
+
+            static getDefaultPreferences() {
+                return {
+                    preferredDifficulty: 'Medium',
+                    preferredTopics: [],
+                    lastUsedTopic: '',
+                    autoSaveHistory: true,
+                    maxHistoryItems: 50
+                };
+            }
+
+            static loadHistory() {
+                try {
+                    const history = localStorage.getItem(CONFIG.HISTORY_KEY);
+                    return history ? JSON.parse(history) : [];
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                    return [];
+                }
+            }
+
+            static saveHistory(historyItems) {
+                try {
+                    const preferences = this.loadPreferences();
+                    if (!preferences.autoSaveHistory) return;
+
+                    // Limit history size
+                    const limitedHistory = historyItems.slice(0, preferences.maxHistoryItems);
+                    localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(limitedHistory));
+                } catch (error) {
+                    console.error('Error saving history:', error);
+                }
+            }
+
+            static addToHistory(topic, difficulty, questionsCount = 3) {
+                const history = this.loadHistory();
+                const historyItem = {
+                    id: Date.now(),
+                    topic: topic.trim(),
+                    difficulty,
+                    questionsCount,
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString()
+                };
+
+                // Remove duplicate topics (keep most recent)
+                const filteredHistory = history.filter(item => 
+                    item.topic.toLowerCase() !== topic.toLowerCase().trim()
+                );
+
+                // Add new item at the beginning
+                const updatedHistory = [historyItem, ...filteredHistory];
+                this.saveHistory(updatedHistory);
+                this.updateStats(topic, difficulty);
+
+                return updatedHistory;
+            }
+
+            static getRecentTopics(limit = 6) {
+                const history = this.loadHistory();
+                return history.slice(0, limit).map(item => ({
+                    topic: item.topic,
+                    difficulty: item.difficulty,
+                    lastUsed: item.date
+                }));
+            }
+
+            static loadStats() {
+                try {
+                    const stats = localStorage.getItem(CONFIG.STATS_KEY);
+                    return stats ? JSON.parse(stats) : {
+                        totalQuestions: 0,
+                        totalSessions: 0,
+                        favoriteTopics: {},
+                        difficultyDistribution: {},
+                        firstUsed: new Date().toISOString(),
+                        lastUsed: new Date().toISOString()
+                    };
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                    return this.getDefaultStats();
+                }
+            }
+
+            static saveStats(stats) {
+                try {
+                    localStorage.setItem(CONFIG.STATS_KEY, JSON.stringify(stats));
+                } catch (error) {
+                    console.error('Error saving stats:', error);
+                }
+            }
+
+            static updateStats(topic, difficulty) {
+                const stats = this.loadStats();
+                
+                stats.totalQuestions += 3; // Assuming 3 questions per generation
+                stats.totalSessions += 1;
+                stats.lastUsed = new Date().toISOString();
+
+                // Track favorite topics
+                const topicKey = topic.toLowerCase().trim();
+                stats.favoriteTopics[topicKey] = (stats.favoriteTopics[topicKey] || 0) + 1;
+
+                // Track difficulty distribution
+                stats.difficultyDistribution[difficulty] = (stats.difficultyDistribution[difficulty] || 0) + 1;
+
+                this.saveStats(stats);
+            }
+
+            static getDefaultStats() {
+                return {
+                    totalQuestions: 0,
+                    totalSessions: 0,
+                    favoriteTopics: {},
+                    difficultyDistribution: {},
+                    firstUsed: new Date().toISOString(),
+                    lastUsed: new Date().toISOString()
+                };
+            }
+
+            static loadFavorites() {
+                try {
+                    const favorites = localStorage.getItem(CONFIG.FAVORITES_KEY);
+                    return favorites ? JSON.parse(favorites) : [];
+                } catch (error) {
+                    console.error('Error loading favorites:', error);
+                    return [];
+                }
+            }
+
+            static saveFavorites(favorites) {
+                try {
+                    localStorage.setItem(CONFIG.FAVORITES_KEY, JSON.stringify(favorites));
+                } catch (error) {
+                    console.error('Error saving favorites:', error);
+                }
+            }
+
+            static addToFavorites(question, answer, solution, topic, difficulty) {
+                const favorites = this.loadFavorites();
+                const favorite = {
+                    id: Date.now(),
+                    question,
+                    answer,
+                    solution,
+                    topic,
+                    difficulty,
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleDateString()
+                };
+
+                favorites.unshift(favorite);
+                this.saveFavorites(favorites);
+                return favorites;
+            }
+
+            static removeFromFavorites(favoriteId) {
+                const favorites = this.loadFavorites();
+                const updatedFavorites = favorites.filter(fav => fav.id !== favoriteId);
+                this.saveFavorites(updatedFavorites);
+                return updatedFavorites;
+            }
+        }
+
         // Initialize the application
         function initializeApp() {
             // Load saved API key
@@ -701,6 +898,12 @@
                 apiKeyInput.value = savedApiKey;
                 apiKeyContainer.style.display = 'none';
             }
+
+            // Phase 3: Load user preferences and apply them
+            loadAndApplyUserPreferences();
+            
+            // Phase 3: Initialize personalization features
+            initializePersonalizationFeatures();
 
             // Check if KaTeX is loaded
             checkKaTeXLoaded();
@@ -715,6 +918,292 @@
             initializeSmartInput();
         }
 
+        // Phase 3: Load and apply user preferences
+        function loadAndApplyUserPreferences() {
+            const preferences = DataManager.loadPreferences();
+            
+            // Apply preferred difficulty
+            difficultySelect.value = preferences.preferredDifficulty;
+            
+            // Set last used topic if available
+            if (preferences.lastUsedTopic) {
+                mathTopicInput.value = preferences.lastUsedTopic;
+            }
+        }
+
+        // Phase 3: Initialize personalization features
+        function initializePersonalizationFeatures() {
+            // Add recently used topics section
+            addRecentTopicsSection();
+            
+            // Add stats dashboard
+            addStatsDashboard();
+            
+            // Update stats display
+            updateStatsDisplay();
+        }
+
+        // Phase 3: Add recently used topics section
+        function addRecentTopicsSection() {
+            const recentTopics = DataManager.getRecentTopics(6);
+            
+            if (recentTopics.length === 0) return;
+            
+            const container = document.querySelector('.main-container');
+            const topicInput = document.getElementById('mathTopic').parentElement;
+            
+            const recentSection = document.createElement('div');
+            recentSection.className = 'mb-6';
+            recentSection.innerHTML = `
+                <label class="block mb-3 text-sm font-medium text-gray-300">
+                    📚 Recently Used Topics
+                </label>
+                <div class="grid grid-cols-2 gap-2 mb-4" id="recentTopicsGrid">
+                    ${recentTopics.map((item, index) => `
+                        <button type="button" 
+                                class="recent-topic-btn p-3 text-left bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                                onclick="selectRecentTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
+                                title="Last used: ${item.lastUsed}">
+                            <div class="text-sm font-medium text-gray-200 group-hover:text-white truncate">${item.topic}</div>
+                            <div class="text-xs text-gray-400 mt-1">${item.difficulty} • ${item.lastUsed}</div>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            container.insertBefore(recentSection, topicInput.nextSibling);
+        }
+
+        // Phase 3: Select a recent topic
+        function selectRecentTopic(topic, difficulty) {
+            mathTopicInput.value = topic;
+            difficultySelect.value = difficulty;
+            mathTopicInput.focus();
+            
+            // Provide feedback
+            displayMessage(`Selected: ${topic} (${difficulty})`, 'text-green-400');
+        }
+
+        // Phase 3: Add stats dashboard
+        function addStatsDashboard() {
+            const container = document.querySelector('.main-container');
+            const footer = document.querySelector('.footer');
+            
+            const statsSection = document.createElement('div');
+            statsSection.className = 'mt-8 p-4 bg-gray-800 rounded-lg border border-gray-700';
+            statsSection.innerHTML = `
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+                        📊 Your Progress
+                    </h3>
+                    <button type="button" 
+                            class="text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                            onclick="toggleStatsDetails()"
+                            id="statsToggleBtn">
+                        Show Details
+                    </button>
+                </div>
+                <div id="statsOverview" class="grid grid-cols-3 gap-4 text-center">
+                    <div class="stats-item">
+                        <div class="text-2xl font-bold text-red-400" id="totalQuestions">0</div>
+                        <div class="text-xs text-gray-400">Questions Generated</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="text-2xl font-bold text-red-400" id="totalSessions">0</div>
+                        <div class="text-xs text-gray-400">Study Sessions</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="text-2xl font-bold text-red-400" id="topicsExplored">0</div>
+                        <div class="text-xs text-gray-400">Topics Explored</div>
+                    </div>
+                </div>
+                <div id="statsDetails" class="mt-4 space-y-3 hidden">
+                    <div id="favoriteTopicsSection"></div>
+                    <div id="difficultyDistributionSection"></div>
+                </div>
+            `;
+            
+            container.insertBefore(statsSection, footer);
+        }
+
+        // Phase 3: Update stats display
+        function updateStatsDisplay() {
+            const stats = DataManager.loadStats();
+            
+            document.getElementById('totalQuestions').textContent = stats.totalQuestions;
+            document.getElementById('totalSessions').textContent = stats.totalSessions;
+            document.getElementById('topicsExplored').textContent = Object.keys(stats.favoriteTopics).length;
+            
+            // Update detailed stats if visible
+            updateDetailedStats(stats);
+        }
+
+        // Phase 3: Update detailed stats
+        function updateDetailedStats(stats) {
+            const favoriteTopicsSection = document.getElementById('favoriteTopicsSection');
+            const difficultyDistributionSection = document.getElementById('difficultyDistributionSection');
+            
+            if (!favoriteTopicsSection || !difficultyDistributionSection) return;
+            
+            // Favorite topics
+            const topTopics = Object.entries(stats.favoriteTopics)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3);
+            
+            favoriteTopicsSection.innerHTML = topTopics.length > 0 ? `
+                <div class="text-sm font-medium text-gray-300 mb-2">Most Practiced Topics:</div>
+                <div class="space-y-1">
+                    ${topTopics.map(([topic, count]) => `
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400 truncate">${topic}</span>
+                            <span class="text-red-400">${count} times</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<div class="text-xs text-gray-500">No topics practiced yet</div>';
+            
+            // Difficulty distribution
+            const difficultyEntries = Object.entries(stats.difficultyDistribution);
+            difficultyDistributionSection.innerHTML = difficultyEntries.length > 0 ? `
+                <div class="text-sm font-medium text-gray-300 mb-2">Difficulty Breakdown:</div>
+                <div class="grid grid-cols-2 gap-2">
+                    ${difficultyEntries.map(([difficulty, count]) => `
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">${difficulty}:</span>
+                            <span class="text-red-400">${count}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<div class="text-xs text-gray-500">No difficulty data yet</div>';
+        }
+
+        // Phase 3: Toggle stats details
+        function toggleStatsDetails() {
+            const details = document.getElementById('statsDetails');
+            const toggleBtn = document.getElementById('statsToggleBtn');
+            
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                toggleBtn.textContent = 'Hide Details';
+                updateDetailedStats(DataManager.loadStats());
+            } else {
+                details.classList.add('hidden');
+                toggleBtn.textContent = 'Show Details';
+            }
+        }
+        
+        // Phase 3: Update recent topics display
+        function updateRecentTopicsDisplay() {
+            const recentTopicsGrid = document.getElementById('recentTopicsGrid');
+            if (!recentTopicsGrid) return;
+            
+            const recentTopics = DataManager.getRecentTopics(6);
+            
+            if (recentTopics.length === 0) {
+                recentTopicsGrid.parentElement.style.display = 'none';
+                return;
+            }
+            
+            recentTopicsGrid.innerHTML = recentTopics.map((item, index) => `
+                <button type="button" 
+                        class="recent-topic-btn p-3 text-left bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                        onclick="selectRecentTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
+                        title="Last used: ${item.lastUsed}">
+                    <div class="text-sm font-medium text-gray-200 group-hover:text-white truncate">${item.topic}</div>
+                    <div class="text-xs text-gray-400 mt-1">${item.difficulty} • ${item.lastUsed}</div>
+                </button>
+            `).join('');
+            
+            recentTopicsGrid.parentElement.style.display = 'block';
+        }
+        
+        // Phase 3: Add question to favorites
+        function addToFavorites(problem, questionIndex, favoriteBtn) {
+            const topic = mathTopicInput.value.trim();
+            const difficulty = difficultySelect.value;
+            
+            DataManager.addToFavorites(
+                problem.question,
+                problem.correctAnswer,
+                problem.stepByStepSolution,
+                topic,
+                difficulty
+            );
+            
+            // Update button state
+            favoriteBtn.textContent = '✓ Favorited';
+            favoriteBtn.disabled = true;
+            favoriteBtn.className = 'action-btn bg-green-600 hover:bg-green-700';
+            
+            // Show success message
+            displayMessage(`Question ${questionIndex + 1} added to favorites!`, 'text-green-400');
+        }
+
+        // Phase 3: Show favorites panel
+        function showFavoritesPanel() {
+            const favorites = DataManager.loadFavorites();
+            
+            if (favorites.length === 0) {
+                displayMessage('No favorite questions yet. Click the star button on any question to add it to favorites!', 'text-yellow-400');
+                return;
+            }
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            overlay.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto border border-red-500/30">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            ⭐ Your Favorite Questions (${favorites.length})
+                        </h3>
+                        <button class="action-btn bg-red-600 hover:bg-red-700" onclick="this.closest('.fixed').remove()">
+                            Close
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        ${favorites.map((fav, index) => `
+                            <div class="p-4 bg-gray-700 rounded-lg border border-gray-600">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="text-sm text-gray-400">${fav.topic} • ${fav.difficulty} • ${fav.date}</div>
+                                    <button class="text-red-400 hover:text-red-300 text-sm" onclick="removeFavorite(${fav.id}, this)">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div class="text-white mb-2">${fav.question}</div>
+                                <div class="text-gray-300 text-sm">
+                                    <strong>Answer:</strong> ${fav.answer}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Close on ESC or click outside
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+            
+            const closeOnEsc = (e) => {
+                if (e.key === 'Escape') {
+                    overlay.remove();
+                    document.removeEventListener('keydown', closeOnEsc);
+                }
+            };
+            document.addEventListener('keydown', closeOnEsc);
+        }
+        
+        // Phase 3: Remove favorite
+        function removeFavorite(favoriteId, buttonElement) {
+            DataManager.removeFromFavorites(favoriteId);
+            buttonElement.closest('.p-4').remove();
+            displayMessage('Favorite removed!', 'text-orange-400');
+        }
+        
         // Mobile-specific features
         function initializeMobileFeatures() {
             // Add touch feedback to all buttons
@@ -1252,6 +1741,12 @@
                 e.preventDefault();
                 showKeyboardShortcuts();
             }
+            
+            // Ctrl+F to show favorites
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                showFavoritesPanel();
+            }
         }
         
         // Show keyboard shortcuts overlay
@@ -1270,6 +1765,7 @@
                         <div class="flex justify-between"><span class="text-gray-300">Navigate Questions:</span><span class="text-red-400">← →</span></div>
                         <div class="flex justify-between"><span class="text-gray-300">Refresh/Regenerate:</span><span class="text-red-400">F5</span></div>
                         <div class="flex justify-between"><span class="text-gray-300">Show Answer 1-3:</span><span class="text-red-400">1, 2, 3</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Show Favorites:</span><span class="text-red-400">Ctrl + F</span></div>
                         <div class="flex justify-between"><span class="text-gray-300">Close Dialogs:</span><span class="text-red-400">Escape</span></div>
                         <div class="flex justify-between"><span class="text-gray-300">Show This Help:</span><span class="text-red-400">?</span></div>
                     </div>
@@ -1950,6 +2446,14 @@
                 similarBtn.setAttribute('aria-label', `Generate similar question to ${index + 1}`);
                 similarBtn.addEventListener('click', () => generateSimilarQuestion(problem, index));
                 buttonContainer.appendChild(similarBtn);
+                
+                // Phase 3: Add favorite button
+                const favoriteBtn = document.createElement('button');
+                favoriteBtn.className = 'action-btn bg-yellow-600 hover:bg-yellow-700';
+                favoriteBtn.textContent = '⭐ Favorite';
+                favoriteBtn.setAttribute('aria-label', `Add question ${index + 1} to favorites`);
+                favoriteBtn.addEventListener('click', () => addToFavorites(problem, index, favoriteBtn));
+                buttonContainer.appendChild(favoriteBtn);
 
                 problemDiv.appendChild(buttonContainer);
 
@@ -2011,6 +2515,31 @@
                     questions[0].classList.add('active');
                 }
             }
+            
+            // Phase 3: Save to history and update preferences
+            const topic = mathTopicInput.value.trim();
+            const difficulty = difficultySelect.value;
+            
+            // Update history and stats
+            DataManager.addToHistory(topic, difficulty, problems.length);
+            
+            // Update user preferences
+            const preferences = DataManager.loadPreferences();
+            preferences.lastUsedTopic = topic;
+            preferences.preferredDifficulty = difficulty;
+            
+            // Add to preferred topics if not already there
+            const topicLower = topic.toLowerCase();
+            if (!preferences.preferredTopics.some(t => t.toLowerCase() === topicLower)) {
+                preferences.preferredTopics.unshift(topic);
+                preferences.preferredTopics = preferences.preferredTopics.slice(0, 10); // Keep only top 10
+            }
+            
+            DataManager.savePreferences(preferences);
+            
+            // Update UI components
+            updateStatsDisplay();
+            updateRecentTopicsDisplay();
             
             // Initial rendering of math after questions are added to DOM
             // Use retry mechanism to ensure KaTeX has time to initialize
