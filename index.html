@@ -561,20 +561,18 @@
                     <ol class="list-decimal list-inside space-y-1 text-blue-300">
                         <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="text-blue-400 underline">Google Cloud Console</a></li>
                         <li>Create a new project or select existing one</li>
-                        <li>Enable the Google Drive API</li>
-                        <li>Create credentials (API Key and OAuth 2.0 Client ID)</li>
-                        <li>Add your domain to authorized origins</li>
-                        <li>Enter your credentials below</li>
+                        <li>Enable the Google Drive API in the library</li>
+                        <li>Go to Credentials → Create Credentials → OAuth 2.0 Client ID</li>
+                        <li>Choose "Web application" type</li>
+                        <li>Add your domain/localhost to "Authorized JavaScript origins"</li>
+                        <li>Copy the Client ID and enter it below</li>
                     </ol>
                 </div>
                 <div class="grid grid-cols-1 gap-3">
                     <div>
-                        <label for="googleClientId" class="block text-sm font-medium text-blue-200 mb-1">Google Client ID:</label>
-                        <input type="text" id="googleClientId" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="your-client-id.googleusercontent.com">
-                    </div>
-                    <div>
-                        <label for="googleApiKey" class="block text-sm font-medium text-blue-200 mb-1">Google API Key:</label>
-                        <input type="text" id="googleApiKey" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="AIza...">
+                        <label for="googleClientId" class="block text-sm font-medium text-blue-200 mb-1">Google OAuth Client ID:</label>
+                        <input type="text" id="googleClientId" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="123456789-abcdefg.apps.googleusercontent.com">
+                        <div class="text-xs text-blue-300 mt-1">Only the Client ID is needed - no API Key required for Drive access</div>
                     </div>
                     <button type="button" class="action-btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="saveGoogleCredentials()">
                         Save & Initialize Drive Sync
@@ -714,7 +712,6 @@
             STATS_KEY: 'sage_stats',
             // Google Drive integration
             GOOGLE_CLIENT_ID: '', // To be configured by users
-            GOOGLE_API_KEY: '', // To be configured by users
             DRIVE_FOLDER_NAME: 'SAGE_Data',
             DRIVE_DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
             DRIVE_SCOPE: 'https://www.googleapis.com/auth/drive.file'
@@ -977,19 +974,16 @@
                     
                     // Load credentials from localStorage or config
                     const clientId = localStorage.getItem('google_client_id') || CONFIG.GOOGLE_CLIENT_ID;
-                    const apiKey = localStorage.getItem('google_api_key') || CONFIG.GOOGLE_API_KEY;
                     
-                    if (!clientId || !apiKey || clientId === 'YOUR_GOOGLE_CLIENT_ID' || apiKey === 'YOUR_GOOGLE_API_KEY') {
-                        console.log('Google credentials not configured, using localStorage only');
+                    if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+                        console.log('Google Client ID not configured, using localStorage only');
                         return false;
                     }
                     
                     // Update config with loaded credentials
                     CONFIG.GOOGLE_CLIENT_ID = clientId;
-                    CONFIG.GOOGLE_API_KEY = apiKey;
                     
                     await gapi.client.init({
-                        apiKey: apiKey,
                         clientId: clientId,
                         discoveryDocs: [CONFIG.DRIVE_DISCOVERY_DOC],
                         scope: CONFIG.DRIVE_SCOPE
@@ -1375,13 +1369,9 @@
                 
                 // Load saved credentials if they exist
                 const savedClientId = localStorage.getItem('google_client_id');
-                const savedApiKey = localStorage.getItem('google_api_key');
                 
                 if (savedClientId) {
                     document.getElementById('googleClientId').value = savedClientId;
-                }
-                if (savedApiKey) {
-                    document.getElementById('googleApiKey').value = savedApiKey;
                 }
             } else {
                 configPanel.classList.add('hidden');
@@ -1391,20 +1381,22 @@
         // Phase 4: Save Google credentials and initialize
         async function saveGoogleCredentials() {
             const clientId = document.getElementById('googleClientId').value.trim();
-            const apiKey = document.getElementById('googleApiKey').value.trim();
             
-            if (!clientId || !apiKey) {
-                displayMessage('Please enter both Client ID and API Key', 'text-red-500');
+            if (!clientId) {
+                displayMessage('Please enter the Google Client ID', 'text-red-500');
+                return;
+            }
+            
+            if (!clientId.includes('.googleusercontent.com')) {
+                displayMessage('Please enter a valid Google Client ID (should end with .googleusercontent.com)', 'text-red-500');
                 return;
             }
             
             // Save credentials
             localStorage.setItem('google_client_id', clientId);
-            localStorage.setItem('google_api_key', apiKey);
             
             // Update config
             CONFIG.GOOGLE_CLIENT_ID = clientId;
-            CONFIG.GOOGLE_API_KEY = apiKey;
             
             // Close config panel
             toggleGoogleDriveConfig();
