@@ -1373,7 +1373,11 @@
             if (recentTopics.length === 0) return;
             
             const container = document.querySelector('.main-container');
-            const topicInput = document.getElementById('mathTopic').parentElement;
+            const topicInputContainer = document.getElementById('mathTopic').parentElement;
+            
+            console.log('Adding recent topics section...');
+            console.log('Container found:', !!container);
+            console.log('Topic input container found:', !!topicInputContainer);
             
             const recentSection = document.createElement('div');
             recentSection.className = 'mb-6';
@@ -1394,7 +1398,20 @@
                 </div>
             `;
             
-            container.insertBefore(recentSection, topicInput.nextSibling);
+            // Safer insertion: insert after the topic input container
+            try {
+                if (topicInputContainer && topicInputContainer.parentElement === container) {
+                    // Insert after the topic input container
+                    topicInputContainer.insertAdjacentElement('afterend', recentSection);
+                    console.log('Recent topics section added successfully');
+                } else {
+                    // Fallback: append to container
+                    console.log('Using fallback insertion method');
+                    container.appendChild(recentSection);
+                }
+            } catch (error) {
+                console.error('Error adding recent topics section:', error);
+            }
         }
 
         // Phase 3: Select a recent topic
@@ -1693,7 +1710,35 @@
             try {
                 container.insertBefore(statsSection, footer);
                 console.log('Stats dashboard added successfully');
-                console.log('Dashboard element inserted, checking if visible:', document.querySelector('#statsOverview'));
+                
+                // Immediate verification
+                const insertedDashboard = document.querySelector('#statsOverview');
+                const insertedDetails = document.querySelector('#statsDetails');
+                const insertedFavorites = document.querySelector('#favoriteTopicsSection');
+                const insertedDifficulty = document.querySelector('#difficultyDistributionSection');
+                
+                console.log('Dashboard verification:');
+                console.log('- statsOverview found:', !!insertedDashboard);
+                console.log('- statsDetails found:', !!insertedDetails);
+                console.log('- favoriteTopicsSection found:', !!insertedFavorites);
+                console.log('- difficultyDistributionSection found:', !!insertedDifficulty);
+                
+                if (insertedDashboard) {
+                    console.log('Dashboard HTML structure confirmed in DOM');
+                
+                // Check if dashboard is visible (not hidden by CSS)
+                const computedStyle = window.getComputedStyle(insertedDashboard);
+                console.log('Dashboard display style:', computedStyle.display);
+                console.log('Dashboard visibility:', computedStyle.visibility);
+                console.log('Dashboard opacity:', computedStyle.opacity);
+                
+                // Check dashboard position in DOM
+                console.log('Dashboard parent:', insertedDashboard.parentElement);
+                console.log('Dashboard next sibling:', insertedDashboard.nextElementSibling);
+                console.log('Dashboard class list:', insertedDashboard.className);
+                } else {
+                    console.error('Dashboard was not inserted properly into DOM');
+                }
             } catch (error) {
                 console.error('Error inserting stats dashboard:', error);
             }
@@ -2637,17 +2682,20 @@
                 processed = processed.replace(/\\n/g, '\n');
             }
             
-            // More comprehensive LaTeX command detection
-            const hasLatexCommands = /\\(frac|sqrt|int|sum|lim|cdot|times|div|pm|infty|alpha|beta|gamma|theta|pi|sin|cos|tan|log|ln|exp|left|right|begin|end|[a-zA-Z]+)/g.test(processed);
+            // Much more conservative LaTeX command detection - only obvious math
+            const hasObviousMath = /\\(frac|sqrt|int|sum|lim|cdot|times|pm|infty|alpha|beta|gamma|theta|delta|lambda|mu|sigma|pi|sin|cos|tan|log|ln|exp|left|right|begin\{|end\{)/.test(processed);
             
-            // Only add delimiters if content has LaTeX commands but no delimiters
-            if (!processed.includes('$') && hasLatexCommands) {
+            // Additional check: avoid processing if it looks like regular text
+            const looksLikeRegularText = /^[A-Za-z\s]+/.test(processed.trim()) && !hasObviousMath;
+            
+            // Only add delimiters if content has obvious LaTeX commands, no existing delimiters, and doesn't look like regular text
+            if (!processed.includes('$') && hasObviousMath && !looksLikeRegularText) {
                 console.log('Adding math delimiters to:', processed.substring(0, 50) + '...');
                 // Wrap the entire content in display math
                 return `$$${processed}$$`;
             }
             
-            console.log('Content processed as:', processed.substring(0, 50) + '...');
+            console.log('Content processed as regular text:', processed.substring(0, 50) + '...');
             // Return content unchanged - let KaTeX handle it naturally
             return processed;
         }
