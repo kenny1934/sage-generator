@@ -13,8 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
     
     <!-- Google APIs for Drive integration -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://apis.google.com/js/api.js" async defer onload="onGoogleApiLoad()" onerror="onGoogleApiError()"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="onGoogleGsiLoad()" onerror="onGoogleGsiError()"></script>
 
     <style>
         body {
@@ -567,6 +567,14 @@
                         <li>Add your domain/localhost to "Authorized JavaScript origins"</li>
                         <li>Copy the Client ID and enter it below</li>
                     </ol>
+                    
+                    <div class="mt-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-yellow-200 text-xs">
+                        <strong>Network Requirements:</strong> Ensure your firewall allows access to:
+                        <ul class="list-disc list-inside mt-1">
+                            <li><code>apis.google.com</code></li>
+                            <li><code>accounts.google.com</code></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 gap-3">
                     <div>
@@ -748,6 +756,12 @@
         let googleUser = null;
         let driveFolder = null;
         let syncInProgress = false;
+        
+        // Google APIs loading status
+        let googleApiLoaded = false;
+        let googleGsiLoaded = false;
+        let apiLoadAttempts = 0;
+        const maxApiLoadAttempts = 3;
 
         // Phase 3: Data Management and Personalization
         class DataManager {
@@ -957,28 +971,172 @@
             }
         }
 
+        // Google API loading callbacks
+        function onGoogleApiLoad() {
+            console.log('Google API script loaded successfully');
+            googleApiLoaded = true;
+            checkAllGoogleApisLoaded();
+        }
+        
+        function onGoogleApiError() {
+            console.error('Failed to load Google API script');
+            updateGoogleApiStatus('Failed to load Google APIs - Check network connection');
+        }
+        
+        function onGoogleGsiLoad() {
+            console.log('Google GSI script loaded successfully');
+            googleGsiLoaded = true;
+            checkAllGoogleApisLoaded();
+        }
+        
+        function onGoogleGsiError() {
+            console.error('Failed to load Google GSI script');
+            updateGoogleApiStatus('Failed to load Google Sign-In - Check network connection');
+        }
+        
+        function checkAllGoogleApisLoaded() {
+            if (googleApiLoaded && googleGsiLoaded) {
+                console.log('All Google APIs loaded successfully');
+                updateGoogleApiStatus('Google APIs loaded successfully');
+                
+                // Auto-initialize if we have credentials
+                const savedClientId = localStorage.getItem('google_client_id');
+                if (savedClientId) {
+                    setTimeout(() => {
+                        console.log('Auto-initializing Google Drive with saved credentials');
+                        initializeGoogleDriveWithRetry();
+                    }, 1000);
+                }
+            }
+        }
+        
+        // Enhanced Google Drive initialization with retry
+        async function initializeGoogleDriveWithRetry() {
+            apiLoadAttempts++;
+            console.log(`Google Drive initialization attempt ${apiLoadAttempts}/${maxApiLoadAttempts}`);
+            
+            try {
+                const success = await DriveManager.initialize();
+                if (success) {
+                    updateGoogleApiStatus('Google Drive ready - Click Connect to sign in');
+                    updateGoogleSignInUI();
+                } else if (apiLoadAttempts < maxApiLoadAttempts) {
+                    console.log('Retrying Google Drive initialization...');
+                    setTimeout(initializeGoogleDriveWithRetry, 2000);
+                } else {
+                    updateGoogleApiStatus('Failed to initialize after multiple attempts');
+                }
+            } catch (error) {
+                console.error('Google Drive initialization error:', error);
+                if (apiLoadAttempts < maxApiLoadAttempts) {
+                    setTimeout(initializeGoogleDriveWithRetry, 2000);
+                } else {
+                    updateGoogleApiStatus(`Initialization failed: ${error.message}`);
+                }
+            }
+        }
+        
+        // Update Google API status in UI
+        function updateGoogleApiStatus(message) {
+            const statusElement = document.getElementById('googleApiStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                
+                // Color coding for different status types
+                if (message.includes('loaded successfully') || message.includes('ready')) {
+                    statusElement.className = 'text-green-400 text-xs';
+                } else if (message.includes('Failed') || message.includes('error')) {
+                    statusElement.className = 'text-red-400 text-xs';
+                } else {
+                    statusElement.className = 'text-blue-400 text-xs';
+                }
+            }
+        }
+        
+        // Manual retry function
+        async function retryGoogleApiLoading() {
+            updateGoogleApiStatus('Retrying Google API loading...');
+            apiLoadAttempts = 0;
+            
+            // Try to reload the scripts
+            try {
+                // Remove existing scripts
+                const existingApiScript = document.querySelector('script[src*="apis.google.com"]');
+                const existingGsiScript = document.querySelector('script[src*="accounts.google.com"]');
+                
+                if (existingApiScript) existingApiScript.remove();
+                if (existingGsiScript) existingGsiScript.remove();
+                
+                // Reset loading status
+                googleApiLoaded = false;
+                googleGsiLoaded = false;
+                
+                // Create new script elements
+                const apiScript = document.createElement('script');
+                apiScript.src = 'https://apis.google.com/js/api.js';
+                apiScript.async = true;
+                apiScript.defer = true;
+                apiScript.onload = onGoogleApiLoad;
+                apiScript.onerror = onGoogleApiError;
+                
+                const gsiScript = document.createElement('script');
+                gsiScript.src = 'https://accounts.google.com/gsi/client';
+                gsiScript.async = true;
+                gsiScript.defer = true;
+                gsiScript.onload = onGoogleGsiLoad;
+                gsiScript.onerror = onGoogleGsiError;
+                
+                // Add to document
+                document.head.appendChild(apiScript);
+                document.head.appendChild(gsiScript);
+                
+                updateGoogleApiStatus('Loading Google APIs...');
+            } catch (error) {
+                console.error('Error reloading Google APIs:', error);
+                updateGoogleApiStatus('Error reloading APIs: ' + error.message);
+            }
+        }
+        
         // Phase 4: Google Drive Integration Manager
         class DriveManager {
             static async initialize() {
                 try {
+                    console.log('Starting Google Drive initialization...');
+                    
                     // Check if Google APIs are loaded
-                    if (typeof gapi === 'undefined' || typeof google === 'undefined') {
-                        console.log('Google APIs not available, using localStorage only');
-                        return false;
+                    if (typeof gapi === 'undefined') {
+                        console.log('gapi not available - Google API script not loaded');
+                        throw new Error('Google API script not loaded. Check network connection or firewall settings.');
                     }
                     
-                    // Initialize gapi
-                    await new Promise((resolve) => {
-                        gapi.load('client:auth2', resolve);
+                    if (typeof google === 'undefined') {
+                        console.log('google object not available - Google GSI script not loaded');
+                        throw new Error('Google Sign-In script not loaded. Check network connection or firewall settings.');
+                    }
+                    
+                    console.log('Google APIs detected, proceeding with initialization...');
+                    
+                    // Initialize gapi with timeout
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => {
+                            reject(new Error('Timeout loading Google API client'));
+                        }, 10000);
+                        
+                        gapi.load('client:auth2', () => {
+                            clearTimeout(timeout);
+                            console.log('Google API client loaded successfully');
+                            resolve();
+                        });
                     });
                     
                     // Load credentials from localStorage or config
                     const clientId = localStorage.getItem('google_client_id') || CONFIG.GOOGLE_CLIENT_ID;
                     
                     if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
-                        console.log('Google Client ID not configured, using localStorage only');
-                        return false;
+                        throw new Error('Google Client ID not configured. Click Setup to configure.');
                     }
+                    
+                    console.log('Initializing Google client with Client ID:', clientId.substring(0, 20) + '...');
                     
                     // Update config with loaded credentials
                     CONFIG.GOOGLE_CLIENT_ID = clientId;
@@ -989,10 +1147,11 @@
                         scope: CONFIG.DRIVE_SCOPE
                     });
                     
+                    console.log('Google Drive API initialized successfully');
                     return true;
                 } catch (error) {
                     console.error('Failed to initialize Google Drive:', error);
-                    return false;
+                    throw error;
                 }
             }
             
@@ -1261,28 +1420,33 @@
             // Add Google Drive UI components
             addGoogleDriveUI();
             
-            // Try to initialize Google Drive
-            const initialized = await DriveManager.initialize();
+            // Set initial status
+            updateGoogleApiStatus('Checking Google APIs...');
             
-            if (initialized) {
-                // Check if user is already signed in
-                const authInstance = gapi.auth2.getAuthInstance();
-                if (authInstance.isSignedIn.get()) {
-                    isGoogleSignedIn = true;
-                    googleUser = authInstance.currentUser.get();
-                    
-                    // Try to set up folder and sync
-                    try {
-                        await DriveManager.ensureSageFolder();
-                        await DriveManager.syncFromDrive();
-                        updateGoogleSignInUI();
-                    } catch (error) {
-                        console.error('Failed to initialize existing session:', error);
+            // Wait a moment for scripts to load
+            setTimeout(async () => {
+                try {
+                    // Check if APIs are available
+                    if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
+                        updateGoogleApiStatus('Google APIs available');
+                        
+                        // Try to initialize if we have credentials
+                        const savedClientId = localStorage.getItem('google_client_id');
+                        if (savedClientId) {
+                            await initializeGoogleDriveWithRetry();
+                        } else {
+                            updateGoogleApiStatus('Ready - Click Setup to configure');
+                        }
+                    } else {
+                        updateGoogleApiStatus('Google APIs not loaded - Click Retry APIs');
                     }
+                } catch (error) {
+                    console.error('Error in Google Drive initialization:', error);
+                    updateGoogleApiStatus('Error: ' + error.message);
                 }
-            }
-            
-            updateGoogleSignInUI();
+                
+                updateGoogleSignInUI();
+            }, 2000);
         }
         
         // Phase 4: Add Google Drive UI components
@@ -1293,10 +1457,16 @@
                 const syncStatusDiv = document.createElement('div');
                 syncStatusDiv.className = 'mt-3 pt-3 border-t border-gray-700 flex items-center justify-between text-xs';
                 syncStatusDiv.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-gray-400">☁️ Google Drive:</span>
-                        <span id="googleSignInStatus" class="text-gray-500">Not connected</span>
-                        <span id="syncStatus" class="text-blue-400"></span>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400">☁️ Google Drive:</span>
+                            <span id="googleSignInStatus" class="text-gray-500">Not connected</span>
+                            <span id="syncStatus" class="text-blue-400"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-400">API Status:</span>
+                            <span id="googleApiStatus" class="text-gray-500">Loading...</span>
+                        </div>
                     </div>
                     <div class="flex gap-2">
                         <button id="googleSignInBtn" 
@@ -1308,6 +1478,11 @@
                                 class="text-xs bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded transition-colors"
                                 onclick="toggleGoogleDriveConfig()">
                             Setup
+                        </button>
+                        <button id="retryApiBtn" 
+                                class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition-colors"
+                                onclick="retryGoogleApiLoading()">
+                            Retry APIs
                         </button>
                         <button id="syncNowBtn" 
                                 class="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors hidden"
