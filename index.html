@@ -1634,6 +1634,8 @@
                     container.appendChild(recommendationsSection);
                 }
             }
+            
+            console.log('Topic recommendations section update completed');
         }
 
         // Phase 3: Select a recommended topic
@@ -1650,20 +1652,20 @@
             
             // Update recommendations based on new topic
             setTimeout(() => {
+                console.log('Updating recommendations section...');
                 addTopicRecommendationsSection();
+                
+                // Wait for DOM to update, then reposition dashboard
+                setTimeout(() => {
+                    console.log('Repositioning dashboard after recommendations update...');
+                    addStatsDashboard();
+                }, 100);
             }, 500);
         }
 
         // Phase 3: Add stats dashboard
         function addStatsDashboard() {
             console.log('Adding stats dashboard...');
-            
-            // Check if dashboard already exists
-            const existingDashboard = document.querySelector('#statsOverview');
-            if (existingDashboard) {
-                console.log('Stats dashboard already exists, skipping...');
-                return;
-            }
             
             const container = document.querySelector('.main-container');
             const footer = document.querySelector('.footer');
@@ -1728,8 +1730,15 @@
             `;
             
             try {
+                // Always ensure dashboard is positioned just before footer (at the very bottom)
+                const existingDashboard = container.querySelector('#statsOverview')?.parentElement;
+                if (existingDashboard) {
+                    existingDashboard.remove();
+                    console.log('Removed existing dashboard to reposition');
+                }
+                
                 container.insertBefore(statsSection, footer);
-                console.log('Stats dashboard added successfully');
+                console.log('Stats dashboard added successfully at bottom position');
                 
                 // Immediate verification
                 const insertedDashboard = document.querySelector('#statsOverview');
