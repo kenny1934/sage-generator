@@ -1144,26 +1144,33 @@
                 try {
                     console.log('Starting Google Drive initialization...');
                     
-                    // Check if Google APIs are loaded
-                    if (typeof gapi === 'undefined') {
+                    // Check if Google APIs are loaded (check window object first)
+                    let gapiRef = (typeof gapi !== 'undefined') ? gapi : window.gapi;
+                    let googleRef = (typeof google !== 'undefined') ? google : window.google;
+                    
+                    if (typeof gapiRef === 'undefined') {
                         console.log('gapi not available - Google API script not loaded');
                         throw new Error('Google API script not loaded. Check network connection or firewall settings.');
                     }
                     
-                    if (typeof google === 'undefined') {
+                    if (typeof googleRef === 'undefined') {
                         console.log('google object not available - Google GSI script not loaded');
                         throw new Error('Google Sign-In script not loaded. Check network connection or firewall settings.');
                     }
                     
+                    // Ensure global references for the rest of the code
+                    if (typeof gapi === 'undefined') window.gapi = gapiRef;
+                    if (typeof google === 'undefined') window.google = googleRef;
+                    
                     console.log('Google APIs detected, proceeding with initialization...');
                     
-                    // Initialize gapi with timeout
+                    // Initialize gapi with timeout (use window.gapi reference)
                     await new Promise((resolve, reject) => {
                         const timeout = setTimeout(() => {
                             reject(new Error('Timeout loading Google API client'));
                         }, 10000);
                         
-                        gapi.load('client:auth2', () => {
+                        (window.gapi || gapi).load('client:auth2', () => {
                             clearTimeout(timeout);
                             console.log('Google API client loaded successfully');
                             resolve();
@@ -1182,7 +1189,7 @@
                     // Update config with loaded credentials
                     CONFIG.GOOGLE_CLIENT_ID = clientId;
                     
-                    await gapi.client.init({
+                    await (window.gapi || gapi).client.init({
                         clientId: clientId,
                         discoveryDocs: [CONFIG.DRIVE_DISCOVERY_DOC],
                         scope: CONFIG.DRIVE_SCOPE
@@ -1198,7 +1205,7 @@
             
             static async signIn() {
                 try {
-                    const authInstance = gapi.auth2.getAuthInstance();
+                    const authInstance = (window.gapi || gapi).auth2.getAuthInstance();
                     googleUser = await authInstance.signIn();
                     isGoogleSignedIn = true;
                     
@@ -1221,7 +1228,7 @@
             
             static async signOut() {
                 try {
-                    const authInstance = gapi.auth2.getAuthInstance();
+                    const authInstance = (window.gapi || gapi).auth2.getAuthInstance();
                     await authInstance.signOut();
                     isGoogleSignedIn = false;
                     googleUser = null;
@@ -1237,7 +1244,7 @@
             static async ensureSageFolder() {
                 try {
                     // Search for existing SAGE folder
-                    const response = await gapi.client.drive.files.list({
+                    const response = await (window.gapi || gapi).client.drive.files.list({
                         q: `name='${CONFIG.DRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
                         spaces: 'drive'
                     });
@@ -1247,7 +1254,7 @@
                         console.log('Found existing SAGE folder:', driveFolder.id);
                     } else {
                         // Create new SAGE folder
-                        const createResponse = await gapi.client.drive.files.create({
+                        const createResponse = await (window.gapi || gapi).client.drive.files.create({
                             resource: {
                                 name: CONFIG.DRIVE_FOLDER_NAME,
                                 mimeType: 'application/vnd.google-apps.folder'
@@ -1335,7 +1342,7 @@
                 
                 try {
                     // Check if file exists
-                    const searchResponse = await gapi.client.drive.files.list({
+                    const searchResponse = await (window.gapi || gapi).client.drive.files.list({
                         q: `name='${fileName}' and '${driveFolder.id}' in parents and trashed=false`,
                         spaces: 'drive'
                     });
@@ -1362,7 +1369,7 @@
                     if (searchResponse.result.files.length > 0) {
                         // Update existing file
                         const fileId = searchResponse.result.files[0].id;
-                        request = gapi.client.request({
+                        request = (window.gapi || gapi).client.request({
                             path: `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
                             method: 'PATCH',
                             params: { uploadType: 'multipart' },
@@ -1373,7 +1380,7 @@
                         });
                     } else {
                         // Create new file
-                        request = gapi.client.request({
+                        request = (window.gapi || gapi).client.request({
                             path: 'https://www.googleapis.com/upload/drive/v3/files',
                             method: 'POST',
                             params: { uploadType: 'multipart' },
@@ -1398,7 +1405,7 @@
                 
                 try {
                     // Search for the file
-                    const searchResponse = await gapi.client.drive.files.list({
+                    const searchResponse = await (window.gapi || gapi).client.drive.files.list({
                         q: `name='${fileName}' and '${driveFolder.id}' in parents and trashed=false`,
                         spaces: 'drive'
                     });
@@ -1411,7 +1418,7 @@
                     const fileId = searchResponse.result.files[0].id;
                     
                     // Download file content
-                    const response = await gapi.client.drive.files.get({
+                    const response = await (window.gapi || gapi).client.drive.files.get({
                         fileId: fileId,
                         alt: 'media'
                     });
@@ -1473,8 +1480,18 @@
                 console.log(`Checking API availability (attempt ${apiCheckAttempts}/${maxApiCheckAttempts})`);
                 
                 try {
-                    if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-                        console.log('Google APIs are now available!');
+                    // Check for APIs on window object (more reliable)
+                    if (typeof window.gapi !== 'undefined' && typeof window.google !== 'undefined') {
+                        console.log('Google APIs are now available on window object!');
+                        
+                        // Make sure global references exist
+                        if (typeof gapi === 'undefined') {
+                            window.gapi = window.gapi;
+                        }
+                        if (typeof google === 'undefined') {
+                            window.google = window.google;
+                        }
+                        
                         updateGoogleApiStatus('Google APIs detected');
                         
                         // Try to initialize if we have credentials
