@@ -17,26 +17,425 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
+        /* CSS Custom Properties for Responsive Design */
+        :root {
+            --breakpoint-mobile: 768px;
+            --breakpoint-tablet: 1024px;
+            --breakpoint-desktop: 1200px;
+            
+            --container-padding: 1rem;
+            --container-gap: 2rem;
+            --config-panel-width: 350px;
+            --questions-canvas-width: 1fr;
+            
+            /* Theme colors */
+            --bg-primary: #23272f;
+            --bg-secondary: #18181b;
+            --surface: rgba(44, 46, 56, 0.98);
+            --accent: #f87171;
+            --text-primary: #e5e7eb;
+        }
+
         body {
             font-family: 'Inter', 'Georgia', serif;
-            background: radial-gradient(ellipse at top left, #23272f 60%, #18181b 100%);
-            color: #e5e7eb;
+            background: radial-gradient(ellipse at top left, var(--bg-primary) 60%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
         }
+
+        /* App Layout Container */
+        .app-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: var(--container-padding);
+            gap: var(--container-gap);
+        }
+
+        /* Header Section */
+        .app-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Main Content Area */
+        .app-main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--container-gap);
+            max-width: var(--main-max-width);
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Content Sections */
         .main-container {
-            background: rgba(44, 46, 56, 0.98);
-            border-radius: 2rem;
+            background: var(--surface);
+            border-radius: 1.5rem;
             box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
             border: none;
-            max-width: 44rem;
+            padding: 2rem;
             width: 100%;
-            margin-top: 3.5rem;
-            padding: 3rem 2.2rem 2.5rem 2.2rem;
+        }
+
+        /* Config Panel Styling */
+        .config-panel {
+            border-right: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .config-panel h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        /* Questions Canvas Styling */
+        .questions-canvas {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .questions-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        #questionsPlaceholder {
+            text-align: center;
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        /* Collapsible Popular Topics Styles */
+        .example-topics {
+            margin-bottom: 1.5rem;
+        }
+
+        .example-topics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .example-topics-header:hover {
+            background: rgba(248, 113, 113, 0.2);
+            border-color: rgba(248, 113, 113, 0.4);
+        }
+
+        .example-topics-title {
+            flex: 1;
+            text-align: left;
+        }
+
+        .toggle-icon {
+            transition: transform 0.2s ease;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .example-topics-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .example-topics-content.expanded {
+            max-height: 400px;
+            padding-top: 0.75rem;
+        }
+
+        /* Compact Grid Layout */
+        .example-topics-grid.compact {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .example-topic {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: #e5e7eb;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .example-topic:hover {
+            background: rgba(248, 113, 113, 0.2);
+            border-color: rgba(248, 113, 113, 0.4);
+            color: #f87171;
+            transform: translateY(-1px);
+        }
+
+        .example-topic.hidden {
+            display: none;
+        }
+
+        .show-more-topics {
+            width: 100%;
+            padding: 0.5rem;
+            background: transparent;
+            border: 1px dashed rgba(248, 113, 113, 0.3);
+            color: var(--accent);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .show-more-topics:hover {
+            background: rgba(248, 113, 113, 0.1);
+            border-color: rgba(248, 113, 113, 0.5);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Sidebar Content Styling */
+        .sidebar-section {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px rgba(60, 72, 88, 0.15);
+        }
+
+        /* Mobile: Hide sidebar by default */
+        @media (max-width: 1023px) {
+            .sidebar {
+                display: none;
+            }
+        }
+
+        /* Mobile Menu Styles */
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+
+        .hamburger-line {
+            width: 24px;
+            height: 2px;
+            background: var(--accent);
+            margin: 2px 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-btn.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-btn.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu-content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: var(--surface);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .mobile-menu-overlay.active .mobile-menu-content {
+            transform: translateX(0);
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .mobile-menu-header h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .mobile-menu-close {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-sections {
+            padding: 1rem;
+        }
+
+        .collapsible-section {
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(248, 113, 113, 0.1);
+            cursor: pointer;
+            border: none;
+            width: 100%;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .collapsible-header:hover {
+            background: rgba(248, 113, 113, 0.2);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .collapsible-content.expanded {
+            max-height: 500px;
+        }
+
+        .collapsible-content > div {
+            padding: 1rem;
+        }
+
+        /* Show mobile menu button on mobile */
+        @media (max-width: 1023px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .app-header {
+                position: relative;
+            }
+        }
+
+        /* Footer Styling */
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-top: auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (min-width: 768px) {
+            :root {
+                --container-padding: 1.5rem;
+            }
+            .main-container {
+                padding: 2.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            :root {
+                --container-padding: 2rem;
+            }
+            
+            .app-main {
+                grid-template-columns: var(--config-panel-width) var(--questions-canvas-width);
+                max-width: none;
+                width: 100%;
+                max-width: 1400px;
+            }
+            
+            .config-panel {
+                padding: 2rem;
+            }
+            
+            .questions-canvas {
+                padding: 2rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            :root {
+                --config-panel-width: 400px;
+                --container-gap: 2.5rem;
+            }
         }
         .logo {
             width: 80px;
@@ -189,17 +588,6 @@
         
         .math-rendered .katex {
             font-size: 1em;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding-top: 2rem;
-            border-top: 1px solid #ef4444;
-            color: #f87171;
-            background: none;
-        }
-        .footer p {
-            font-size: 0.95rem;
         }
         
         /* Enhanced loading animations */
@@ -534,14 +922,45 @@
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <main id="main-content">
-            <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
-            <h1 class="sage-title">SAGE</h1>
-            <div class="divider"></div>
-            <div class="full-name">
-                <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
+    <div class="app-layout">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
+                <h1 class="sage-title">SAGE</h1>
+                <div class="divider"></div>
+                <div class="full-name">
+                    <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
+                </div>
             </div>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </header>
+
+        <!-- Mobile Menu Overlay -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+            <div class="mobile-menu-content">
+                <div class="mobile-menu-header">
+                    <h3>Menu</h3>
+                    <button class="mobile-menu-close" id="mobileMenuClose">&times;</button>
+                </div>
+                <div class="mobile-menu-sections" id="mobileMenuSections">
+                    <!-- Collapsible sections will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="app-main">
+            <!-- Left Config Panel -->
+            <aside class="config-panel main-container">
+                <div class="config-content">
+                    <!-- Configuration sections will go here -->
 
             <!-- AI Disclaimer -->
             <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
@@ -595,13 +1014,22 @@
             
 
             <div class="space-y-8">
-                <!-- Example Topics -->
+                <!-- Popular Topics - Collapsible -->
                 <div class="example-topics">
-                    <label class="block text-lg font-semibold mb-2">
-                        Popular Topics <span class="text-gray-400 text-sm">(click to select)</span>:
-                    </label>
-                    <div class="example-topics-grid" id="exampleTopicsGrid">
-                        <!-- Example topics will be populated here -->
+                    <button class="example-topics-header" id="exampleTopicsToggle" type="button">
+                        <span class="example-topics-title">
+                            📚 Popular Topics 
+                            <span class="text-gray-400 text-xs">(click to select)</span>
+                        </span>
+                        <span class="toggle-icon" id="exampleTopicsIcon">▼</span>
+                    </button>
+                    <div class="example-topics-content" id="exampleTopicsContent">
+                        <div class="example-topics-grid compact" id="exampleTopicsGrid">
+                            <!-- Example topics will be populated here -->
+                        </div>
+                        <button class="show-more-topics" id="showMoreTopics" style="display: none;">
+                            Show More Topics
+                        </button>
                     </div>
                 </div>
 
@@ -688,14 +1116,218 @@
                     <p class="text-gray-400 text-center" id="initialMessage">Your generated maths questions will appear here.</p>
                 </div>
             </div>
-        </main>
+                </div>
+            </aside>
+
+            <!-- Right Questions Canvas -->
+            <main class="questions-canvas main-container" id="questions-canvas">
+                <div class="questions-content">
+                    <!-- Questions will be displayed here -->
+                    <p class="text-gray-400 text-center" id="questionsPlaceholder">Select a topic and generate questions to see them here.</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer -->
         <footer class="footer">
             <p>&copy; 2025 MathConcept Secondary Academy. All Rights Reserved.</p>
         </footer>
     </div>
 
     <script>
-        // NOTE: Javascript logic remains the same, only styling was updated.
+        // Phase 4: Responsive Layout Management
+        class ResponsiveLayoutManager {
+            constructor() {
+                this.isDesktop = false;
+                this.sidebarContent = document.getElementById('sidebar-content');
+                this.mainContainer = document.querySelector('.main-container main');
+                this.breakpoint = 1024; // Desktop breakpoint
+                
+                this.init();
+            }
+            
+            init() {
+                this.checkLayout();
+                window.addEventListener('resize', () => this.checkLayout());
+                console.log('Responsive Layout Manager initialized');
+            }
+            
+            checkLayout() {
+                const wasDesktop = this.isDesktop;
+                this.isDesktop = window.innerWidth >= this.breakpoint;
+                
+                if (wasDesktop !== this.isDesktop) {
+                    this.reorganizeLayout();
+                }
+            }
+            
+            reorganizeLayout() {
+                console.log(`Layout change: ${this.isDesktop ? 'Desktop' : 'Mobile'} mode`);
+                
+                if (this.isDesktop) {
+                    this.moveToSidebar();
+                } else {
+                    this.moveToMain();
+                }
+            }
+            
+            moveToSidebar() {
+                // For now, disable automatic section moving to prevent bugs
+                // We'll implement this properly in the new layout design
+                console.log('Sidebar layout - sections remain in main content for now');
+            }
+            
+            // Phase 4: Move questions to questions canvas
+            moveQuestionsToCanvas() {
+                const questionsContainer = document.getElementById('questionsContainer');
+                const questionsCanvas = document.querySelector('.questions-content');
+                const placeholder = document.getElementById('questionsPlaceholder');
+                
+                if (questionsContainer && questionsCanvas && this.isDesktop) {
+                    // Hide placeholder
+                    if (placeholder) placeholder.style.display = 'none';
+                    
+                    // Move questions container to canvas
+                    questionsCanvas.appendChild(questionsContainer);
+                    console.log('Questions moved to canvas');
+                }
+            }
+            
+            moveToMain() {
+                // Move sections back to main content area
+                const sidebarSections = this.sidebarContent.querySelectorAll('.sidebar-section');
+                sidebarSections.forEach(section => section.remove());
+                
+                // Show original sections in main content
+                const originalSections = [
+                    '#statsOverview',
+                    '#recentTopicsSection', 
+                    '#recommendationsSection'
+                ];
+                
+                originalSections.forEach(selector => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.style.display = '';
+                    }
+                });
+            }
+        }
+
+        // Phase 4: Mobile Menu Management
+        class MobileMenuManager {
+            constructor() {
+                this.menuBtn = document.getElementById('mobileMenuBtn');
+                this.menuOverlay = document.getElementById('mobileMenuOverlay');
+                this.menuClose = document.getElementById('mobileMenuClose');
+                this.menuSections = document.getElementById('mobileMenuSections');
+                this.isOpen = false;
+                
+                this.init();
+            }
+            
+            init() {
+                if (this.menuBtn) {
+                    this.menuBtn.addEventListener('click', () => this.toggleMenu());
+                }
+                if (this.menuClose) {
+                    this.menuClose.addEventListener('click', () => this.closeMenu());
+                }
+                if (this.menuOverlay) {
+                    this.menuOverlay.addEventListener('click', (e) => {
+                        if (e.target === this.menuOverlay) {
+                            this.closeMenu();
+                        }
+                    });
+                }
+                
+                // Close menu on escape key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isOpen) {
+                        this.closeMenu();
+                    }
+                });
+                
+                console.log('Mobile Menu Manager initialized');
+            }
+            
+            toggleMenu() {
+                if (this.isOpen) {
+                    this.closeMenu();
+                } else {
+                    this.openMenu();
+                }
+            }
+            
+            openMenu() {
+                this.isOpen = true;
+                this.menuBtn.classList.add('active');
+                this.menuOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                this.populateMenuSections();
+            }
+            
+            closeMenu() {
+                this.isOpen = false;
+                this.menuBtn.classList.remove('active');
+                this.menuOverlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+            
+            populateMenuSections() {
+                this.menuSections.innerHTML = '';
+                
+                // Get sections to show in mobile menu
+                const sections = [
+                    { 
+                        title: '📚 Recent Topics', 
+                        elementId: 'recentTopicsSection',
+                        icon: '▼'
+                    },
+                    { 
+                        title: '💡 Recommendations', 
+                        elementId: 'recommendationsSection',
+                        icon: '▼'
+                    },
+                    { 
+                        title: '📊 Your Progress', 
+                        elementId: 'statsOverview',
+                        icon: '▼'
+                    }
+                ];
+                
+                sections.forEach(section => {
+                    const element = document.querySelector(`#${section.elementId}`);
+                    if (element && element.style.display !== 'none') {
+                        this.createCollapsibleSection(section.title, element.cloneNode(true), section.icon);
+                    }
+                });
+            }
+            
+            createCollapsibleSection(title, content, icon) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'collapsible-section';
+                
+                const header = document.createElement('button');
+                header.className = 'collapsible-header';
+                header.innerHTML = `<span>${title}</span><span class="collapse-icon">${icon}</span>`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'collapsible-content';
+                contentDiv.appendChild(content);
+                
+                header.addEventListener('click', () => {
+                    const isExpanded = contentDiv.classList.contains('expanded');
+                    contentDiv.classList.toggle('expanded');
+                    header.querySelector('.collapse-icon').textContent = isExpanded ? '▼' : '▲';
+                });
+                
+                sectionDiv.appendChild(header);
+                sectionDiv.appendChild(contentDiv);
+                this.menuSections.appendChild(sectionDiv);
+            }
+        }
+
         // Configuration constants
         const CONFIG = {
             API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent',
@@ -931,6 +1563,10 @@
         // Initialize the application
         function initializeApp() {
             console.log('Initializing app...');
+            
+            // Phase 4: Initialize responsive layout and mobile menu managers
+            window.layoutManager = new ResponsiveLayoutManager();
+            window.mobileMenuManager = new MobileMenuManager();
             
             // Load saved API key first
             const apiKeyInput = document.getElementById('apiKeyInput');
@@ -1668,17 +2304,11 @@
             console.log('Adding stats dashboard...');
             
             const container = document.querySelector('.main-container');
-            const footer = document.querySelector('.footer');
             
             console.log('Container found:', !!container);
-            console.log('Footer found:', !!footer);
             
             if (!container) {
                 console.error('Main container not found for stats dashboard');
-                return;
-            }
-            if (!footer) {
-                console.error('Footer not found for stats dashboard');
                 return;
             }
             
@@ -1730,14 +2360,15 @@
             `;
             
             try {
-                // Always ensure dashboard is positioned just before footer (at the very bottom)
+                // Always ensure dashboard is positioned at the bottom of the container
                 const existingDashboard = container.querySelector('#statsOverview')?.parentElement;
                 if (existingDashboard) {
                     existingDashboard.remove();
                     console.log('Removed existing dashboard to reposition');
                 }
                 
-                container.insertBefore(statsSection, footer);
+                // Simply append to the end of the container
+                container.appendChild(statsSection);
                 console.log('Stats dashboard added successfully at bottom position');
                 
                 // Immediate verification
@@ -2277,9 +2908,13 @@
         function populateExampleTopics() {
             console.log('Attempting to populate example topics...');
             const grid = document.getElementById('exampleTopicsGrid');
-            if (!grid) {
-                console.error('exampleTopicsGrid element not found - DOM might not be ready');
-                // Retry after a short delay
+            const toggle = document.getElementById('exampleTopicsToggle');
+            const content = document.getElementById('exampleTopicsContent');
+            const icon = document.getElementById('exampleTopicsIcon');
+            const showMoreBtn = document.getElementById('showMoreTopics');
+            
+            if (!grid || !toggle || !content) {
+                console.error('Example topics elements not found - DOM might not be ready');
                 setTimeout(() => {
                     console.log('Retrying populateExampleTopics...');
                     populateExampleTopics();
@@ -2287,31 +2922,78 @@
                 return;
             }
             
-            console.log('Found exampleTopicsGrid, populating topics...');
-            grid.innerHTML = '';
+            console.log('Found example topics elements, setting up...');
             
-            exampleTopics.forEach((topic, index) => {
-                const topicButton = document.createElement('div');
-                topicButton.className = 'example-topic';
-                topicButton.textContent = topic;
-                topicButton.addEventListener('click', () => {
-                    console.log('Topic clicked:', topic);
-                    const mathTopicInput = document.getElementById('mathTopic');
-                    if (mathTopicInput) {
-                        mathTopicInput.value = topic;
-                        mathTopicInput.focus();
-                        // Hide autocomplete dropdown if visible
-                        const dropdown = document.getElementById('autocompleteDropdown');
-                        if (dropdown) dropdown.style.display = 'none';
-                        console.log('Topic set successfully:', topic);
-                    } else {
-                        console.error('mathTopic input not found when clicking topic');
-                    }
-                });
-                grid.appendChild(topicButton);
+            // Set up toggle functionality
+            let isExpanded = false;
+            let showingAll = false;
+            const INITIAL_DISPLAY = 6; // Show only 6 topics initially
+            
+            toggle.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                content.classList.toggle('expanded', isExpanded);
+                icon.classList.toggle('expanded', isExpanded);
+                icon.textContent = isExpanded ? '▲' : '▼';
+                
+                if (isExpanded && !grid.children.length) {
+                    populateTopicButtons();
+                }
             });
             
-            console.log(`Successfully populated ${exampleTopics.length} example topics`);
+            function populateTopicButtons() {
+                grid.innerHTML = '';
+                
+                exampleTopics.forEach((topic, index) => {
+                    const topicButton = document.createElement('div');
+                    topicButton.className = 'example-topic';
+                    topicButton.textContent = topic;
+                    
+                    // Hide topics beyond initial display count
+                    if (index >= INITIAL_DISPLAY && !showingAll) {
+                        topicButton.classList.add('hidden');
+                    }
+                    
+                    topicButton.addEventListener('click', () => {
+                        console.log('Topic clicked:', topic);
+                        const mathTopicInput = document.getElementById('mathTopic');
+                        if (mathTopicInput) {
+                            mathTopicInput.value = topic;
+                            mathTopicInput.focus();
+                            // Hide autocomplete dropdown if visible
+                            const dropdown = document.getElementById('autocompleteDropdown');
+                            if (dropdown) dropdown.style.display = 'none';
+                            console.log('Topic set successfully:', topic);
+                        } else {
+                            console.error('mathTopic input not found when clicking topic');
+                        }
+                    });
+                    
+                    grid.appendChild(topicButton);
+                });
+                
+                // Show "Show More" button if there are hidden topics
+                if (exampleTopics.length > INITIAL_DISPLAY && !showingAll && showMoreBtn) {
+                    showMoreBtn.style.display = 'block';
+                    showMoreBtn.textContent = `Show ${exampleTopics.length - INITIAL_DISPLAY} More Topics`;
+                }
+            }
+            
+            // Set up "Show More" functionality
+            if (showMoreBtn) {
+                showMoreBtn.addEventListener('click', () => {
+                    showingAll = !showingAll;
+                    const hiddenTopics = grid.querySelectorAll('.example-topic.hidden');
+                    
+                    hiddenTopics.forEach(topic => {
+                        topic.classList.toggle('hidden', !showingAll);
+                    });
+                    
+                    showMoreBtn.textContent = showingAll ? 'Show Less' : `Show ${hiddenTopics.length} More Topics`;
+                    if (showingAll) showMoreBtn.style.display = 'none';
+                });
+            }
+            
+            console.log(`Example topics setup complete - ${exampleTopics.length} topics available`);
         }
         
         function setupAutocomplete() {
@@ -2692,45 +3374,77 @@
             displayMessage('API key saved successfully!', 'text-green-400');
         }
 
-        // Minimal preprocessing - only clean up obvious LaTeX issues
+        // Smart math preprocessing - handles API responses with math delimiters
         function preprocessMathContent(content) {
             if (!content) return content;
             
-            console.log('Preprocessing content:', content.substring(0, 100) + '...');
+            console.log('🔍 MATH PREPROCESSING DEBUG:');
+            console.log('Raw content:', content.substring(0, 150));
+            console.log('Content type:', typeof content);
+            console.log('Content length:', content.length);
             
-            // If content already has math delimiters, return it unchanged
-            if (content.includes('$')) {
-                console.log('Content already has math delimiters, skipping preprocessing');
+            // SMART HANDLING: If content has math delimiters, validate and fix them
+            if (content.includes('$') || content.includes('\\[') || content.includes('\\(')) {
+                console.log('📐 Content has math delimiters - performing smart validation');
+                
+                // Fix common issues with $$ \text{ patterns
+                if (content.includes('$$ \\text{') || content.includes('$$\\text{')) {
+                    console.log('🔧 Fixing $$ \\text{ pattern');
+                    let processed = content;
+                    
+                    // Handle $$ \text{...} $$ patterns - extract text content
+                    processed = processed.replace(/\$\$\s*\\text\{([^}]*)\}\s*\$\$/g, '$1');
+                    console.log('✅ Fixed $$ \\text{} pattern:', processed);
+                    return processed;
+                }
+                
+                // For other math patterns, return as-is
+                console.log('✅ Valid math delimiters found - returning unchanged');
                 return content;
             }
             
-            // Only do minimal cleanup for non-delimited content
+            // ULTRA-CONSERVATIVE: Only process if content is CLEARLY mathematical
+            // Must have explicit mathematical structures, not just backslashes
+            const hasClearMathStructure = /\\frac\{.*\}.*\{.*\}|\\sqrt\{.*\}|\\int.*d[xyz]|\\sum.*=.*\^.*|\\lim.*\\to/.test(content);
+            
+            if (!hasClearMathStructure) {
+                console.log('✅ No clear math structure detected - returning as regular text');
+                return content;
+            }
+            
+            // Additional safety: ensure it's not just regular text with escaped characters
+            const wordCount = content.split(/\s+/).length;
+            const hasRegularWords = /\b(the|and|or|in|on|at|to|for|of|with|by|from|about|into|through|during|before|after|above|below|up|down|out|off|over|under|again|further|then|once)\b/i.test(content);
+            
+            if (wordCount > 10 && hasRegularWords) {
+                console.log('✅ Detected regular sentence structure - returning as text');
+                return content;
+            }
+            
+            // Only now do minimal cleanup
             let processed = content;
             
-            // Only clean up \text{} wrappers if they exist  
+            // Clean up \text{} wrappers ONLY if they exist (but preserve context)
             if (processed.includes('\\text{')) {
+                const beforeCleanup = processed;
                 processed = processed.replace(/\\text\{([^}]*)\}/g, '$1');
+                console.log('🧹 Cleaned \\text{} wrappers:', beforeCleanup, '->', processed);
             }
             
-            // Convert \n to proper line breaks but preserve all other spacing
+            // Convert \n to line breaks ONLY if they exist
             if (processed.includes('\\n')) {
                 processed = processed.replace(/\\n/g, '\n');
+                console.log('🧹 Converted \\n to line breaks');
             }
             
-            // Very strict LaTeX command detection - only common math expressions
-            const hasObviousMath = /\\(frac\{|sqrt\{|int_|sum_|lim_|infty|alpha|beta|gamma|theta|delta|lambda|mu|sigma|pi)/.test(processed);
-            
-            // Check if content looks like regular text (words, sentences, normal punctuation)
-            const looksLikeRegularText = /^[A-Za-z0-9\s\.,!?;:()-]+$/.test(processed.trim()) && !hasObviousMath;
-            
-            // Very conservative: only add delimiters for clear mathematical expressions without existing delimiters
-            if (hasObviousMath && !looksLikeRegularText && processed.length < 500) {
-                console.log('Adding math delimiters to mathematical content:', processed.substring(0, 50) + '...');
+            // FINAL CHECK: Only add delimiters if we're absolutely sure it's math
+            if (hasClearMathStructure && processed.length < 200) {
+                console.log('🔢 ADDING math delimiters to confirmed mathematical content');
+                console.log('Final processed:', processed);
                 return `$$${processed}$$`;
             }
             
-            console.log('Content processed as regular text:', processed.substring(0, 50) + '...');
-            // Return content unchanged - let KaTeX handle it naturally
+            console.log('✅ Final result: returning as regular text');
             return processed;
         }
         
@@ -3337,6 +4051,11 @@
 
             questionsContainer.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
+            
+            // Phase 4: Move questions to canvas on desktop
+            if (window.layoutManager) {
+                window.layoutManager.moveQuestionsToCanvas();
+            }
             
             // Initialize question navigation
             if (totalQuestions > 1) {
