@@ -1226,11 +1226,16 @@
         function loadAndApplyUserPreferences() {
             const preferences = DataManager.loadPreferences();
             
+            const difficultySelect = document.getElementById('difficulty');
+            const mathTopicInput = document.getElementById('mathTopic');
+            
             // Apply preferred difficulty
-            difficultySelect.value = preferences.preferredDifficulty;
+            if (difficultySelect && preferences.preferredDifficulty) {
+                difficultySelect.value = preferences.preferredDifficulty;
+            }
             
             // Set last used topic if available
-            if (preferences.lastUsedTopic) {
+            if (mathTopicInput && preferences.lastUsedTopic) {
                 mathTopicInput.value = preferences.lastUsedTopic;
             }
         }
@@ -1283,9 +1288,12 @@
 
         // Phase 3: Select a recent topic
         function selectRecentTopic(topic, difficulty) {
-            mathTopicInput.value = topic;
-            difficultySelect.value = difficulty;
-            mathTopicInput.focus();
+            const mathTopicInput = document.getElementById('mathTopic');
+            const difficultySelect = document.getElementById('difficulty');
+            
+            if (mathTopicInput) mathTopicInput.value = topic;
+            if (difficultySelect) difficultySelect.value = difficulty;
+            if (mathTopicInput) mathTopicInput.focus();
             
             // Provide feedback
             displayMessage(`Selected: ${topic} (${difficulty})`, 'text-green-400');
@@ -2039,6 +2047,11 @@
         
         function populateExampleTopics() {
             const grid = document.getElementById('exampleTopicsGrid');
+            if (!grid) {
+                console.error('exampleTopicsGrid element not found');
+                return;
+            }
+            
             grid.innerHTML = '';
             
             exampleTopics.forEach(topic => {
@@ -2046,11 +2059,14 @@
                 topicButton.className = 'example-topic';
                 topicButton.textContent = topic;
                 topicButton.addEventListener('click', () => {
-                    mathTopicInput.value = topic;
-                    mathTopicInput.focus();
-                    // Hide autocomplete dropdown if visible
-                    const dropdown = document.getElementById('autocompleteDropdown');
-                    if (dropdown) dropdown.style.display = 'none';
+                    const mathTopicInput = document.getElementById('mathTopic');
+                    if (mathTopicInput) {
+                        mathTopicInput.value = topic;
+                        mathTopicInput.focus();
+                        // Hide autocomplete dropdown if visible
+                        const dropdown = document.getElementById('autocompleteDropdown');
+                        if (dropdown) dropdown.style.display = 'none';
+                    }
                 });
                 grid.appendChild(topicButton);
             });
@@ -2058,7 +2074,13 @@
         
         function setupAutocomplete() {
             const dropdown = document.getElementById('autocompleteDropdown');
+            const mathTopicInput = document.getElementById('mathTopic');
             let selectedIndex = -1;
+            
+            if (!dropdown || !mathTopicInput) {
+                console.error('Autocomplete elements not found');
+                return;
+            }
             
             mathTopicInput.addEventListener('input', (e) => {
                 const value = e.target.value.toLowerCase();
@@ -2129,12 +2151,15 @@
             }
             
             function selectSuggestion(suggestion) {
-                const currentValue = mathTopicInput.value;
-                const words = currentValue.split(' ');
-                words[words.length - 1] = suggestion;
-                mathTopicInput.value = words.join(' ') + ' ';
-                hideAutocomplete();
-                mathTopicInput.focus();
+                const mathTopicInput = document.getElementById('mathTopic');
+                if (mathTopicInput) {
+                    const currentValue = mathTopicInput.value;
+                    const words = currentValue.split(' ');
+                    words[words.length - 1] = suggestion;
+                    mathTopicInput.value = words.join(' ') + ' ';
+                    hideAutocomplete();
+                    mathTopicInput.focus();
+                }
             }
         }
         
@@ -2189,13 +2214,7 @@
             }
         });
 
-        // Enter key support for topic input
-        mathTopicInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                e.preventDefault();
-                generateMathQuestions();
-            }
-        });
+        // Enter key support for topic input is handled in setupAutocomplete()
 
         function handleKeyboardNavigation(e) {
             // ESC key to close revealed answers and hide error dialogs
@@ -2234,8 +2253,11 @@
             // Ctrl+K to focus on topic input
             if (e.ctrlKey && e.key === 'k') {
                 e.preventDefault();
-                mathTopicInput.focus();
-                mathTopicInput.select();
+                const mathTopicInput = document.getElementById('mathTopic');
+                if (mathTopicInput) {
+                    mathTopicInput.focus();
+                    mathTopicInput.select();
+                }
             }
             
             // Ctrl+E to export questions (if available)
@@ -2779,13 +2801,25 @@
         }
 
         async function generateMathQuestions() {
+            const mathTopicInput = document.getElementById('mathTopic');
+            const difficultySelect = document.getElementById('difficulty');
+            
+            if (!mathTopicInput || !difficultySelect) {
+                console.error('Required input elements not found');
+                displayMessage("Error: Required form elements not found.", "text-red-500");
+                return;
+            }
+            
             const mathTopic = mathTopicInput.value.trim();
             const difficulty = difficultySelect.value;
             const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
 
             // Validation
             if (!apiKey) {
-                apiKeyContainer.style.display = 'block';
+                const apiKeyContainer = document.getElementById('apiKeyContainer');
+                if (apiKeyContainer) {
+                    apiKeyContainer.style.display = 'block';
+                }
                 displayMessage("Please enter your Gemini API key first.", "text-red-500");
                 return;
             }
@@ -2797,13 +2831,21 @@
             }
 
             // Hide previous messages/questions, show loading
-            initialMessage.classList.add('hidden');
-            questionsContainer.classList.add('hidden');
-            resetBtn.classList.add('hidden');
-            loadingIndicator.classList.remove('hidden');
-            generateQuestionsBtn.disabled = true;
-            mathQuestionsList.innerHTML = ''; // Clear previous questions
-            messageContainer.innerHTML = ''; // Clear any previous error messages
+            const initialMessage = document.getElementById('initialMessage');
+            const questionsContainer = document.getElementById('questionsContainer');
+            const resetBtn = document.getElementById('resetBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
+            const mathQuestionsList = document.getElementById('mathQuestionsList');
+            const messageContainer = document.getElementById('messageContainer');
+            
+            if (initialMessage) initialMessage.classList.add('hidden');
+            if (questionsContainer) questionsContainer.classList.add('hidden');
+            if (resetBtn) resetBtn.classList.add('hidden');
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+            if (generateQuestionsBtn) generateQuestionsBtn.disabled = true;
+            if (mathQuestionsList) mathQuestionsList.innerHTML = '';
+            if (messageContainer) messageContainer.innerHTML = '';
             
             // Start enhanced loading animation
             startLoadingAnimation();
@@ -2903,13 +2945,19 @@
                 }
             } finally {
                 stopLoadingAnimation();
-                loadingIndicator.classList.add('hidden');
-                generateQuestionsBtn.disabled = false;
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
+                
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                if (generateQuestionsBtn) generateQuestionsBtn.disabled = false;
             }
         }
 
         function displayMathQuestions(problems) {
-            mathQuestionsList.innerHTML = ''; // Clear previous questions
+            const mathQuestionsList = document.getElementById('mathQuestionsList');
+            if (mathQuestionsList) {
+                mathQuestionsList.innerHTML = ''; // Clear previous questions
+            }
             currentQuestions = problems; // Store for export functionality
             totalQuestions = problems.length;
             currentQuestionIndex = 0; // Reset to first question
@@ -3266,17 +3314,27 @@
         }
 
         function resetGenerator() {
-            mathTopicInput.value = ''; // Clear input
-            difficultySelect.value = 'Medium'; // Reset difficulty
-            mathQuestionsList.innerHTML = ''; // Clear questions
+            const mathTopicInput = document.getElementById('mathTopic');
+            const difficultySelect = document.getElementById('difficulty');
+            const mathQuestionsList = document.getElementById('mathQuestionsList');
+            const questionsContainer = document.getElementById('questionsContainer');
+            const resetBtn = document.getElementById('resetBtn');
+            const initialMessage = document.getElementById('initialMessage');
+            const messageContainer = document.getElementById('messageContainer');
+            
+            if (mathTopicInput) mathTopicInput.value = ''; // Clear input
+            if (difficultySelect) difficultySelect.value = 'Medium'; // Reset difficulty
+            if (mathQuestionsList) mathQuestionsList.innerHTML = ''; // Clear questions
             currentQuestions = []; // Clear stored questions
             currentQuestionIndex = 0;
             totalQuestions = 0;
-            document.getElementById('questionNavigator').classList.add('hidden'); // Hide navigator
-            questionsContainer.classList.add('hidden');
-            resetBtn.classList.add('hidden');
-            initialMessage.classList.remove('hidden'); // Show initial message again
-            messageContainer.innerHTML = ''; // Clear any messages
+            
+            const questionNavigator = document.getElementById('questionNavigator');
+            if (questionNavigator) questionNavigator.classList.add('hidden'); // Hide navigator
+            if (questionsContainer) questionsContainer.classList.add('hidden');
+            if (resetBtn) resetBtn.classList.add('hidden');
+            if (initialMessage) initialMessage.classList.remove('hidden'); // Show initial message again
+            if (messageContainer) messageContainer.innerHTML = ''; // Clear any messages
         }
 
         function displayMessage(message, colorClass) {
