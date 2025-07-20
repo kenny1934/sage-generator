@@ -930,33 +930,48 @@
 
         // Initialize the application
         function initializeApp() {
-            // Load saved API key
+            console.log('Initializing app...');
+            
+            // Load saved API key first
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const apiKeyContainer = document.getElementById('apiKeyContainer');
+            
             const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
-            if (savedApiKey) {
+            if (savedApiKey && apiKeyInput && apiKeyContainer) {
                 apiKeyInput.value = savedApiKey;
                 apiKeyContainer.style.display = 'none';
+                console.log('Loaded saved API key');
             }
 
-            // Phase 3: Load user preferences and apply them
-            loadAndApplyUserPreferences();
+            // Attach event listeners first
+            attachEventListeners();
             
-            // Phase 3: Initialize personalization features
-            initializePersonalizationFeatures();
+            // Initialize core features with delay to ensure DOM is ready
+            setTimeout(() => {
+                console.log('Initializing smart input features...');
+                initializeSmartInput();
+                
+                // Check if KaTeX is loaded
+                checkKaTeXLoaded();
+                
+                // Initialize mobile enhancements
+                initializeMobileFeatures();
+                
+                // Initialize network monitoring
+                initializeNetworkMonitoring();
+                
+                // Check for Google Drive availability (optional)
+                checkGoogleDriveAvailability();
 
-            // Check if KaTeX is loaded
-            checkKaTeXLoaded();
-            
-            // Initialize mobile enhancements
-            initializeMobileFeatures();
-            
-            // Initialize network monitoring
-            initializeNetworkMonitoring();
-            
-            // Initialize smart input features
-            initializeSmartInput();
-            
-            // Check for Google Drive availability (optional)
-            checkGoogleDriveAvailability();
+                // Phase 3: Load user preferences and apply them
+                loadAndApplyUserPreferences();
+                
+                // Phase 3: Initialize personalization features AFTER core features
+                setTimeout(() => {
+                    console.log('Initializing personalization features...');
+                    initializePersonalizationFeatures();
+                }, 200);
+            }, 150);
         }
         
         // Check if Google Drive APIs are available (non-blocking)
@@ -2046,19 +2061,27 @@
         ];
         
         function populateExampleTopics() {
+            console.log('Attempting to populate example topics...');
             const grid = document.getElementById('exampleTopicsGrid');
             if (!grid) {
-                console.error('exampleTopicsGrid element not found');
+                console.error('exampleTopicsGrid element not found - DOM might not be ready');
+                // Retry after a short delay
+                setTimeout(() => {
+                    console.log('Retrying populateExampleTopics...');
+                    populateExampleTopics();
+                }, 100);
                 return;
             }
             
+            console.log('Found exampleTopicsGrid, populating topics...');
             grid.innerHTML = '';
             
-            exampleTopics.forEach(topic => {
+            exampleTopics.forEach((topic, index) => {
                 const topicButton = document.createElement('div');
                 topicButton.className = 'example-topic';
                 topicButton.textContent = topic;
                 topicButton.addEventListener('click', () => {
+                    console.log('Topic clicked:', topic);
                     const mathTopicInput = document.getElementById('mathTopic');
                     if (mathTopicInput) {
                         mathTopicInput.value = topic;
@@ -2066,10 +2089,15 @@
                         // Hide autocomplete dropdown if visible
                         const dropdown = document.getElementById('autocompleteDropdown');
                         if (dropdown) dropdown.style.display = 'none';
+                        console.log('Topic set successfully:', topic);
+                    } else {
+                        console.error('mathTopic input not found when clicking topic');
                     }
                 });
                 grid.appendChild(topicButton);
             });
+            
+            console.log(`Successfully populated ${exampleTopics.length} example topics`);
         }
         
         function setupAutocomplete() {
@@ -2909,14 +2937,19 @@
                     result.candidates[0].content.parts.length > 0) {
                     const jsonText = result.candidates[0].content.parts[0].text;
                     try {
+                        console.log("Raw API response text:", jsonText);
                         const mathProblems = JSON.parse(jsonText);
+                        console.log("Parsed math problems:", mathProblems);
+                        
                         if (Array.isArray(mathProblems) && mathProblems.length > 0) {
                             displayMathQuestions(mathProblems);
                         } else {
-                            throw new Error('Invalid response format');
+                            console.error("Response is not a valid array:", mathProblems);
+                            throw new Error('Invalid response format - not an array or empty');
                         }
                     } catch (parseError) {
                         console.error("Error parsing JSON response:", parseError);
+                        console.error("Raw response that failed to parse:", jsonText);
                         displayMessage("Sorry, I received an invalid response format. Please try again.", "text-red-500");
                     }
                 } else {
