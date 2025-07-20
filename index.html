@@ -547,6 +547,35 @@
             <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
                 <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently and consult your teacher or textbook for accuracy.
             </div>
+            
+            <!-- Google Drive Setup (hidden by default) -->
+            <div id="googleDriveSetupPanel" class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-blue-200">
+                        ☁️ Google Drive Setup
+                    </h3>
+                    <button type="button" class="text-blue-400 hover:text-blue-300 text-sm" onclick="hideGoogleDriveSetup()">Close</button>
+                </div>
+                <div class="text-sm text-blue-200 mb-4">
+                    <p class="mb-2">Enable multi-device sync for your Google Workspace:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-blue-300 text-xs">
+                        <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="text-blue-400 underline">Google Cloud Console</a></li>
+                        <li>Enable the Google Drive API</li>
+                        <li>Create OAuth 2.0 Client ID (Web application)</li>
+                        <li>Add <code class="bg-gray-700 px-1 rounded text-blue-200" id="currentOriginDisplay">your current URL</code> to "Authorized JavaScript origins"</li>
+                        <li>Enter Client ID below</li>
+                    </ol>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label for="googleClientId" class="block text-sm font-medium text-blue-200 mb-1">Google OAuth Client ID:</label>
+                        <input type="text" id="googleClientId" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="123456789-abcdefg.apps.googleusercontent.com">
+                    </div>
+                    <button type="button" class="action-btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="saveGoogleDriveConfig()">
+                        Save Configuration
+                    </button>
+                </div>
+            </div>
 
             <!-- API Key Configuration -->
             <div id="apiKeyContainer" class="api-key-container">
@@ -945,6 +974,22 @@
                         statusElement.textContent = 'Available (setup required)';
                         statusElement.className = 'text-blue-400';
                     }
+                    
+                    // Show setup button
+                    const setupBtn = document.getElementById('googleDriveSetupBtn');
+                    if (setupBtn) setupBtn.classList.remove('hidden');
+                    
+                    // Check if already configured
+                    const savedClientId = localStorage.getItem('google_client_id');
+                    if (savedClientId) {
+                        if (statusElement) {
+                            statusElement.textContent = 'Configured (ready to connect)';
+                            statusElement.className = 'text-green-400';
+                        }
+                        
+                        // Try to initialize Google Drive
+                        initializeGoogleDrive(savedClientId);
+                    }
                 } else {
                     console.log('Google Drive APIs not available - using localStorage only');
                     
@@ -954,6 +999,227 @@
                     }
                 }
             }, 3000);
+        }
+        
+        function showGoogleDriveSetup() {
+            const panel = document.getElementById('googleDriveSetupPanel');
+            if (panel) {
+                panel.classList.remove('hidden');
+                
+                // Load saved client ID if exists
+                const savedClientId = localStorage.getItem('google_client_id');
+                if (savedClientId) {
+                    document.getElementById('googleClientId').value = savedClientId;
+                }
+                
+                // Show current origin for easy copying
+                const originDisplay = document.getElementById('currentOriginDisplay');
+                if (originDisplay) {
+                    originDisplay.textContent = window.location.origin;
+                }
+            }
+        }
+        
+        function hideGoogleDriveSetup() {
+            const panel = document.getElementById('googleDriveSetupPanel');
+            if (panel) panel.classList.add('hidden');
+        }
+        
+        function saveGoogleDriveConfig() {
+            const clientId = document.getElementById('googleClientId').value.trim();
+            
+            if (!clientId) {
+                displayMessage('Please enter the Google Client ID', 'text-red-500');
+                return;
+            }
+            
+            if (!clientId.includes('.googleusercontent.com')) {
+                displayMessage('Please enter a valid Google Client ID', 'text-red-500');
+                return;
+            }
+            
+            // Save the client ID
+            localStorage.setItem('google_client_id', clientId);
+            
+            // Update UI
+            const statusElement = document.getElementById('googleDriveStatus');
+            if (statusElement) {
+                statusElement.textContent = 'Configured (ready to connect)';
+                statusElement.className = 'text-green-400';
+            }
+            
+            hideGoogleDriveSetup();
+            displayMessage('Google Drive configured successfully!', 'text-green-400');
+            
+            // Try to initialize with the new client ID
+            initializeGoogleDrive(clientId);
+        }
+        
+        // Initialize Google Drive with client ID
+        async function initializeGoogleDrive(clientId) {
+            if (!googleDriveAvailable) return;
+            
+            try {
+                console.log('Initializing Google Drive...');
+                
+                // Check if running from file:// protocol
+                const isLocalFile = window.location.protocol === 'file:';
+                if (isLocalFile) {
+                    console.warn('Google Drive requires HTTPS or localhost. Try running: python -m http.server 8000');
+                    
+                    const statusElement = document.getElementById('googleDriveStatus');
+                    if (statusElement) {
+                        statusElement.textContent = 'Setup error';
+                        statusElement.className = 'text-red-400';
+                    }
+                    
+                    displayMessage('Google Drive requires HTTPS or localhost. Try running: python -m http.server 8000', 'text-yellow-400');
+                    return;
+                }
+                
+                // Initialize gapi client
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
+                    
+                    window.gapi.load('client:auth2', {
+                        callback: () => {
+                            clearTimeout(timeout);
+                            resolve();
+                        },
+                        onerror: (error) => {
+                            clearTimeout(timeout);
+                            reject(error);
+                        }
+                    });
+                });
+                
+                // Initialize client with cookiePolicy for local testing
+                const initConfig = {
+                    clientId: clientId,
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                    scope: 'https://www.googleapis.com/auth/drive.file'
+                };
+                
+                if (isLocalFile) {
+                    initConfig.cookiePolicy = 'single_host_origin';
+                }
+                
+                await window.gapi.client.init(initConfig);
+                
+                console.log('Google Drive initialized successfully');
+                
+                // Update status and add connect button
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Ready to connect';
+                    statusElement.className = 'text-green-400';
+                }
+                
+                addGoogleDriveConnectButton();
+                
+            } catch (error) {
+                console.error('Failed to initialize Google Drive:', error);
+                console.error('Error details:', error.message || error.details);
+                
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Setup error';
+                    statusElement.className = 'text-red-400';
+                }
+                
+                let errorMsg = 'Failed to initialize Google Drive. Please check your credentials.';
+                
+                // Handle different error types
+                if (error.message && error.message.includes('Invalid cookiePolicy')) {
+                    errorMsg = 'Google Drive requires HTTPS or localhost. Try running: python -m http.server 8000';
+                } else if (error.error === 'idpiframe_initialization_failed' || 
+                          (error.details && error.details.includes('Not a valid origin'))) {
+                    const currentOrigin = window.location.origin;
+                    errorMsg = `OAuth error: ${currentOrigin} is not authorized. Add this URL to your Google Cloud Console OAuth settings under "Authorized JavaScript origins".`;
+                } else if (error.message) {
+                    errorMsg = `Google Drive error: ${error.message}`;
+                } else if (error.details) {
+                    errorMsg = `Google Drive error: ${error.details}`;
+                }
+                
+                displayMessage(errorMsg, 'text-red-500');
+            }
+        }
+        
+        function addGoogleDriveConnectButton() {
+            const setupBtn = document.getElementById('googleDriveSetupBtn');
+            if (setupBtn && !document.getElementById('googleDriveConnectBtn')) {
+                const connectBtn = document.createElement('button');
+                connectBtn.id = 'googleDriveConnectBtn';
+                connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                connectBtn.textContent = 'Connect';
+                connectBtn.onclick = connectToGoogleDrive;
+                
+                setupBtn.parentNode.appendChild(connectBtn);
+            }
+        }
+        
+        // Connect to Google Drive
+        async function connectToGoogleDrive() {
+            try {
+                const authInstance = window.gapi.auth2.getAuthInstance();
+                googleUser = await authInstance.signIn();
+                isGoogleSignedIn = true;
+                
+                console.log('Signed in to Google Drive successfully');
+                
+                // Update UI
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    const profile = googleUser.getBasicProfile();
+                    statusElement.textContent = `Connected as ${profile.getName()}`;
+                    statusElement.className = 'text-green-400';
+                }
+                
+                // Hide connect button, show disconnect
+                const connectBtn = document.getElementById('googleDriveConnectBtn');
+                if (connectBtn) {
+                    connectBtn.textContent = 'Disconnect';
+                    connectBtn.className = 'text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                    connectBtn.onclick = disconnectFromGoogleDrive;
+                }
+                
+                displayMessage('Connected to Google Drive successfully!', 'text-green-400');
+                
+            } catch (error) {
+                console.error('Failed to connect to Google Drive:', error);
+                displayMessage('Failed to connect to Google Drive', 'text-red-500');
+            }
+        }
+        
+        async function disconnectFromGoogleDrive() {
+            try {
+                const authInstance = window.gapi.auth2.getAuthInstance();
+                await authInstance.signOut();
+                
+                isGoogleSignedIn = false;
+                googleUser = null;
+                
+                // Update UI
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Ready to connect';
+                    statusElement.className = 'text-green-400';
+                }
+                
+                // Restore connect button
+                const connectBtn = document.getElementById('googleDriveConnectBtn');
+                if (connectBtn) {
+                    connectBtn.textContent = 'Connect';
+                    connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                    connectBtn.onclick = connectToGoogleDrive;
+                }
+                
+                displayMessage('Disconnected from Google Drive', 'text-gray-400');
+                
+            } catch (error) {
+                console.error('Failed to disconnect from Google Drive:', error);
+            }
         }
 
         // Phase 3: Load and apply user preferences
