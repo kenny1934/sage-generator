@@ -1619,8 +1619,29 @@
 
         // Phase 3: Add stats dashboard
         function addStatsDashboard() {
+            console.log('Adding stats dashboard...');
+            
+            // Check if dashboard already exists
+            const existingDashboard = document.querySelector('#statsOverview');
+            if (existingDashboard) {
+                console.log('Stats dashboard already exists, skipping...');
+                return;
+            }
+            
             const container = document.querySelector('.main-container');
             const footer = document.querySelector('.footer');
+            
+            console.log('Container found:', !!container);
+            console.log('Footer found:', !!footer);
+            
+            if (!container) {
+                console.error('Main container not found for stats dashboard');
+                return;
+            }
+            if (!footer) {
+                console.error('Footer not found for stats dashboard');
+                return;
+            }
             
             const statsSection = document.createElement('div');
             statsSection.className = 'mt-8 p-4 bg-gray-800 rounded-lg border border-gray-700';
@@ -1669,7 +1690,13 @@
                 </div>
             `;
             
-            container.insertBefore(statsSection, footer);
+            try {
+                container.insertBefore(statsSection, footer);
+                console.log('Stats dashboard added successfully');
+                console.log('Dashboard element inserted, checking if visible:', document.querySelector('#statsOverview'));
+            } catch (error) {
+                console.error('Error inserting stats dashboard:', error);
+            }
         }
 
         // Phase 3: Update stats display
@@ -1691,8 +1718,10 @@
                 topicsExploredEl.textContent = Object.keys(stats.favoriteTopics).length;
             }
             
-            // Update detailed stats if visible
-            updateDetailedStats(stats);
+            // Update detailed stats if visible (with small delay to ensure DOM is ready)
+            setTimeout(() => {
+                updateDetailedStats(stats);
+            }, 100);
         }
 
         // Phase 3: Update detailed stats
@@ -2338,9 +2367,7 @@
         saveApiKeyBtn.addEventListener('click', saveApiKey);
         exportQuestionsBtn.addEventListener('click', exportQuestions);
         
-        // Question navigation event listeners
-        document.getElementById('prevQuestionBtn').addEventListener('click', () => navigateQuestion(-1));
-        document.getElementById('nextQuestionBtn').addEventListener('click', () => navigateQuestion(1));
+        // Question navigation event listeners (removed - handled in attachEventListeners function)
 
         // Keyboard navigation support
         document.addEventListener('keydown', handleKeyboardNavigation);
@@ -2595,6 +2622,8 @@
         function preprocessMathContent(content) {
             if (!content) return content;
             
+            console.log('Preprocessing content:', content.substring(0, 100) + '...');
+            
             // Only do minimal cleanup, preserve all spacing
             let processed = content;
             
@@ -2608,14 +2637,17 @@
                 processed = processed.replace(/\\n/g, '\n');
             }
             
+            // More comprehensive LaTeX command detection
+            const hasLatexCommands = /\\(frac|sqrt|int|sum|lim|cdot|times|div|pm|infty|alpha|beta|gamma|theta|pi|sin|cos|tan|log|ln|exp|left|right|begin|end|[a-zA-Z]+)/g.test(processed);
+            
             // Only add delimiters if content has LaTeX commands but no delimiters
-            if (!processed.includes('$') && processed.includes('\\')) {
-                // Check if it's a pure math expression (starts with LaTeX command)
-                if (/^\\(frac|sqrt|int|sum)/.test(processed.trim())) {
-                    return `$$${processed}$$`;
-                }
+            if (!processed.includes('$') && hasLatexCommands) {
+                console.log('Adding math delimiters to:', processed.substring(0, 50) + '...');
+                // Wrap the entire content in display math
+                return `$$${processed}$$`;
             }
             
+            console.log('Content processed as:', processed.substring(0, 50) + '...');
             // Return content unchanged - let KaTeX handle it naturally
             return processed;
         }
@@ -3126,13 +3158,13 @@
                 const questionRenderedDiv = document.createElement('div');
                 questionRenderedDiv.className = 'text-lg text-gray-200 mb-4 math-rendered';
                 
-                // Use innerHTML to preserve spacing and formatting
-                if (problem.question.includes('\\') && !problem.question.includes('$')) {
-                    // Only preprocess LaTeX content without delimiters
+                // Always preprocess the content to ensure proper math handling
+                try {
                     const processedQuestion = preprocessMathContent(problem.question);
                     questionRenderedDiv.innerHTML = sanitizeHTML(processedQuestion);
-                } else {
-                    // For regular text or already delimited math, preserve as-is
+                    console.log(`Question ${index + 1} processed:`, processedQuestion.substring(0, 100) + '...');
+                } catch (error) {
+                    console.error(`Error processing question ${index + 1}:`, error);
                     questionRenderedDiv.innerHTML = sanitizeHTML(problem.question);
                 }
                 problemDiv.appendChild(questionRenderedDiv);
@@ -3275,23 +3307,35 @@
 
         // Question navigation functions
         function navigateQuestion(direction) {
+            console.log(`Navigating from question ${currentQuestionIndex + 1} with direction ${direction}`);
             const newIndex = currentQuestionIndex + direction;
+            console.log(`New index: ${newIndex + 1}, total questions: ${totalQuestions}`);
+            
             if (newIndex >= 0 && newIndex < totalQuestions) {
                 currentQuestionIndex = newIndex;
+                console.log(`Current question index updated to: ${currentQuestionIndex + 1}`);
                 showQuestion(currentQuestionIndex);
                 updateNavigationState();
+            } else {
+                console.log('Navigation blocked - index out of bounds');
             }
         }
         
         function showQuestion(index) {
             const questions = document.querySelectorAll('.question-item');
+            console.log(`Showing question ${index + 1}, total questions found: ${questions.length}`);
+            
             questions.forEach((question, i) => {
-                question.classList.toggle('active', i === index);
+                const isActive = i === index;
+                question.classList.toggle('active', isActive);
+                console.log(`Question ${i + 1}: ${isActive ? 'ACTIVE' : 'hidden'}`);
             });
             
             // Update counter
-            document.getElementById('questionCounter').textContent = 
-                `Question ${index + 1} of ${totalQuestions}`;
+            const counter = document.getElementById('questionCounter');
+            if (counter) {
+                counter.textContent = `Question ${index + 1} of ${totalQuestions}`;
+            }
         }
         
         function updateNavigationState() {
