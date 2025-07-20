@@ -1091,12 +1091,23 @@
                     });
                 }
                 
-                // Initialize client
-                await window.gapi.client.init({
+                // Initialize client with proper domain handling
+                const isLocalFile = window.location.protocol === 'file:';
+                const initConfig = {
                     clientId: clientId,
                     discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
                     scope: 'https://www.googleapis.com/auth/drive.file'
-                });
+                };
+                
+                // Add cookiePolicy for local file access
+                if (isLocalFile) {
+                    initConfig.cookiePolicy = 'single_host_origin';
+                    console.log('Running from local file, using single_host_origin cookiePolicy');
+                } else {
+                    console.log('Running from web server:', window.location.origin);
+                }
+                
+                await window.gapi.client.init(initConfig);
                 
                 console.log('Google Drive initialized successfully');
                 
@@ -1118,8 +1129,18 @@
                 
                 const statusElement = document.getElementById('googleDriveStatus');
                 if (statusElement) {
-                    statusElement.textContent = `Setup error: ${error.message}`;
-                    statusElement.className = 'text-red-400';
+                    if (error.message.includes('Invalid cookiePolicy') || window.location.protocol === 'file:') {
+                        statusElement.textContent = 'Requires web server (not file://)';
+                        statusElement.className = 'text-orange-400';
+                        
+                        // Add helpful message
+                        setTimeout(() => {
+                            displayMessage('Google Drive requires HTTPS or localhost. Try running: python -m http.server 8000', 'text-orange-400');
+                        }, 1000);
+                    } else {
+                        statusElement.textContent = `Setup error: ${error.message}`;
+                        statusElement.className = 'text-red-400';
+                    }
                 }
                 
                 return false;
