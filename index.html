@@ -539,6 +539,11 @@
                 <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
             </div>
 
+            <!-- AI Disclaimer -->
+            <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
+                <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently and consult your teacher or textbook for accuracy.
+            </div>
+
             <!-- API Key Configuration -->
             <div id="apiKeyContainer" class="api-key-container">
                 <label for="apiKeyInput" class="block text-sm font-semibold text-gray-200 mb-2">
@@ -1967,7 +1972,10 @@
                 // Convert \n to line breaks but preserve other formatting
                 processedSolution = processedSolution.replace(/\\n/g, '<br>');
                 
-                answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
+                answerContentDiv.innerHTML = `<div class="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-yellow-200 text-xs">
+                                                 <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
+                                             </div>` +
+                                             `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
                                              `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`; // Raw LaTeX for solution
@@ -2168,7 +2176,10 @@
                     // Convert \n to line breaks
                     processedSolution = processedSolution.replace(/\\n/g, '<br>');
                     
-                    answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
+                    answerContentDiv.innerHTML = `<div class="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-yellow-200 text-xs">
+                                                     <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
+                                                 </div>` +
+                                                 `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
                                                  `<div class="latex-view">${sanitizeHTML(newProblem.correctAnswer)}</div>` +
                                                  `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
                                                  `<div class="latex-view">${sanitizeHTML(newProblem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`;
