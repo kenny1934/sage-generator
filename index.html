@@ -54,13 +54,45 @@
             gap: var(--container-gap);
         }
 
-        /* Header Section */
+        /* Header Section - Compact Design */
         .app-header {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
             margin-bottom: 1rem;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            max-width: 100%;
+        }
+
+        /* Desktop: Horizontal header layout */
+        @media (min-width: 1024px) {
+            .app-header {
+                padding: 0.75rem 0;
+                margin-bottom: 0.5rem;
+            }
+            
+            .header-content {
+                flex-direction: row;
+                justify-content: center;
+                gap: 1.5rem;
+                align-items: center;
+            }
+            
+            .header-text {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+                gap: 0.25rem;
+            }
         }
 
         /* Main Content Area */
@@ -437,43 +469,75 @@
                 --container-gap: 2.5rem;
             }
         }
+        /* Compact Logo */
         .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 16px;
+            width: 60px;
+            height: 60px;
+            margin: 0;
             display: block;
             border-radius: 50%;
             border: 2px solid #f87171;
             background: #23272f;
             object-fit: cover;
             box-shadow: 0 2px 8px rgba(60, 72, 88, 0.10);
+            flex-shrink: 0;
         }
+
+        /* Compact Title */
         .sage-title {
             color: #fff;
             font-family: 'Georgia', serif;
-            font-size: 2.4rem;
+            font-size: 1.8rem;
             font-weight: 900;
-            margin-bottom: 0.2rem;
-            margin-top: 0.5rem;
-            letter-spacing: 1.5px;
+            margin: 0;
+            letter-spacing: 1px;
             text-align: center;
             line-height: 1.1;
         }
+
+        /* Compact Divider */
         .divider {
-            width: 60px;
-            height: 4px;
+            width: 40px;
+            height: 3px;
             background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
             border-radius: 2px;
-            margin: 0.5rem auto 1.2rem auto;
+            margin: 0.25rem 0;
         }
+
+        /* Compact Full Name */
         .full-name {
             color: #f87171;
             font-family: 'Georgia', serif;
-            font-size: 1.1rem;
-            margin-bottom: 1.7rem;
+            font-size: 0.9rem;
+            margin: 0;
             font-weight: normal;
             text-align: center;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        /* Desktop: Further optimizations */
+        @media (min-width: 1024px) {
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .sage-title {
+                font-size: 1.6rem;
+                text-align: left;
+            }
+            
+            .divider {
+                width: 30px;
+                height: 2px;
+                margin: 0.15rem 0;
+            }
+            
+            .full-name {
+                font-size: 0.8rem;
+                text-align: left;
+            }
         }
         .full-name .em {
             color: #ef4444;
@@ -927,10 +991,12 @@
         <header class="app-header">
             <div class="header-content">
                 <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
-                <h1 class="sage-title">SAGE</h1>
-                <div class="divider"></div>
-                <div class="full-name">
-                    <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
+                <div class="header-text">
+                    <h1 class="sage-title">SAGE</h1>
+                    <div class="divider"></div>
+                    <div class="full-name">
+                        <span class="em">S</span>econdary <span class="em">A</span>cademy <span class="em">G</span>enerator of <span class="em">E</span>xercises
+                    </div>
                 </div>
             </div>
             
