@@ -974,6 +974,85 @@
             }, 150);
         }
         
+        // Attach all event listeners with proper null checks
+        function attachEventListeners() {
+            console.log('Attaching event listeners...');
+            
+            const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const toggleMathViewBtn = document.getElementById('toggleMathViewBtn');
+            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+            const exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const prevQuestionBtn = document.getElementById('prevQuestionBtn');
+            const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+            
+            if (generateQuestionsBtn) {
+                generateQuestionsBtn.addEventListener('click', generateMathQuestions);
+                console.log('Attached generateMathQuestions event');
+            } else {
+                console.error('generateQuestionsBtn not found');
+            }
+            
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetGenerator);
+                console.log('Attached resetGenerator event');
+            } else {
+                console.error('resetBtn not found');
+            }
+            
+            if (toggleMathViewBtn) {
+                toggleMathViewBtn.addEventListener('click', toggleMathView);
+                console.log('Attached toggleMathView event');
+            } else {
+                console.error('toggleMathViewBtn not found');
+            }
+            
+            if (saveApiKeyBtn) {
+                saveApiKeyBtn.addEventListener('click', saveApiKey);
+                console.log('Attached saveApiKey event');
+            } else {
+                console.error('saveApiKeyBtn not found');
+            }
+            
+            if (exportQuestionsBtn) {
+                exportQuestionsBtn.addEventListener('click', exportQuestions);
+                console.log('Attached exportQuestions event');
+            } else {
+                console.error('exportQuestionsBtn not found');
+            }
+            
+            if (apiKeyInput) {
+                apiKeyInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveApiKey();
+                    }
+                });
+                console.log('Attached apiKeyInput Enter key event');
+            } else {
+                console.error('apiKeyInput not found');
+            }
+            
+            if (prevQuestionBtn) {
+                prevQuestionBtn.addEventListener('click', () => navigateQuestion(-1));
+                console.log('Attached prevQuestion event');
+            } else {
+                console.error('prevQuestionBtn not found');
+            }
+            
+            if (nextQuestionBtn) {
+                nextQuestionBtn.addEventListener('click', () => navigateQuestion(1));
+                console.log('Attached nextQuestion event');
+            } else {
+                console.error('nextQuestionBtn not found');
+            }
+            
+            // Keyboard navigation support
+            document.addEventListener('keydown', handleKeyboardNavigation);
+            console.log('Attached keyboard navigation');
+        }
+        
         // Check if Google Drive APIs are available (non-blocking)
         function checkGoogleDriveAvailability() {
             const statusElement = document.getElementById('googleDriveStatus');
@@ -1257,17 +1336,34 @@
 
         // Phase 3: Initialize personalization features
         function initializePersonalizationFeatures() {
-            // Add recently used topics section
-            addRecentTopicsSection();
-            
-            // Add topic recommendations
-            addTopicRecommendationsSection();
-            
-            // Add stats dashboard
-            addStatsDashboard();
-            
-            // Update stats display
-            updateStatsDisplay();
+            try {
+                console.log('Adding personalization features...');
+                
+                // Add recently used topics section
+                addRecentTopicsSection();
+                
+                // Add topic recommendations
+                addTopicRecommendationsSection();
+                
+                // Add stats dashboard
+                addStatsDashboard();
+                
+                // Update stats display (with error handling)
+                setTimeout(() => {
+                    try {
+                        updateStatsDisplay();
+                        console.log('Stats display updated successfully');
+                    } catch (statsError) {
+                        console.error('Error updating stats display:', statsError);
+                        // Don't let stats errors break the app
+                    }
+                }, 100);
+                
+                console.log('Personalization features initialized successfully');
+            } catch (error) {
+                console.error('Error initializing personalization features:', error);
+                // Don't let personalization errors break core functionality
+            }
         }
 
         // Phase 3: Add recently used topics section
@@ -1580,9 +1676,20 @@
         function updateStatsDisplay() {
             const stats = DataManager.loadStats();
             
-            document.getElementById('totalQuestions').textContent = stats.totalQuestions;
-            document.getElementById('totalSessions').textContent = stats.totalSessions;
-            document.getElementById('topicsExplored').textContent = Object.keys(stats.favoriteTopics).length;
+            // Safely update stats elements with null checks
+            const totalQuestionsEl = document.getElementById('totalQuestions');
+            const totalSessionsEl = document.getElementById('totalSessions');
+            const topicsExploredEl = document.getElementById('topicsExplored');
+            
+            if (totalQuestionsEl) {
+                totalQuestionsEl.textContent = stats.totalQuestions;
+            }
+            if (totalSessionsEl) {
+                totalSessionsEl.textContent = stats.totalSessions;
+            }
+            if (topicsExploredEl) {
+                topicsExploredEl.textContent = Object.keys(stats.favoriteTopics).length;
+            }
             
             // Update detailed stats if visible
             updateDetailedStats(stats);
@@ -1593,7 +1700,11 @@
             const favoriteTopicsSection = document.getElementById('favoriteTopicsSection');
             const difficultyDistributionSection = document.getElementById('difficultyDistributionSection');
             
-            if (!favoriteTopicsSection || !difficultyDistributionSection) return;
+            // Only update if both elements exist
+            if (!favoriteTopicsSection || !difficultyDistributionSection) {
+                console.log('Stats detail elements not found - stats dashboard may not be initialized yet');
+                return;
+            }
             
             // Favorite topics
             const topTopics = Object.entries(stats.favoriteTopics)
