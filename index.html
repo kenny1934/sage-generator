@@ -143,6 +143,9 @@
             padding: 1.15rem;
             margin-bottom: 1.2rem;
             box-shadow: 0 2px 8px rgba(60, 72, 88, 0.06);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
         .answer-content {
             background: #23272f;
@@ -162,6 +165,26 @@
             color: #e5e7eb;
             display: none;
             overflow-x: auto;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .math-rendered {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+        
+        .math-rendered .katex-display {
+            margin: 1em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        .math-rendered .katex {
+            font-size: 1em;
         }
         .footer {
             text-align: center;
@@ -174,16 +197,335 @@
         .footer p {
             font-size: 0.95rem;
         }
+        
+        /* Enhanced loading animations */
+        .math-spinner {
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .math-symbol {
+            font-size: 2rem;
+            color: #f87171;
+            animation: mathFloat 2s ease-in-out infinite;
+            opacity: 0.7;
+        }
+        
+        .math-symbol:nth-child(1) { animation-delay: 0s; }
+        .math-symbol:nth-child(2) { animation-delay: 0.3s; }
+        .math-symbol:nth-child(3) { animation-delay: 0.6s; }
+        .math-symbol:nth-child(4) { animation-delay: 0.9s; }
+        
+        @keyframes mathFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            25% { transform: translateY(-10px) rotate(5deg); opacity: 1; }
+            50% { transform: translateY(-15px) rotate(-5deg); opacity: 0.9; }
+            75% { transform: translateY(-5px) rotate(3deg); opacity: 1; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(248, 113, 113, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f87171, #ef4444);
+            background-size: 200% 100%;
+            animation: progressSlide 2s linear infinite;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @keyframes progressSlide {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .loading-message {
+            color: #e5e7eb;
+            font-size: 1rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            min-height: 1.5rem;
+        }
+        
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1.5rem;
+                margin-top: 2rem;
+                margin-bottom: 2rem;
+                border-radius: 1.5rem;
+            }
+            
+            .sage-title {
+                font-size: 2rem;
+            }
+            
+            .full-name {
+                font-size: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            /* Improve touch targets */
+            .action-btn {
+                min-height: 48px;
+                padding: 0.875rem 1.5rem;
+                font-size: 1rem;
+                touch-action: manipulation;
+            }
+            
+            input[type="text"], input[type="password"], textarea, select {
+                min-height: 48px;
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                touch-action: manipulation;
+            }
+            
+            /* Better spacing for mobile */
+            .space-y-8 > * + * {
+                margin-top: 1.5rem;
+            }
+            
+            /* Optimize button layout on mobile */
+            .flex.gap-2.flex-wrap {
+                gap: 0.75rem;
+            }
+            
+            .flex.gap-2.flex-wrap .action-btn {
+                flex: 1;
+                min-width: 140px;
+            }
+            
+            /* Improve question cards on mobile */
+            .question-item {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .question-item .math-rendered {
+                font-size: 1rem;
+                line-height: 1.5;
+            }
+            
+            /* Mobile-specific math symbol sizing */
+            .math-symbol {
+                font-size: 1.5rem;
+            }
+            
+            /* Better progress bar visibility */
+            .progress-bar {
+                height: 6px;
+                margin: 1.25rem 0;
+            }
+            
+            /* Optimize keyboard shortcuts overlay for mobile */
+            .fixed.inset-0 .bg-gray-800 {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+        
         @media (max-width: 640px) {
             .main-container {
                 padding: 1.25rem;
+                margin: 1rem;
+                border-radius: 1rem;
             }
+            
             .sage-title {
-                font-size: 1.7rem;
+                font-size: 1.8rem;
             }
+            
             .full-name {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
+            
+            /* Stack buttons vertically on small screens */
+            .flex.flex-col.sm\\:flex-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .flex.flex-col.sm\\:flex-row .action-btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Smaller math symbols for very small screens */
+            .math-symbol {
+                font-size: 1.25rem;
+                gap: 0.25rem;
+            }
+            
+            /* Compact question cards */
+            .question-item {
+                padding: 0.875rem;
+            }
+            
+            .question-item h3 {
+                font-size: 1.125rem;
+            }
+            
+            .question-item .math-rendered {
+                font-size: 0.9rem;
+                line-height: 1.4;
+            }
+        }
+        
+        /* Touch-specific improvements */
+        @media (hover: none) and (pointer: coarse) {
+            /* Remove hover effects on touch devices */
+            .action-btn:hover {
+                transform: none;
+                background: inherit;
+            }
+            
+            /* Add press feedback instead */
+            .action-btn:active {
+                transform: scale(0.98);
+                transition: transform 0.1s;
+            }
+            
+            /* Improve touch scroll */
+            .main-container {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Better touch targets for copy buttons */
+            .action-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+        
+        /* Autocomplete and example topics styling */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #23272f;
+            border: 1px solid #f87171;
+            border-top: none;
+            border-radius: 0 0 0.85rem 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .autocomplete-item {
+            padding: 0.75rem 1.1rem;
+            cursor: pointer;
+            color: #e5e7eb;
+            border-bottom: 1px solid rgba(248, 113, 113, 0.2);
+            transition: background-color 0.2s;
+        }
+        
+        .autocomplete-item:hover, .autocomplete-item.selected {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .example-topics {
+            margin-bottom: 1rem;
+        }
+        
+        .example-topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .example-topic {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #e5e7eb;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .example-topic:hover {
+            background: rgba(248, 113, 113, 0.2);
+            border-color: #f87171;
+            color: #f87171;
+            transform: translateY(-1px);
+        }
+        
+        .difficulty-description {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+        
+        /* Question navigation */
+        .question-navigator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 0.75rem;
+        }
+        
+        .nav-button {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid #f87171;
+            color: #e5e7eb;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            min-width: 80px;
+        }
+        
+        .nav-button:hover:not(:disabled) {
+            background: rgba(248, 113, 113, 0.3);
+            color: #f87171;
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .question-counter {
+            color: #f87171;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .question-item {
+            display: none;
+        }
+        
+        .question-item.active {
+            display: block;
         }
     </style>
 </head>
@@ -214,11 +556,24 @@
             </div>
 
             <div class="space-y-8">
+                <!-- Example Topics -->
+                <div class="example-topics">
+                    <label class="block text-lg font-semibold mb-2">
+                        Popular Topics <span class="text-gray-400 text-sm">(click to select)</span>:
+                    </label>
+                    <div class="example-topics-grid" id="exampleTopicsGrid">
+                        <!-- Example topics will be populated here -->
+                    </div>
+                </div>
+
                 <div>
                     <label for="mathTopic" class="block text-lg font-semibold mb-2">
                         Maths Topic & Grade Level <span class="text-gray-400 text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
                     </label>
-                    <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
+                    <div class="autocomplete-container">
+                        <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
+                        <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                    </div>
                 </div>
 
                 <div>
@@ -231,14 +586,26 @@
                         <option value="Hard">Hard</option>
                         <option value="Challenging">Challenging</option>
                     </select>
+                    <div id="difficultyDescription" class="difficulty-description">
+                        Medium complexity with step-by-step explanations
+                    </div>
                 </div>
 
                 <button id="generateQuestionsBtn" class="w-full bg-red-600 text-white font-extrabold py-4 px-6 rounded-xl hover:bg-red-700 transition-all duration-300 ease-in-out shadow-lg transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-400 flex items-center justify-center text-xl" aria-label="Generate Math Questions">
                     Generate Maths Questions! ➕
                 </button>
 
-                <div id="loadingIndicator" class="hidden text-center text-red-400 text-lg font-semibold mt-4" role="status" aria-live="polite">
-                    <span class="spinner"></span> Crunching numbers... Please wait.
+                <div id="loadingIndicator" class="hidden text-center mt-6" role="status" aria-live="polite">
+                    <div class="math-spinner justify-center">
+                        <span class="math-symbol">π</span>
+                        <span class="math-symbol">∑</span>
+                        <span class="math-symbol">∫</span>
+                        <span class="math-symbol">∞</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <div id="loadingMessage" class="loading-message">Initializing math generator...</div>
                 </div>
 
                 <div id="questionsContainer" class="hidden mt-10 border-t-2 border-gray-700 pt-10">
@@ -253,6 +620,20 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Question Navigator -->
+                    <div id="questionNavigator" class="question-navigator hidden">
+                        <button id="prevQuestionBtn" class="nav-button" aria-label="Previous question">
+                            ← Previous
+                        </button>
+                        <div class="question-counter" id="questionCounter">
+                            Question 1 of 3
+                        </div>
+                        <button id="nextQuestionBtn" class="nav-button" aria-label="Next question">
+                            Next →
+                        </button>
+                    </div>
+                    
                     <div id="mathQuestionsList" class="space-y-8" role="list">
                         <!-- Math questions will be inserted here -->
                     </div>
@@ -275,7 +656,7 @@
         // NOTE: Javascript logic remains the same, only styling was updated.
         // Configuration constants
         const CONFIG = {
-            API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+            API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent',
             MAX_RETRIES: 3,
             RETRY_DELAY: 1000,
             STORAGE_KEY: 'sage_api_key',
@@ -302,6 +683,10 @@
         let isKaTeXLoaded = false;
         let currentQuestions = []; // Store current questions for export
         let mathRenderCache = new Map(); // Cache for rendered math content
+        let isOnline = navigator.onLine;
+        let networkStatusIndicator;
+        let currentQuestionIndex = 0;
+        let totalQuestions = 0;
 
         // Initialize the application
         function initializeApp() {
@@ -314,6 +699,439 @@
 
             // Check if KaTeX is loaded
             checkKaTeXLoaded();
+            
+            // Initialize mobile enhancements
+            initializeMobileFeatures();
+            
+            // Initialize network monitoring
+            initializeNetworkMonitoring();
+            
+            // Initialize smart input features
+            initializeSmartInput();
+        }
+
+        // Mobile-specific features
+        function initializeMobileFeatures() {
+            // Add touch feedback to all buttons
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.classList.contains('action-btn')) {
+                    e.target.style.transform = 'scale(0.98)';
+                }
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                if (e.target.classList.contains('action-btn')) {
+                    setTimeout(() => {
+                        e.target.style.transform = '';
+                    }, 100);
+                }
+            });
+            
+            // Improve mobile keyboard experience
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    // Scroll into view on mobile to prevent keyboard overlap
+                    setTimeout(() => {
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                });
+            });
+            
+            // Add pull-to-refresh hint (visual only)
+            if (isMobileDevice()) {
+                addPullToRefreshHint();
+            }
+        }
+        
+        // Detect mobile device
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Add subtle pull-to-refresh visual hint
+        function addPullToRefreshHint() {
+            const hint = document.createElement('div');
+            hint.className = 'text-center text-gray-500 text-xs py-2';
+            hint.textContent = '↓ Pull down to refresh ↓';
+            hint.style.opacity = '0.5';
+            
+            const container = document.querySelector('.main-container');
+            container.insertBefore(hint, container.firstChild);
+            
+            // Simple pull-to-refresh detection
+            let startY = 0;
+            let currentY = 0;
+            let pullDistance = 0;
+            
+            container.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            });
+            
+            container.addEventListener('touchmove', (e) => {
+                currentY = e.touches[0].clientY;
+                pullDistance = currentY - startY;
+                
+                if (pullDistance > 0 && window.scrollY === 0) {
+                    hint.style.opacity = Math.min(1, pullDistance / 100);
+                    hint.style.transform = `translateY(${Math.min(pullDistance / 3, 20)}px)`;
+                }
+            });
+            
+            container.addEventListener('touchend', () => {
+                if (pullDistance > 80 && window.scrollY === 0 && mathTopicInput.value.trim()) {
+                    // Trigger refresh
+                    if (!generateQuestionsBtn.disabled) {
+                        generateMathQuestions();
+                    }
+                }
+                
+                // Reset hint
+                hint.style.opacity = '0.5';
+                hint.style.transform = 'translateY(0)';
+                pullDistance = 0;
+            });
+        }
+
+        // Network monitoring and fallback content
+        function initializeNetworkMonitoring() {
+            // Create network status indicator
+            createNetworkStatusIndicator();
+            
+            // Monitor network status
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateNetworkStatus();
+                showNetworkMessage('🟢 Connection restored!', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateNetworkStatus();
+                showNetworkMessage('🔴 No internet connection. Some features may be limited.', 'warning');
+            });
+            
+            // Initial status update
+            updateNetworkStatus();
+        }
+        
+        function createNetworkStatusIndicator() {
+            networkStatusIndicator = document.createElement('div');
+            networkStatusIndicator.id = 'networkStatus';
+            networkStatusIndicator.className = 'fixed top-4 right-4 z-50 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300';
+            networkStatusIndicator.style.display = 'none';
+            document.body.appendChild(networkStatusIndicator);
+        }
+        
+        function updateNetworkStatus() {
+            if (!networkStatusIndicator) return;
+            
+            if (isOnline) {
+                networkStatusIndicator.className = networkStatusIndicator.className.replace(/bg-\w+-\d+/, 'bg-green-600');
+                networkStatusIndicator.textContent = '🟢 Online';
+                networkStatusIndicator.style.display = 'none'; // Hide when online
+            } else {
+                networkStatusIndicator.className = networkStatusIndicator.className.replace(/bg-\w+-\d+/, 'bg-red-600');
+                networkStatusIndicator.textContent = '🔴 Offline';
+                networkStatusIndicator.style.display = 'block';
+            }
+        }
+        
+        function showNetworkMessage(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg text-white font-medium transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : 'bg-orange-600'
+            }`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Add fallback content for offline scenarios
+        function getFallbackQuestions(topic, difficulty) {
+            const fallbackQuestions = {
+                easy: [
+                    {
+                        question: "Solve for x: $2x + 5 = 11$",
+                        correctAnswer: "$x = 3$",
+                        stepByStepSolution: "1. Subtract 5 from both sides: $2x = 6$\\n2. Divide both sides by 2: $x = 3$"
+                    },
+                    {
+                        question: "What is $3 \\times 7$?",
+                        correctAnswer: "$21$",
+                        stepByStepSolution: "Simple multiplication: $3 \\times 7 = 21$"
+                    },
+                    {
+                        question: "Find the area of a rectangle with length 5 cm and width 3 cm.",
+                        correctAnswer: "$15 \\text{ cm}^2$",
+                        stepByStepSolution: "Area = length × width = $5 \\times 3 = 15 \\text{ cm}^2$"
+                    }
+                ],
+                medium: [
+                    {
+                        question: "Solve the quadratic equation: $x^2 - 5x + 6 = 0$",
+                        correctAnswer: "$x = 2$ or $x = 3$",
+                        stepByStepSolution: "1. Factor: $(x-2)(x-3) = 0$\\n2. Set each factor to zero: $x-2=0$ or $x-3=0$\\n3. Solve: $x = 2$ or $x = 3$"
+                    },
+                    {
+                        question: "Find the derivative of $f(x) = 3x^2 + 2x - 1$",
+                        correctAnswer: "$f'(x) = 6x + 2$",
+                        stepByStepSolution: "Using power rule: $\\frac{d}{dx}[3x^2] = 6x$, $\\frac{d}{dx}[2x] = 2$, $\\frac{d}{dx}[-1] = 0$\\nTherefore: $f'(x) = 6x + 2$"
+                    },
+                    {
+                        question: "Simplify: $\\frac{x^2 - 4}{x + 2}$ for $x \\neq -2$",
+                        correctAnswer: "$x - 2$",
+                        stepByStepSolution: "1. Factor numerator: $x^2 - 4 = (x+2)(x-2)$\\n2. Cancel common factor: $\\frac{(x+2)(x-2)}{x+2} = x-2$"
+                    }
+                ],
+                hard: [
+                    {
+                        question: "Evaluate: $\\int_0^\\pi \\sin(x) \\, dx$",
+                        correctAnswer: "$2$",
+                        stepByStepSolution: "1. Find antiderivative: $\\int \\sin(x) \\, dx = -\\cos(x) + C$\\n2. Apply limits: $[-\\cos(x)]_0^\\pi = -\\cos(\\pi) - (-\\cos(0)) = -(-1) - (-1) = 2$"
+                    },
+                    {
+                        question: "Find the limit: $\\lim_{x \\to 0} \\frac{\\sin(x)}{x}$",
+                        correctAnswer: "$1$",
+                        stepByStepSolution: "This is a standard limit. Using L'Hôpital's rule or the squeeze theorem:\\n$\\lim_{x \\to 0} \\frac{\\sin(x)}{x} = 1$"
+                    },
+                    {
+                        question: "Solve the system: $\\begin{cases} 2x + 3y = 7 \\\\ 4x - y = 2 \\end{cases}$",
+                        correctAnswer: "$x = 1, y = \\frac{5}{3}$",
+                        stepByStepSolution: "1. From equation 2: $y = 4x - 2$\\n2. Substitute into equation 1: $2x + 3(4x - 2) = 7$\\n3. Simplify: $2x + 12x - 6 = 7$, so $14x = 13$, thus $x = \\frac{13}{14}$\\n4. Find y: $y = 4(\\frac{13}{14}) - 2 = \\frac{26}{14} - 2 = \\frac{26-28}{14} = -\\frac{1}{7}$"
+                    }
+                ]
+            };
+            
+            const difficultyLevel = difficulty.toLowerCase();
+            const questions = fallbackQuestions[difficultyLevel] || fallbackQuestions.medium;
+            
+            // Return a copy to avoid modifying the original
+            return questions.map(q => ({ ...q }));
+        }
+        
+        // Enhanced API call with offline fallback
+        async function makeAPICallWithRetry(url, payload, retries = CONFIG.MAX_RETRIES) {
+            // Check if offline first
+            if (!isOnline) {
+                throw new Error('No internet connection available');
+            }
+            
+            let lastError;
+            
+            for (let i = 0; i < retries; i++) {
+                try {
+                    // Show retry attempt if not first try
+                    if (i > 0) {
+                        updateLoadingMessage(`Retrying... (Attempt ${i + 1}/${retries})`);
+                    }
+                    
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMessage = errorData.error?.message || response.statusText;
+                        throw new Error(`HTTP ${response.status}: ${errorMessage}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    lastError = error;
+                    console.error(`API call attempt ${i + 1} failed:`, error);
+                    
+                    if (i === retries - 1) {
+                        throw error; // Last attempt failed
+                    }
+                    
+                    // Progressive backoff: wait longer for each retry
+                    const delay = CONFIG.RETRY_DELAY * Math.pow(2, i);
+                    updateLoadingMessage(`Network issue detected. Retrying in ${delay/1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+        // Smart input features: autocomplete and example topics
+        function initializeSmartInput() {
+            populateExampleTopics();
+            setupAutocomplete();
+            setupDifficultyDescriptions();
+        }
+        
+        // Example topics data
+        const exampleTopics = [
+            "Linear equations for Grade 9",
+            "Quadratic functions for Form 4", 
+            "Trigonometry basics for Grade 10",
+            "Calculus derivatives for Form 6",
+            "Geometry proofs for Grade 8",
+            "Statistics and probability for Form 5",
+            "Algebraic expressions for Grade 7",
+            "Circle theorems for Form 3",
+            "Logarithms for Grade 11",
+            "Complex numbers for Form 6",
+            "Vectors for Grade 12",
+            "Integration for A-Level"
+        ];
+        
+        // Math topic suggestions for autocomplete
+        const mathTopicSuggestions = [
+            "Linear equations",
+            "Quadratic equations", 
+            "Exponential functions",
+            "Logarithmic functions",
+            "Trigonometric functions",
+            "Polynomial functions",
+            "Rational functions",
+            "Systems of equations",
+            "Inequalities",
+            "Sequences and series",
+            "Matrices",
+            "Vectors",
+            "Complex numbers",
+            "Limits",
+            "Derivatives",
+            "Integration",
+            "Differential equations",
+            "Statistics",
+            "Probability",
+            "Combinatorics",
+            "Number theory",
+            "Geometry",
+            "Circle theorems",
+            "Triangle properties",
+            "Coordinate geometry",
+            "Transformations",
+            "Similarity and congruence",
+            "Area and volume",
+            "Pythagoras theorem"
+        ];
+        
+        function populateExampleTopics() {
+            const grid = document.getElementById('exampleTopicsGrid');
+            grid.innerHTML = '';
+            
+            exampleTopics.forEach(topic => {
+                const topicButton = document.createElement('div');
+                topicButton.className = 'example-topic';
+                topicButton.textContent = topic;
+                topicButton.addEventListener('click', () => {
+                    mathTopicInput.value = topic;
+                    mathTopicInput.focus();
+                    // Hide autocomplete dropdown if visible
+                    const dropdown = document.getElementById('autocompleteDropdown');
+                    if (dropdown) dropdown.style.display = 'none';
+                });
+                grid.appendChild(topicButton);
+            });
+        }
+        
+        function setupAutocomplete() {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            let selectedIndex = -1;
+            
+            mathTopicInput.addEventListener('input', (e) => {
+                const value = e.target.value.toLowerCase();
+                if (value.length < 2) {
+                    hideAutocomplete();
+                    return;
+                }
+                
+                const matches = mathTopicSuggestions.filter(suggestion => 
+                    suggestion.toLowerCase().includes(value)
+                ).slice(0, 8); // Limit to 8 suggestions
+                
+                if (matches.length > 0) {
+                    showAutocomplete(matches);
+                } else {
+                    hideAutocomplete();
+                }
+                selectedIndex = -1;
+            });
+            
+            mathTopicInput.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(items);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    selectSuggestion(items[selectedIndex].textContent);
+                } else if (e.key === 'Escape') {
+                    hideAutocomplete();
+                }
+            });
+            
+            // Hide autocomplete when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.autocomplete-container')) {
+                    hideAutocomplete();
+                }
+            });
+            
+            function showAutocomplete(suggestions) {
+                dropdown.innerHTML = '';
+                suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.textContent = suggestion;
+                    item.addEventListener('click', () => selectSuggestion(suggestion));
+                    dropdown.appendChild(item);
+                });
+                dropdown.style.display = 'block';
+            }
+            
+            function hideAutocomplete() {
+                dropdown.style.display = 'none';
+                selectedIndex = -1;
+            }
+            
+            function updateSelection(items) {
+                items.forEach((item, index) => {
+                    item.classList.toggle('selected', index === selectedIndex);
+                });
+            }
+            
+            function selectSuggestion(suggestion) {
+                const currentValue = mathTopicInput.value;
+                const words = currentValue.split(' ');
+                words[words.length - 1] = suggestion;
+                mathTopicInput.value = words.join(' ') + ' ';
+                hideAutocomplete();
+                mathTopicInput.focus();
+            }
+        }
+        
+        function setupDifficultyDescriptions() {
+            const difficultyDescriptions = {
+                'Easy': 'Simple problems with basic concepts and clear solutions',
+                'Medium': 'Moderate complexity with step-by-step explanations',
+                'Hard': 'Advanced problems requiring deeper mathematical understanding',
+                'Challenging': 'Complex multi-step problems for advanced learners'
+            };
+            
+            const descriptionElement = document.getElementById('difficultyDescription');
+            
+            difficultySelect.addEventListener('change', (e) => {
+                const selectedDifficulty = e.target.value;
+                descriptionElement.textContent = difficultyDescriptions[selectedDifficulty] || 
+                    difficultyDescriptions['Medium'];
+            });
         }
 
         // Check if KaTeX is properly loaded
@@ -334,6 +1152,10 @@
         toggleMathViewBtn.addEventListener('click', toggleMathView);
         saveApiKeyBtn.addEventListener('click', saveApiKey);
         exportQuestionsBtn.addEventListener('click', exportQuestions);
+        
+        // Question navigation event listeners
+        document.getElementById('prevQuestionBtn').addEventListener('click', () => navigateQuestion(-1));
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => navigateQuestion(1));
 
         // Keyboard navigation support
         document.addEventListener('keydown', handleKeyboardNavigation);
@@ -355,8 +1177,9 @@
         });
 
         function handleKeyboardNavigation(e) {
-            // ESC key to close revealed answers
+            // ESC key to close revealed answers and hide error dialogs
             if (e.key === 'Escape') {
+                // Close revealed answers
                 document.querySelectorAll('.answer-content').forEach(content => {
                     if (content.style.display === 'block') {
                         content.style.display = 'none';
@@ -367,7 +1190,106 @@
                         }
                     }
                 });
+                
+                // Hide error messages
+                if (messageContainer.innerHTML.includes('bg-red-900/20')) {
+                    messageContainer.innerHTML = '';
+                }
+                
+                // Close API key container if visible
+                if (apiKeyContainer.style.display === 'block') {
+                    apiKeyContainer.style.display = 'none';
+                }
             }
+            
+            // F5 or Ctrl+R to generate new questions (if topic is filled)
+            if ((e.key === 'F5' || (e.ctrlKey && e.key === 'r')) && mathTopicInput.value.trim()) {
+                e.preventDefault();
+                if (!generateQuestionsBtn.disabled) {
+                    generateMathQuestions();
+                }
+            }
+            
+            // Ctrl+K to focus on topic input
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                mathTopicInput.focus();
+                mathTopicInput.select();
+            }
+            
+            // Ctrl+E to export questions (if available)
+            if (e.ctrlKey && e.key === 'e' && currentQuestions.length > 0) {
+                e.preventDefault();
+                exportQuestions();
+            }
+            
+            // Arrow keys for question navigation (if multiple questions)
+            if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && totalQuestions > 1 && !questionsContainer.classList.contains('hidden')) {
+                e.preventDefault();
+                const direction = e.key === 'ArrowLeft' ? -1 : 1;
+                navigateQuestion(direction);
+            }
+            
+            // Number keys 1-3 to reveal specific answers (if questions are visible)
+            if (['1', '2', '3'].includes(e.key) && questionsContainer.classList.contains('hidden') === false) {
+                const questionIndex = parseInt(e.key) - 1;
+                const questions = document.querySelectorAll('.question-item');
+                if (questions[questionIndex]) {
+                    const revealBtn = questions[questionIndex].querySelector('.action-btn:last-child');
+                    if (revealBtn) {
+                        revealBtn.click();
+                    }
+                }
+            }
+            
+            // ? key to show keyboard shortcuts help
+            if (e.key === '?' && !e.ctrlKey && !e.altKey) {
+                e.preventDefault();
+                showKeyboardShortcuts();
+            }
+        }
+        
+        // Show keyboard shortcuts overlay
+        function showKeyboardShortcuts() {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            overlay.innerHTML = `
+                <div class="bg-gray-800 rounded-lg p-6 max-w-md mx-4 border border-red-500/30">
+                    <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        ⌨️ Keyboard Shortcuts
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-300">Generate Questions:</span><span class="text-red-400">Ctrl + Enter</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Focus Topic Input:</span><span class="text-red-400">Ctrl + K</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Export Questions:</span><span class="text-red-400">Ctrl + E</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Navigate Questions:</span><span class="text-red-400">← →</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Refresh/Regenerate:</span><span class="text-red-400">F5</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Show Answer 1-3:</span><span class="text-red-400">1, 2, 3</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Close Dialogs:</span><span class="text-red-400">Escape</span></div>
+                        <div class="flex justify-between"><span class="text-gray-300">Show This Help:</span><span class="text-red-400">?</span></div>
+                    </div>
+                    <button class="mt-4 w-full action-btn bg-red-600 hover:bg-red-700" onclick="this.parentElement.parentElement.remove()">
+                        Close (ESC)
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Close on ESC or click outside
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+            
+            const closeOnEsc = (e) => {
+                if (e.key === 'Escape') {
+                    overlay.remove();
+                    document.removeEventListener('keydown', closeOnEsc);
+                }
+            };
+            document.addEventListener('keydown', closeOnEsc);
         }
 
         // Export questions to text file
@@ -480,6 +1402,35 @@
             displayMessage('API key saved successfully!', 'text-green-400');
         }
 
+        // Minimal preprocessing - only clean up obvious LaTeX issues
+        function preprocessMathContent(content) {
+            if (!content) return content;
+            
+            // Only do minimal cleanup, preserve all spacing
+            let processed = content;
+            
+            // Only clean up \text{} wrappers if they exist
+            if (processed.includes('\\text{')) {
+                processed = processed.replace(/\\text\{([^}]*)\}/g, '$1');
+            }
+            
+            // Convert \n to proper line breaks but preserve all other spacing
+            if (processed.includes('\\n')) {
+                processed = processed.replace(/\\n/g, '\n');
+            }
+            
+            // Only add delimiters if content has LaTeX commands but no delimiters
+            if (!processed.includes('$') && processed.includes('\\')) {
+                // Check if it's a pure math expression (starts with LaTeX command)
+                if (/^\\(frac|sqrt|int|sum)/.test(processed.trim())) {
+                    return `$$${processed}$$`;
+                }
+            }
+            
+            // Return content unchanged - let KaTeX handle it naturally
+            return processed;
+        }
+        
         // Function to render math when content is added to the DOM
         function renderMathContent(element) {
             if (!isKaTeXLoaded) {
@@ -489,28 +1440,60 @@
 
             const mathElements = element.querySelectorAll('.math-rendered');
             mathElements.forEach(mathEl => {
-                const content = mathEl.textContent;
-                const cacheKey = content;
+                const originalContent = mathEl.innerHTML;
+                const cacheKey = originalContent;
                 
                 if (mathRenderCache.has(cacheKey)) {
                     mathEl.innerHTML = mathRenderCache.get(cacheKey);
                 } else {
                     try {
-                        renderMathInElement(mathEl, {
-                            delimiters: [
-                                {left: "$$", right: "$$", display: true},
-                                {left: "$", right: "$", display: false}
-                            ],
-                            throwOnError: false,
-                            errorColor: '#ef4444'
-                        });
-                        mathRenderCache.set(cacheKey, mathEl.innerHTML);
+                        // Only render if content has math delimiters or LaTeX commands
+                        if (originalContent.includes('$') || originalContent.includes('\\frac') || originalContent.includes('\\int') || originalContent.includes('\\sum')) {
+                            // Render with KaTeX - let it handle the content naturally
+                            renderMathInElement(mathEl, {
+                                delimiters: [
+                                    {left: "$$", right: "$$", display: true},
+                                    {left: "$", right: "$", display: false}
+                                ],
+                                throwOnError: false,
+                                errorColor: '#ef4444',
+                                strict: false,
+                                trust: false
+                            });
+                            
+                            mathRenderCache.set(cacheKey, mathEl.innerHTML);
+                        }
+                        // If no math indicators, leave content as-is (don't process regular text)
                     } catch (error) {
                         console.error('Error rendering math:', error);
-                        displayMessage('Error rendering mathematical expressions.', 'text-red-500');
+                        // Keep original content on error
+                        mathEl.innerHTML = originalContent;
                     }
                 }
             });
+        }
+
+        // Retry math rendering with delay
+        function retryMathRendering(element, maxRetries = 3, delay = 500) {
+            let retries = 0;
+            
+            const attemptRender = () => {
+                if (retries >= maxRetries) {
+                    console.warn('Max retries reached for math rendering');
+                    return;
+                }
+                
+                retries++;
+                
+                if (isKaTeXLoaded) {
+                    renderMathContent(element);
+                } else {
+                    console.log(`Math rendering retry ${retries}/${maxRetries} - KaTeX not ready`);
+                    setTimeout(attemptRender, delay);
+                }
+            };
+            
+            attemptRender();
         }
 
         // Function to toggle between rendered math and raw LaTeX
@@ -562,10 +1545,17 @@
             }, CONFIG.MESSAGE_TIMEOUT);
         }
 
-        // Retry mechanism for API calls
+        // Enhanced retry mechanism for API calls with better error handling
         async function makeAPICallWithRetry(url, payload, retries = CONFIG.MAX_RETRIES) {
+            let lastError;
+            
             for (let i = 0; i < retries; i++) {
                 try {
+                    // Show retry attempt if not first try
+                    if (i > 0) {
+                        updateLoadingMessage(`Retrying... (Attempt ${i + 1}/${retries})`);
+                    }
+                    
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -573,20 +1563,190 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMessage = errorData.error?.message || response.statusText;
+                        throw new Error(`HTTP ${response.status}: ${errorMessage}`);
                     }
 
                     return await response.json();
                 } catch (error) {
+                    lastError = error;
                     console.error(`API call attempt ${i + 1} failed:`, error);
                     
                     if (i === retries - 1) {
                         throw error; // Last attempt failed
                     }
                     
-                    // Wait before retrying
-                    await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * (i + 1)));
+                    // Progressive backoff: wait longer for each retry
+                    const delay = CONFIG.RETRY_DELAY * Math.pow(2, i);
+                    updateLoadingMessage(`Network issue detected. Retrying in ${delay/1000}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
                 }
+            }
+        }
+
+        // Enhanced loading management with progress tracking
+        let loadingProgress = 0;
+        let loadingInterval;
+        const loadingMessages = [
+            "Analyzing your math topic...",
+            "Consulting mathematical knowledge base...",
+            "Crafting problems for your level...",
+            "Adding solution steps...",
+            "Formatting mathematical expressions...",
+            "Almost ready!"
+        ];
+
+        function updateLoadingMessage(message) {
+            const loadingMessageEl = document.getElementById('loadingMessage');
+            if (loadingMessageEl) {
+                loadingMessageEl.textContent = message;
+            }
+        }
+
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('progressFill');
+            if (progressFill) {
+                progressFill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+            }
+        }
+
+        function startLoadingAnimation() {
+            loadingProgress = 0;
+            updateProgress(0);
+            updateLoadingMessage(loadingMessages[0]);
+            
+            // Simulate realistic progress
+            loadingInterval = setInterval(() => {
+                loadingProgress += Math.random() * 15 + 5; // 5-20% increments
+                
+                if (loadingProgress >= 100) {
+                    loadingProgress = 100;
+                    updateProgress(100);
+                    updateLoadingMessage("Finalizing your questions...");
+                    clearInterval(loadingInterval);
+                } else {
+                    updateProgress(loadingProgress);
+                    const messageIndex = Math.min(
+                        Math.floor(loadingProgress / 20), 
+                        loadingMessages.length - 1
+                    );
+                    updateLoadingMessage(loadingMessages[messageIndex]);
+                }
+            }, 800 + Math.random() * 400); // 800-1200ms intervals
+        }
+
+        function stopLoadingAnimation() {
+            if (loadingInterval) {
+                clearInterval(loadingInterval);
+                loadingInterval = null;
+            }
+            loadingProgress = 0;
+            updateProgress(0);
+        }
+
+        // Get user-friendly error message with actionable suggestions
+        function getErrorMessage(error) {
+            const errorStr = error.message.toLowerCase();
+            
+            if (errorStr.includes('401') || errorStr.includes('invalid api key')) {
+                return {
+                    message: "Your API key appears to be invalid or expired.",
+                    suggestion: "Please check your Gemini API key and make sure it's correctly entered.",
+                    action: "show_api_key"
+                };
+            } else if (errorStr.includes('403') || errorStr.includes('forbidden')) {
+                return {
+                    message: "Access denied. Your API key may not have the required permissions.",
+                    suggestion: "Ensure your Gemini API key has access to the Generative Language API.",
+                    action: "show_api_key"
+                };
+            } else if (errorStr.includes('429') || errorStr.includes('rate limit')) {
+                return {
+                    message: "Too many requests. You've hit the rate limit.",
+                    suggestion: "Please wait a few minutes before trying again, or check your API quota.",
+                    action: "retry_later"
+                };
+            } else if (errorStr.includes('quota') || errorStr.includes('billing')) {
+                return {
+                    message: "API quota exceeded or billing issue detected.",
+                    suggestion: "Check your Google Cloud billing account and API quotas.",
+                    action: "check_billing"
+                };
+            } else if (errorStr.includes('network') || errorStr.includes('fetch')) {
+                return {
+                    message: "Network connection issue detected.",
+                    suggestion: "Check your internet connection and try again.",
+                    action: "retry"
+                };
+            } else if (errorStr.includes('json') || errorStr.includes('parse')) {
+                return {
+                    message: "Received malformed response from the API.",
+                    suggestion: "This might be a temporary issue. Try generating questions again.",
+                    action: "retry"
+                };
+            } else {
+                return {
+                    message: "An unexpected error occurred while generating questions.",
+                    suggestion: "Try again with a simpler topic or different difficulty level.",
+                    action: "retry"
+                };
+            }
+        }
+
+        // Enhanced error display with retry button
+        function displayEnhancedError(error) {
+            const errorInfo = getErrorMessage(error);
+            
+            const errorContainer = document.createElement('div');
+            errorContainer.className = 'bg-red-900/20 border border-red-500/30 rounded-lg p-4 mt-4';
+            
+            errorContainer.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="text-red-400 text-xl">⚠️</div>
+                    <div class="flex-1">
+                        <h4 class="text-red-400 font-semibold mb-2">${errorInfo.message}</h4>
+                        <p class="text-gray-300 text-sm mb-3">${errorInfo.suggestion}</p>
+                        <div class="flex gap-2 flex-wrap">
+                            ${errorInfo.action === 'retry' ? '<button id="retryBtn" class="action-btn bg-red-600 hover:bg-red-700 text-sm">Try Again</button>' : ''}
+                            ${errorInfo.action === 'show_api_key' ? '<button id="showApiKeyBtn" class="action-btn bg-blue-600 hover:bg-blue-700 text-sm">Update API Key</button>' : ''}
+                            ${errorInfo.action === 'retry_later' ? '<button id="retryLaterBtn" class="action-btn bg-yellow-600 hover:bg-yellow-700 text-sm">Retry in 1 minute</button>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            messageContainer.innerHTML = '';
+            messageContainer.appendChild(errorContainer);
+            
+            // Add event listeners for action buttons
+            const retryBtn = errorContainer.querySelector('#retryBtn');
+            const showApiKeyBtn = errorContainer.querySelector('#showApiKeyBtn');
+            const retryLaterBtn = errorContainer.querySelector('#retryLaterBtn');
+            
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    messageContainer.innerHTML = '';
+                    generateMathQuestions();
+                });
+            }
+            
+            if (showApiKeyBtn) {
+                showApiKeyBtn.addEventListener('click', () => {
+                    apiKeyContainer.style.display = 'block';
+                    apiKeyInput.focus();
+                });
+            }
+            
+            if (retryLaterBtn) {
+                retryLaterBtn.addEventListener('click', () => {
+                    retryLaterBtn.disabled = true;
+                    retryLaterBtn.textContent = 'Waiting...';
+                    setTimeout(() => {
+                        messageContainer.innerHTML = '';
+                        generateMathQuestions();
+                    }, 60000); // 1 minute delay
+                });
             }
         }
 
@@ -616,6 +1776,9 @@
             generateQuestionsBtn.disabled = true;
             mathQuestionsList.innerHTML = ''; // Clear previous questions
             messageContainer.innerHTML = ''; // Clear any previous error messages
+            
+            // Start enhanced loading animation
+            startLoadingAnimation();
 
             // Construct the prompt for the Gemini API
             const prompt = `
@@ -694,15 +1857,24 @@
             } catch (error) {
                 console.error("Error generating math questions:", error);
                 
-                if (error.message.includes('401') || error.message.includes('403')) {
-                    displayMessage("Invalid API key. Please check your Gemini API key and try again.", "text-red-500");
-                    apiKeyContainer.style.display = 'block';
-                } else if (error.message.includes('429')) {
-                    displayMessage("Rate limit exceeded. Please wait a moment and try again.", "text-red-500");
+                // Try fallback content if offline or network error
+                if (!isOnline || error.message.includes('No internet connection') || error.message.includes('network') || error.message.includes('fetch')) {
+                    updateLoadingMessage("Using offline fallback questions...");
+                    setTimeout(() => {
+                        const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
+                        displayMathQuestions(fallbackQuestions);
+                        showNetworkMessage('📚 Showing sample questions (offline mode)', 'warning');
+                    }, 1000);
                 } else {
-                    displayMessage("An error occurred while generating questions. Please try again later.", "text-red-500");
+                    displayEnhancedError(error);
+                    
+                    // Show API key container for auth errors
+                    if (error.message.includes('401') || error.message.includes('403')) {
+                        apiKeyContainer.style.display = 'block';
+                    }
                 }
             } finally {
+                stopLoadingAnimation();
                 loadingIndicator.classList.add('hidden');
                 generateQuestionsBtn.disabled = false;
             }
@@ -711,6 +1883,8 @@
         function displayMathQuestions(problems) {
             mathQuestionsList.innerHTML = ''; // Clear previous questions
             currentQuestions = problems; // Store for export functionality
+            totalQuestions = problems.length;
+            currentQuestionIndex = 0; // Reset to first question
             
             if (!Array.isArray(problems) || problems.length === 0) {
                 displayMessage("No math problems were generated. Please try with a different topic.", "text-orange-400");
@@ -731,7 +1905,16 @@
                 // Container for rendered math
                 const questionRenderedDiv = document.createElement('div');
                 questionRenderedDiv.className = 'text-lg text-gray-200 mb-4 math-rendered';
-                questionRenderedDiv.textContent = problem.question; // KaTeX will render this
+                
+                // Use innerHTML to preserve spacing and formatting
+                if (problem.question.includes('\\') && !problem.question.includes('$')) {
+                    // Only preprocess LaTeX content without delimiters
+                    const processedQuestion = preprocessMathContent(problem.question);
+                    questionRenderedDiv.innerHTML = sanitizeHTML(processedQuestion);
+                } else {
+                    // For regular text or already delimited math, preserve as-is
+                    questionRenderedDiv.innerHTML = sanitizeHTML(problem.question);
+                }
                 problemDiv.appendChild(questionRenderedDiv);
 
                 // Container for raw LaTeX
@@ -756,13 +1939,37 @@
                 revealBtn.setAttribute('aria-label', `Show answer and steps for question ${index + 1}`);
                 buttonContainer.appendChild(revealBtn);
 
+                const similarBtn = document.createElement('button');
+                similarBtn.className = 'action-btn bg-blue-600 hover:bg-blue-700';
+                similarBtn.textContent = 'Generate Similar';
+                similarBtn.setAttribute('aria-label', `Generate similar question to ${index + 1}`);
+                similarBtn.addEventListener('click', () => generateSimilarQuestion(problem, index));
+                buttonContainer.appendChild(similarBtn);
+
                 problemDiv.appendChild(buttonContainer);
 
                 const answerContentDiv = document.createElement('div');
                 answerContentDiv.className = 'answer-content text-gray-300';
-                answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(problem.correctAnswer)}</div>` +
+                
+                // Minimal processing - preserve content as much as possible
+                let processedAnswer = problem.correctAnswer;
+                let processedSolution = problem.stepByStepSolution;
+                
+                // Only preprocess if there's LaTeX without delimiters
+                if (problem.correctAnswer.includes('\\') && !problem.correctAnswer.includes('$')) {
+                    processedAnswer = preprocessMathContent(problem.correctAnswer);
+                }
+                
+                if (problem.stepByStepSolution.includes('\\') && !problem.stepByStepSolution.includes('$')) {
+                    processedSolution = preprocessMathContent(problem.stepByStepSolution);
+                }
+                
+                // Convert \n to line breaks but preserve other formatting
+                processedSolution = processedSolution.replace(/\\n/g, '<br>');
+                
+                answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
-                                             `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>` +
+                                             `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`; // Raw LaTeX for solution
                 problemDiv.appendChild(answerContentDiv);
 
@@ -773,8 +1980,8 @@
                     revealBtn.setAttribute('aria-expanded', !isVisible);
                     
                     // Re-render math in the revealed section if it's currently rendered view
-                    if (!isVisible && isMathRendered && isKaTeXLoaded) {
-                         renderMathContent(answerContentDiv);
+                    if (!isVisible && isMathRendered) {
+                         retryMathRendering(answerContentDiv);
                     }
                 });
 
@@ -784,10 +1991,22 @@
             questionsContainer.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
             
-            // Initial rendering of math after questions are added to DOM
-            if (isKaTeXLoaded) {
-                renderMathContent(mathQuestionsList); // Trigger KaTeX rendering for newly added content
+            // Initialize question navigation
+            if (totalQuestions > 1) {
+                document.getElementById('questionNavigator').classList.remove('hidden');
+                showQuestion(currentQuestionIndex);
+                updateNavigationState();
+            } else {
+                // Show single question
+                const questions = document.querySelectorAll('.question-item');
+                if (questions.length > 0) {
+                    questions[0].classList.add('active');
+                }
             }
+            
+            // Initial rendering of math after questions are added to DOM
+            // Use retry mechanism to ensure KaTeX has time to initialize
+            retryMathRendering(mathQuestionsList);
             
             // Ensure initial view state is applied based on isMathRendered
             document.querySelectorAll('.math-rendered').forEach(renderedDiv => {
@@ -798,11 +2017,195 @@
             });
         }
 
+        // Question navigation functions
+        function navigateQuestion(direction) {
+            const newIndex = currentQuestionIndex + direction;
+            if (newIndex >= 0 && newIndex < totalQuestions) {
+                currentQuestionIndex = newIndex;
+                showQuestion(currentQuestionIndex);
+                updateNavigationState();
+            }
+        }
+        
+        function showQuestion(index) {
+            const questions = document.querySelectorAll('.question-item');
+            questions.forEach((question, i) => {
+                question.classList.toggle('active', i === index);
+            });
+            
+            // Update counter
+            document.getElementById('questionCounter').textContent = 
+                `Question ${index + 1} of ${totalQuestions}`;
+        }
+        
+        function updateNavigationState() {
+            const prevBtn = document.getElementById('prevQuestionBtn');
+            const nextBtn = document.getElementById('nextQuestionBtn');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === totalQuestions - 1;
+        }
+
+        // Generate similar question functionality
+        async function generateSimilarQuestion(originalProblem, questionIndex) {
+            const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+            
+            if (!apiKey) {
+                showNetworkMessage('API key required for generating similar questions', 'warning');
+                return;
+            }
+            
+            if (!isOnline) {
+                showNetworkMessage('Internet connection required for generating similar questions', 'warning');
+                return;
+            }
+            
+            // Show loading state for this specific question
+            const similarBtn = document.querySelector(`[aria-label="Generate similar question to ${questionIndex + 1}"]`);
+            const originalText = similarBtn.textContent;
+            similarBtn.disabled = true;
+            similarBtn.textContent = 'Generating...';
+            
+            try {
+                const prompt = `
+                    Generate 1 similar math problem to the following, keeping the same topic and difficulty level but with different numbers/context:
+                    
+                    Original Question: ${originalProblem.question}
+                    
+                    Generate a new problem that:
+                    - Uses the same mathematical concepts
+                    - Has similar difficulty level
+                    - Uses different numbers or context
+                    - Follows the same format with question, correctAnswer, and stepByStepSolution in LaTeX
+                    
+                    Provide the output as a JSON object:
+                    {
+                        "question": "...",
+                        "correctAnswer": "...",
+                        "stepByStepSolution": "..."
+                    }
+                `;
+                
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "question": { "type": "STRING" },
+                                "correctAnswer": { "type": "STRING" },
+                                "stepByStepSolution": { "type": "STRING" }
+                            }
+                        }
+                    }
+                };
+                
+                const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
+                const result = await makeAPICallWithRetry(apiUrl, payload, 2); // Fewer retries for similar questions
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonText = result.candidates[0].content.parts[0].text;
+                    const newProblem = JSON.parse(jsonText);
+                    
+                    // Replace the current question with the similar one
+                    replaceProblemInList(questionIndex, newProblem);
+                    showNetworkMessage('Similar question generated!', 'success');
+                } else {
+                    throw new Error('Invalid response format');
+                }
+                
+            } catch (error) {
+                console.error('Error generating similar question:', error);
+                showNetworkMessage('Failed to generate similar question. Please try again.', 'warning');
+            } finally {
+                similarBtn.disabled = false;
+                similarBtn.textContent = originalText;
+            }
+        }
+        
+        // Replace a specific problem in the displayed list
+        function replaceProblemInList(index, newProblem) {
+            // Update the stored questions array
+            currentQuestions[index] = newProblem;
+            
+            // Find the question element
+            const questions = document.querySelectorAll('.question-item');
+            const questionElement = questions[index];
+            
+            if (questionElement) {
+                // Update the question content
+                const questionRendered = questionElement.querySelector('.math-rendered');
+                const questionLatex = questionElement.querySelector('.latex-view');
+                
+                if (questionRendered) {
+                    if (newProblem.question.includes('\\') && !newProblem.question.includes('$')) {
+                        const processedQuestion = preprocessMathContent(newProblem.question);
+                        questionRendered.innerHTML = sanitizeHTML(processedQuestion);
+                    } else {
+                        questionRendered.innerHTML = sanitizeHTML(newProblem.question);
+                    }
+                }
+                if (questionLatex) questionLatex.textContent = newProblem.question;
+                
+                // Update answer content
+                const answerContentDiv = questionElement.querySelector('.answer-content');
+                if (answerContentDiv) {
+                    let processedAnswer = newProblem.correctAnswer;
+                    let processedSolution = newProblem.stepByStepSolution;
+                    
+                    // Only preprocess if there's LaTeX without delimiters
+                    if (newProblem.correctAnswer.includes('\\') && !newProblem.correctAnswer.includes('$')) {
+                        processedAnswer = preprocessMathContent(newProblem.correctAnswer);
+                    }
+                    
+                    if (newProblem.stepByStepSolution.includes('\\') && !newProblem.stepByStepSolution.includes('$')) {
+                        processedSolution = preprocessMathContent(newProblem.stepByStepSolution);
+                    }
+                    
+                    // Convert \n to line breaks
+                    processedSolution = processedSolution.replace(/\\n/g, '<br>');
+                    
+                    answerContentDiv.innerHTML = `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
+                                                 `<div class="latex-view">${sanitizeHTML(newProblem.correctAnswer)}</div>` +
+                                                 `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
+                                                 `<div class="latex-view">${sanitizeHTML(newProblem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`;
+                    
+                    // Hide the answer initially
+                    answerContentDiv.style.display = 'none';
+                    const revealBtn = questionElement.querySelector('.action-btn:nth-child(2)'); // Second button (reveal)
+                    if (revealBtn) {
+                        revealBtn.textContent = 'Show Answer & Steps';
+                        revealBtn.setAttribute('aria-expanded', 'false');
+                    }
+                }
+                
+                // Re-render math content
+                retryMathRendering(questionElement);
+                
+                // Apply current view state
+                const mathRenderedElements = questionElement.querySelectorAll('.math-rendered');
+                const latexElements = questionElement.querySelectorAll('.latex-view');
+                
+                mathRenderedElements.forEach(el => {
+                    el.style.display = isMathRendered ? 'block' : 'none';
+                });
+                latexElements.forEach(el => {
+                    el.style.display = isMathRendered ? 'none' : 'block';
+                });
+            }
+        }
+
         function resetGenerator() {
             mathTopicInput.value = ''; // Clear input
             difficultySelect.value = 'Medium'; // Reset difficulty
             mathQuestionsList.innerHTML = ''; // Clear questions
             currentQuestions = []; // Clear stored questions
+            currentQuestionIndex = 0;
+            totalQuestions = 0;
+            document.getElementById('questionNavigator').classList.add('hidden'); // Hide navigator
             questionsContainer.classList.add('hidden');
             resetBtn.classList.add('hidden');
             initialMessage.classList.remove('hidden'); // Show initial message again
