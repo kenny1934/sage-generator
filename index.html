@@ -737,6 +737,8 @@
         // Google Drive integration (optional enhancement)
         let googleDriveAvailable = false;
         let isGoogleSignedIn = false;
+        let googleUser = null;
+        let driveFolder = null;
 
         // Phase 3: Data Management and Personalization
         class DataManager {
@@ -977,6 +979,18 @@
                     // Show setup button
                     const setupBtn = document.getElementById('googleDriveSetupBtn');
                     if (setupBtn) setupBtn.classList.remove('hidden');
+                    
+                    // Check if already configured
+                    const savedClientId = localStorage.getItem('google_client_id');
+                    if (savedClientId) {
+                        if (statusElement) {
+                            statusElement.textContent = 'Configured (ready to connect)';
+                            statusElement.className = 'text-green-400';
+                        }
+                        
+                        // Try to initialize Google Drive
+                        initializeGoogleDrive(savedClientId);
+                    }
                 } else {
                     console.log('Google Drive APIs not available - using localStorage only');
                     
@@ -1032,6 +1046,140 @@
             
             hideGoogleDriveSetup();
             displayMessage('Google Drive configured successfully!', 'text-green-400');
+            
+            // Try to initialize with the new client ID
+            initializeGoogleDrive(clientId);
+        }
+        
+        // Initialize Google Drive with client ID
+        async function initializeGoogleDrive(clientId) {
+            if (!googleDriveAvailable) return;
+            
+            try {
+                console.log('Initializing Google Drive...');
+                
+                // Initialize gapi client
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
+                    
+                    window.gapi.load('client:auth2', {
+                        callback: () => {
+                            clearTimeout(timeout);
+                            resolve();
+                        },
+                        onerror: (error) => {
+                            clearTimeout(timeout);
+                            reject(error);
+                        }
+                    });
+                });
+                
+                // Initialize client
+                await window.gapi.client.init({
+                    clientId: clientId,
+                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                    scope: 'https://www.googleapis.com/auth/drive.file'
+                });
+                
+                console.log('Google Drive initialized successfully');
+                
+                // Update status
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Ready to connect';
+                    statusElement.className = 'text-green-400';
+                }
+                
+                // Add connect button
+                addGoogleDriveConnectButton();
+                
+            } catch (error) {
+                console.error('Failed to initialize Google Drive:', error);
+                
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Setup error';
+                    statusElement.className = 'text-red-400';
+                }
+            }
+        }
+        
+        // Add connect button to UI
+        function addGoogleDriveConnectButton() {
+            const setupBtn = document.getElementById('googleDriveSetupBtn');
+            if (setupBtn && !document.getElementById('googleDriveConnectBtn')) {
+                const connectBtn = document.createElement('button');
+                connectBtn.id = 'googleDriveConnectBtn';
+                connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                connectBtn.textContent = 'Connect';
+                connectBtn.onclick = connectToGoogleDrive;
+                
+                setupBtn.parentNode.appendChild(connectBtn);
+            }
+        }
+        
+        // Connect to Google Drive
+        async function connectToGoogleDrive() {
+            try {
+                const authInstance = window.gapi.auth2.getAuthInstance();
+                googleUser = await authInstance.signIn();
+                isGoogleSignedIn = true;
+                
+                console.log('Signed in to Google Drive successfully');
+                
+                // Update UI
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    const profile = googleUser.getBasicProfile();
+                    statusElement.textContent = `Connected as ${profile.getName()}`;
+                    statusElement.className = 'text-green-400';
+                }
+                
+                // Hide connect button, show disconnect
+                const connectBtn = document.getElementById('googleDriveConnectBtn');
+                if (connectBtn) {
+                    connectBtn.textContent = 'Disconnect';
+                    connectBtn.className = 'text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                    connectBtn.onclick = disconnectFromGoogleDrive;
+                }
+                
+                displayMessage('Connected to Google Drive successfully!', 'text-green-400');
+                
+            } catch (error) {
+                console.error('Failed to connect to Google Drive:', error);
+                displayMessage('Failed to connect to Google Drive', 'text-red-500');
+            }
+        }
+        
+        // Disconnect from Google Drive
+        async function disconnectFromGoogleDrive() {
+            try {
+                const authInstance = window.gapi.auth2.getAuthInstance();
+                await authInstance.signOut();
+                
+                isGoogleSignedIn = false;
+                googleUser = null;
+                
+                // Update UI
+                const statusElement = document.getElementById('googleDriveStatus');
+                if (statusElement) {
+                    statusElement.textContent = 'Ready to connect';
+                    statusElement.className = 'text-green-400';
+                }
+                
+                // Restore connect button
+                const connectBtn = document.getElementById('googleDriveConnectBtn');
+                if (connectBtn) {
+                    connectBtn.textContent = 'Connect';
+                    connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                    connectBtn.onclick = connectToGoogleDrive;
+                }
+                
+                displayMessage('Disconnected from Google Drive', 'text-gray-400');
+                
+            } catch (error) {
+                console.error('Failed to disconnect from Google Drive:', error);
+            }
         }
 
         // Phase 3: Load and apply user preferences
