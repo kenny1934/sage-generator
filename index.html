@@ -704,6 +704,10 @@
         let networkStatusIndicator;
         let currentQuestionIndex = 0;
         let totalQuestions = 0;
+        
+        // Google Drive integration (optional enhancement)
+        let googleDriveAvailable = false;
+        let isGoogleSignedIn = false;
 
         // Phase 3: Data Management and Personalization
         class DataManager {
@@ -920,6 +924,24 @@
             
             // Initialize smart input features
             initializeSmartInput();
+            
+            // Check for Google Drive availability (optional)
+            checkGoogleDriveAvailability();
+        }
+        
+        // Check if Google Drive APIs are available (non-blocking)
+        function checkGoogleDriveAvailability() {
+            // Wait a moment for scripts to load
+            setTimeout(() => {
+                if (typeof window.gapi !== 'undefined' && typeof window.google !== 'undefined') {
+                    googleDriveAvailable = true;
+                    console.log('Google Drive APIs detected - multi-device sync available');
+                    
+                    // Could add UI indicator here in future
+                } else {
+                    console.log('Google Drive APIs not available - using localStorage only');
+                }
+            }, 3000);
         }
 
         // Phase 3: Load and apply user preferences
