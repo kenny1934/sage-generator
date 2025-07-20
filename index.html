@@ -11,6 +11,10 @@
     <!-- KaTeX JS for math rendering -->
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" xintegrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+    
+    <!-- Google APIs for Drive integration -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
 
     <style>
         body {
@@ -541,7 +545,41 @@
 
             <!-- AI Disclaimer -->
             <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
-                <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently and consult your teacher or textbook for accuracy.
+                <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently for accuracy.
+            </div>
+            
+            <!-- Google Drive Configuration -->
+            <div id="googleDriveConfig" class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-lg font-semibold text-blue-200 flex items-center gap-2">
+                        ☁️ Google Drive Setup
+                    </h3>
+                    <button type="button" class="text-blue-400 hover:text-blue-300 text-sm" onclick="toggleGoogleDriveConfig()">Close</button>
+                </div>
+                <div class="text-sm text-blue-200 mb-4">
+                    <p class="mb-2">To enable Google Drive sync for your SAGE data across devices:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-blue-300">
+                        <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="text-blue-400 underline">Google Cloud Console</a></li>
+                        <li>Create a new project or select existing one</li>
+                        <li>Enable the Google Drive API</li>
+                        <li>Create credentials (API Key and OAuth 2.0 Client ID)</li>
+                        <li>Add your domain to authorized origins</li>
+                        <li>Enter your credentials below</li>
+                    </ol>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label for="googleClientId" class="block text-sm font-medium text-blue-200 mb-1">Google Client ID:</label>
+                        <input type="text" id="googleClientId" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="your-client-id.googleusercontent.com">
+                    </div>
+                    <div>
+                        <label for="googleApiKey" class="block text-sm font-medium text-blue-200 mb-1">Google API Key:</label>
+                        <input type="text" id="googleApiKey" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="AIza...">
+                    </div>
+                    <button type="button" class="action-btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="saveGoogleCredentials()">
+                        Save & Initialize Drive Sync
+                    </button>
+                </div>
             </div>
 
             <!-- API Key Configuration -->
@@ -669,11 +707,17 @@
             RETRY_DELAY: 1000,
             STORAGE_KEY: 'sage_api_key',
             MESSAGE_TIMEOUT: 3000,
-            // New storage keys for Phase 3 features
+            // Storage keys for Phase 3 features
             PREFERENCES_KEY: 'sage_preferences',
             HISTORY_KEY: 'sage_history',
             FAVORITES_KEY: 'sage_favorites',
-            STATS_KEY: 'sage_stats'
+            STATS_KEY: 'sage_stats',
+            // Google Drive integration
+            GOOGLE_CLIENT_ID: '', // To be configured by users
+            GOOGLE_API_KEY: '', // To be configured by users
+            DRIVE_FOLDER_NAME: 'SAGE_Data',
+            DRIVE_DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
+            DRIVE_SCOPE: 'https://www.googleapis.com/auth/drive.file'
         };
 
         // Get references to DOM elements
@@ -700,6 +744,13 @@
         let networkStatusIndicator;
         let currentQuestionIndex = 0;
         let totalQuestions = 0;
+        
+        // Google Drive integration variables
+        let gapi, google;
+        let isGoogleSignedIn = false;
+        let googleUser = null;
+        let driveFolder = null;
+        let syncInProgress = false;
 
         // Phase 3: Data Management and Personalization
         class DataManager {
@@ -722,6 +773,10 @@
             static savePreferences(preferences) {
                 try {
                     localStorage.setItem(CONFIG.PREFERENCES_KEY, JSON.stringify(preferences));
+                    // Auto-sync to Drive if connected
+                    if (isGoogleSignedIn) {
+                        DriveManager.syncToDrive();
+                    }
                 } catch (error) {
                     console.error('Error saving preferences:', error);
                 }
@@ -755,6 +810,11 @@
                     // Limit history size
                     const limitedHistory = historyItems.slice(0, preferences.maxHistoryItems);
                     localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(limitedHistory));
+                    
+                    // Auto-sync to Drive if connected
+                    if (isGoogleSignedIn) {
+                        DriveManager.syncToDrive();
+                    }
                 } catch (error) {
                     console.error('Error saving history:', error);
                 }
@@ -813,6 +873,11 @@
             static saveStats(stats) {
                 try {
                     localStorage.setItem(CONFIG.STATS_KEY, JSON.stringify(stats));
+                    
+                    // Auto-sync to Drive if connected
+                    if (isGoogleSignedIn) {
+                        DriveManager.syncToDrive();
+                    }
                 } catch (error) {
                     console.error('Error saving stats:', error);
                 }
@@ -859,6 +924,11 @@
             static saveFavorites(favorites) {
                 try {
                     localStorage.setItem(CONFIG.FAVORITES_KEY, JSON.stringify(favorites));
+                    
+                    // Auto-sync to Drive if connected
+                    if (isGoogleSignedIn) {
+                        DriveManager.syncToDrive();
+                    }
                 } catch (error) {
                     console.error('Error saving favorites:', error);
                 }
@@ -890,8 +960,279 @@
             }
         }
 
+        // Phase 4: Google Drive Integration Manager
+        class DriveManager {
+            static async initialize() {
+                try {
+                    // Check if Google APIs are loaded
+                    if (typeof gapi === 'undefined' || typeof google === 'undefined') {
+                        console.log('Google APIs not available, using localStorage only');
+                        return false;
+                    }
+                    
+                    // Initialize gapi
+                    await new Promise((resolve) => {
+                        gapi.load('client:auth2', resolve);
+                    });
+                    
+                    // Load credentials from localStorage or config
+                    const clientId = localStorage.getItem('google_client_id') || CONFIG.GOOGLE_CLIENT_ID;
+                    const apiKey = localStorage.getItem('google_api_key') || CONFIG.GOOGLE_API_KEY;
+                    
+                    if (!clientId || !apiKey || clientId === 'YOUR_GOOGLE_CLIENT_ID' || apiKey === 'YOUR_GOOGLE_API_KEY') {
+                        console.log('Google credentials not configured, using localStorage only');
+                        return false;
+                    }
+                    
+                    // Update config with loaded credentials
+                    CONFIG.GOOGLE_CLIENT_ID = clientId;
+                    CONFIG.GOOGLE_API_KEY = apiKey;
+                    
+                    await gapi.client.init({
+                        apiKey: apiKey,
+                        clientId: clientId,
+                        discoveryDocs: [CONFIG.DRIVE_DISCOVERY_DOC],
+                        scope: CONFIG.DRIVE_SCOPE
+                    });
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Failed to initialize Google Drive:', error);
+                    return false;
+                }
+            }
+            
+            static async signIn() {
+                try {
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    googleUser = await authInstance.signIn();
+                    isGoogleSignedIn = true;
+                    
+                    // Create or find SAGE folder
+                    await this.ensureSageFolder();
+                    
+                    // Load data from Drive
+                    await this.syncFromDrive();
+                    
+                    updateGoogleSignInUI();
+                    displayMessage('Successfully signed in to Google Drive!', 'text-green-400');
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Sign-in failed:', error);
+                    displayMessage('Failed to sign in to Google Drive', 'text-red-500');
+                    return false;
+                }
+            }
+            
+            static async signOut() {
+                try {
+                    const authInstance = gapi.auth2.getAuthInstance();
+                    await authInstance.signOut();
+                    isGoogleSignedIn = false;
+                    googleUser = null;
+                    driveFolder = null;
+                    
+                    updateGoogleSignInUI();
+                    displayMessage('Signed out from Google Drive', 'text-gray-400');
+                } catch (error) {
+                    console.error('Sign-out failed:', error);
+                }
+            }
+            
+            static async ensureSageFolder() {
+                try {
+                    // Search for existing SAGE folder
+                    const response = await gapi.client.drive.files.list({
+                        q: `name='${CONFIG.DRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+                        spaces: 'drive'
+                    });
+                    
+                    if (response.result.files.length > 0) {
+                        driveFolder = response.result.files[0];
+                        console.log('Found existing SAGE folder:', driveFolder.id);
+                    } else {
+                        // Create new SAGE folder
+                        const createResponse = await gapi.client.drive.files.create({
+                            resource: {
+                                name: CONFIG.DRIVE_FOLDER_NAME,
+                                mimeType: 'application/vnd.google-apps.folder'
+                            }
+                        });
+                        
+                        driveFolder = createResponse.result;
+                        console.log('Created new SAGE folder:', driveFolder.id);
+                    }
+                } catch (error) {
+                    console.error('Failed to ensure SAGE folder:', error);
+                    throw error;
+                }
+            }
+            
+            static async syncToDrive() {
+                if (!isGoogleSignedIn || syncInProgress) return;
+                
+                syncInProgress = true;
+                updateSyncStatus('Syncing to Drive...');
+                
+                try {
+                    // Save all localStorage data to Drive
+                    const dataMap = {
+                        'sage_preferences': CONFIG.PREFERENCES_KEY,
+                        'sage_history': CONFIG.HISTORY_KEY,
+                        'sage_favorites': CONFIG.FAVORITES_KEY,
+                        'sage_stats': CONFIG.STATS_KEY
+                    };
+                    
+                    for (const [driveKey, localKey] of Object.entries(dataMap)) {
+                        const localData = localStorage.getItem(localKey);
+                        if (localData) {
+                            await this.saveFileToDrive(driveKey + '.json', localData);
+                        }
+                    }
+                    
+                    updateSyncStatus('Synced \u2713');
+                    setTimeout(() => updateSyncStatus(''), 3000);
+                } catch (error) {
+                    console.error('Sync to Drive failed:', error);
+                    updateSyncStatus('Sync failed \u2717');
+                    setTimeout(() => updateSyncStatus(''), 5000);
+                } finally {
+                    syncInProgress = false;
+                }
+            }
+            
+            static async syncFromDrive() {
+                if (!isGoogleSignedIn) return;
+                
+                syncInProgress = true;
+                updateSyncStatus('Syncing from Drive...');
+                
+                try {
+                    // Load all data from Drive and merge with localStorage
+                    const keys = ['sage_preferences', 'sage_history', 'sage_favorites', 'sage_stats'];
+                    const localKeys = [CONFIG.PREFERENCES_KEY, CONFIG.HISTORY_KEY, CONFIG.FAVORITES_KEY, CONFIG.STATS_KEY];
+                    
+                    for (let i = 0; i < keys.length; i++) {
+                        const driveData = await this.loadFileFromDrive(keys[i] + '.json');
+                        if (driveData) {
+                            localStorage.setItem(localKeys[i], driveData);
+                        }
+                    }
+                    
+                    // Update UI with synced data
+                    updateStatsDisplay();
+                    updateRecentTopicsDisplay();
+                    loadAndApplyUserPreferences();
+                    
+                    updateSyncStatus('Synced \u2713');
+                    setTimeout(() => updateSyncStatus(''), 3000);
+                } catch (error) {
+                    console.error('Sync from Drive failed:', error);
+                    updateSyncStatus('Sync failed \u2717');
+                    setTimeout(() => updateSyncStatus(''), 5000);
+                } finally {
+                    syncInProgress = false;
+                }
+            }
+            
+            static async saveFileToDrive(fileName, content) {
+                if (!isGoogleSignedIn || !driveFolder) return false;
+                
+                try {
+                    // Check if file exists
+                    const searchResponse = await gapi.client.drive.files.list({
+                        q: `name='${fileName}' and '${driveFolder.id}' in parents and trashed=false`,
+                        spaces: 'drive'
+                    });
+                    
+                    const boundary = '-------314159265358979323846';
+                    const delimiter = "\r\n--" + boundary + "\r\n";
+                    const close_delim = "\r\n--" + boundary + "--";
+                    
+                    const metadata = {
+                        name: fileName,
+                        parents: [driveFolder.id]
+                    };
+                    
+                    const multipartRequestBody =
+                        delimiter +
+                        'Content-Type: application/json\r\n\r\n' +
+                        JSON.stringify(metadata) +
+                        delimiter +
+                        'Content-Type: application/json\r\n\r\n' +
+                        content +
+                        close_delim;
+                    
+                    let request;
+                    if (searchResponse.result.files.length > 0) {
+                        // Update existing file
+                        const fileId = searchResponse.result.files[0].id;
+                        request = gapi.client.request({
+                            path: `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
+                            method: 'PATCH',
+                            params: { uploadType: 'multipart' },
+                            headers: {
+                                'Content-Type': `multipart/related; boundary="${boundary}"`
+                            },
+                            body: multipartRequestBody
+                        });
+                    } else {
+                        // Create new file
+                        request = gapi.client.request({
+                            path: 'https://www.googleapis.com/upload/drive/v3/files',
+                            method: 'POST',
+                            params: { uploadType: 'multipart' },
+                            headers: {
+                                'Content-Type': `multipart/related; boundary="${boundary}"`
+                            },
+                            body: multipartRequestBody
+                        });
+                    }
+                    
+                    await request;
+                    console.log(`Saved ${fileName} to Drive`);
+                    return true;
+                } catch (error) {
+                    console.error(`Failed to save ${fileName} to Drive:`, error);
+                    return false;
+                }
+            }
+            
+            static async loadFileFromDrive(fileName) {
+                if (!isGoogleSignedIn || !driveFolder) return null;
+                
+                try {
+                    // Search for the file
+                    const searchResponse = await gapi.client.drive.files.list({
+                        q: `name='${fileName}' and '${driveFolder.id}' in parents and trashed=false`,
+                        spaces: 'drive'
+                    });
+                    
+                    if (searchResponse.result.files.length === 0) {
+                        console.log(`File ${fileName} not found in Drive`);
+                        return null;
+                    }
+                    
+                    const fileId = searchResponse.result.files[0].id;
+                    
+                    // Download file content
+                    const response = await gapi.client.drive.files.get({
+                        fileId: fileId,
+                        alt: 'media'
+                    });
+                    
+                    console.log(`Loaded ${fileName} from Drive`);
+                    return response.body;
+                } catch (error) {
+                    console.error(`Failed to load ${fileName} from Drive:`, error);
+                    return null;
+                }
+            }
+        }
+
         // Initialize the application
-        function initializeApp() {
+        async function initializeApp() {
             // Load saved API key
             const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
             if (savedApiKey) {
@@ -904,6 +1245,9 @@
             
             // Phase 3: Initialize personalization features
             initializePersonalizationFeatures();
+            
+            // Phase 4: Initialize Google Drive integration
+            await initializeGoogleDriveIntegration();
 
             // Check if KaTeX is loaded
             checkKaTeXLoaded();
@@ -916,6 +1260,170 @@
             
             // Initialize smart input features
             initializeSmartInput();
+        }
+        
+        // Phase 4: Initialize Google Drive integration
+        async function initializeGoogleDriveIntegration() {
+            // Add Google Drive UI components
+            addGoogleDriveUI();
+            
+            // Try to initialize Google Drive
+            const initialized = await DriveManager.initialize();
+            
+            if (initialized) {
+                // Check if user is already signed in
+                const authInstance = gapi.auth2.getAuthInstance();
+                if (authInstance.isSignedIn.get()) {
+                    isGoogleSignedIn = true;
+                    googleUser = authInstance.currentUser.get();
+                    
+                    // Try to set up folder and sync
+                    try {
+                        await DriveManager.ensureSageFolder();
+                        await DriveManager.syncFromDrive();
+                        updateGoogleSignInUI();
+                    } catch (error) {
+                        console.error('Failed to initialize existing session:', error);
+                    }
+                }
+            }
+            
+            updateGoogleSignInUI();
+        }
+        
+        // Phase 4: Add Google Drive UI components
+        function addGoogleDriveUI() {
+            // Add sync status indicator to stats dashboard
+            const statsSection = document.querySelector('.mt-8.p-4.bg-gray-800');
+            if (statsSection) {
+                const syncStatusDiv = document.createElement('div');
+                syncStatusDiv.className = 'mt-3 pt-3 border-t border-gray-700 flex items-center justify-between text-xs';
+                syncStatusDiv.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-400">☁️ Google Drive:</span>
+                        <span id="googleSignInStatus" class="text-gray-500">Not connected</span>
+                        <span id="syncStatus" class="text-blue-400"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="googleSignInBtn" 
+                                class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors"
+                                onclick="handleGoogleSignIn()">
+                            Connect Drive
+                        </button>
+                        <button id="driveSetupBtn" 
+                                class="text-xs bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded transition-colors"
+                                onclick="toggleGoogleDriveConfig()">
+                            Setup
+                        </button>
+                        <button id="syncNowBtn" 
+                                class="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors hidden"
+                                onclick="DriveManager.syncToDrive()">
+                            Sync Now
+                        </button>
+                    </div>
+                `;
+                statsSection.appendChild(syncStatusDiv);
+            }
+        }
+        
+        // Phase 4: Handle Google Sign-In button click
+        async function handleGoogleSignIn() {
+            if (isGoogleSignedIn) {
+                await DriveManager.signOut();
+            } else {
+                await DriveManager.signIn();
+            }
+        }
+        
+        // Phase 4: Update Google Sign-In UI
+        function updateGoogleSignInUI() {
+            const statusElement = document.getElementById('googleSignInStatus');
+            const signInBtn = document.getElementById('googleSignInBtn');
+            const syncNowBtn = document.getElementById('syncNowBtn');
+            
+            if (!statusElement || !signInBtn || !syncNowBtn) return;
+            
+            if (isGoogleSignedIn && googleUser) {
+                const profile = googleUser.getBasicProfile();
+                statusElement.textContent = `Connected as ${profile.getName()}`;
+                statusElement.className = 'text-green-400';
+                signInBtn.textContent = 'Disconnect';
+                signInBtn.className = 'text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded transition-colors';
+                syncNowBtn.classList.remove('hidden');
+            } else {
+                statusElement.textContent = 'Not connected';
+                statusElement.className = 'text-gray-500';
+                signInBtn.textContent = 'Connect Drive';
+                signInBtn.className = 'text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors';
+                syncNowBtn.classList.add('hidden');
+            }
+        }
+        
+        // Phase 4: Update sync status
+        function updateSyncStatus(message) {
+            const syncStatus = document.getElementById('syncStatus');
+            if (syncStatus) {
+                syncStatus.textContent = message;
+            }
+        }
+        
+        // Phase 4: Toggle Google Drive configuration panel
+        function toggleGoogleDriveConfig() {
+            const configPanel = document.getElementById('googleDriveConfig');
+            if (configPanel.classList.contains('hidden')) {
+                configPanel.classList.remove('hidden');
+                
+                // Load saved credentials if they exist
+                const savedClientId = localStorage.getItem('google_client_id');
+                const savedApiKey = localStorage.getItem('google_api_key');
+                
+                if (savedClientId) {
+                    document.getElementById('googleClientId').value = savedClientId;
+                }
+                if (savedApiKey) {
+                    document.getElementById('googleApiKey').value = savedApiKey;
+                }
+            } else {
+                configPanel.classList.add('hidden');
+            }
+        }
+        
+        // Phase 4: Save Google credentials and initialize
+        async function saveGoogleCredentials() {
+            const clientId = document.getElementById('googleClientId').value.trim();
+            const apiKey = document.getElementById('googleApiKey').value.trim();
+            
+            if (!clientId || !apiKey) {
+                displayMessage('Please enter both Client ID and API Key', 'text-red-500');
+                return;
+            }
+            
+            // Save credentials
+            localStorage.setItem('google_client_id', clientId);
+            localStorage.setItem('google_api_key', apiKey);
+            
+            // Update config
+            CONFIG.GOOGLE_CLIENT_ID = clientId;
+            CONFIG.GOOGLE_API_KEY = apiKey;
+            
+            // Close config panel
+            toggleGoogleDriveConfig();
+            
+            // Reinitialize Google Drive
+            displayMessage('Initializing Google Drive...', 'text-blue-400');
+            
+            try {
+                const initialized = await DriveManager.initialize();
+                if (initialized) {
+                    displayMessage('Google Drive initialized successfully! You can now connect.', 'text-green-400');
+                    updateGoogleSignInUI();
+                } else {
+                    displayMessage('Failed to initialize Google Drive. Please check your credentials.', 'text-red-500');
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                displayMessage('Error initializing Google Drive. Please check console for details.', 'text-red-500');
+            }
         }
 
         // Phase 3: Load and apply user preferences
@@ -994,14 +1502,22 @@
             statsSection.innerHTML = `
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-white flex items-center gap-2">
-                        📊 Your Progress
+                        📊 Your Record
                     </h3>
-                    <button type="button" 
-                            class="text-xs text-gray-400 hover:text-gray-200 transition-colors"
-                            onclick="toggleStatsDetails()"
-                            id="statsToggleBtn">
-                        Show Details
-                    </button>
+                    <div class="flex gap-2">
+                        <button type="button" 
+                                class="text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                                onclick="toggleStatsDetails()"
+                                id="statsToggleBtn">
+                            Show Details
+                        </button>
+                        <button type="button" 
+                                class="text-xs text-red-400 hover:text-red-300 transition-colors"
+                                onclick="clearAllData()"
+                                title="Clear all history and reset stats">
+                            Clear All
+                        </button>
+                    </div>
                 </div>
                 <div id="statsOverview" class="grid grid-cols-3 gap-4 text-center">
                     <div class="stats-item">
@@ -1010,7 +1526,7 @@
                     </div>
                     <div class="stats-item">
                         <div class="text-2xl font-bold text-red-400" id="totalSessions">0</div>
-                        <div class="text-xs text-gray-400">Study Sessions</div>
+                        <div class="text-xs text-gray-400">Mathy Sessions</div>
                     </div>
                     <div class="stats-item">
                         <div class="text-2xl font-bold text-red-400" id="topicsExplored">0</div>
@@ -1202,6 +1718,35 @@
             DataManager.removeFromFavorites(favoriteId);
             buttonElement.closest('.p-4').remove();
             displayMessage('Favorite removed!', 'text-orange-400');
+        }
+        
+        // Phase 3: Clear all user data
+        function clearAllData() {
+            if (!confirm('Are you sure you want to clear all your history, favorites, and stats? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                // Clear all localStorage data
+                localStorage.removeItem(CONFIG.PREFERENCES_KEY);
+                localStorage.removeItem(CONFIG.HISTORY_KEY);
+                localStorage.removeItem(CONFIG.FAVORITES_KEY);
+                localStorage.removeItem(CONFIG.STATS_KEY);
+                
+                // Update UI
+                updateStatsDisplay();
+                updateRecentTopicsDisplay();
+                
+                // Reset form to defaults
+                const defaultPrefs = DataManager.getDefaultPreferences();
+                difficultySelect.value = defaultPrefs.preferredDifficulty;
+                mathTopicInput.value = '';
+                
+                displayMessage('All data cleared successfully!', 'text-green-400');
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                displayMessage('Error clearing data. Please try again.', 'text-red-500');
+            }
         }
         
         // Mobile-specific features
