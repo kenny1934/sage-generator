@@ -996,17 +996,43 @@
         
         function checkAllGoogleApisLoaded() {
             if (googleApiLoaded && googleGsiLoaded) {
-                console.log('All Google APIs loaded successfully');
-                updateGoogleApiStatus('Google APIs loaded successfully');
+                console.log('All Google API scripts loaded successfully');
+                updateGoogleApiStatus('Scripts loaded, checking API objects...');
                 
-                // Auto-initialize if we have credentials
-                const savedClientId = localStorage.getItem('google_client_id');
-                if (savedClientId) {
-                    setTimeout(() => {
-                        console.log('Auto-initializing Google Drive with saved credentials');
-                        initializeGoogleDriveWithRetry();
-                    }, 1000);
-                }
+                // Wait a moment for the scripts to process and create the gapi/google objects
+                setTimeout(() => {
+                    if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
+                        console.log('Google API objects are now available');
+                        updateGoogleApiStatus('Google APIs ready');
+                        
+                        // Auto-initialize if we have credentials
+                        const savedClientId = localStorage.getItem('google_client_id');
+                        if (savedClientId) {
+                            setTimeout(() => {
+                                console.log('Auto-initializing Google Drive with saved credentials');
+                                initializeGoogleDriveWithRetry();
+                            }, 1000);
+                        } else {
+                            updateGoogleApiStatus('Ready - Click Setup to configure');
+                        }
+                    } else {
+                        console.log('Scripts loaded but API objects not yet available, waiting longer...');
+                        // Try again after a longer delay
+                        setTimeout(() => {
+                            if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
+                                updateGoogleApiStatus('Google APIs ready (delayed)');
+                                const savedClientId = localStorage.getItem('google_client_id');
+                                if (savedClientId) {
+                                    initializeGoogleDriveWithRetry();
+                                } else {
+                                    updateGoogleApiStatus('Ready - Click Setup to configure');
+                                }
+                            } else {
+                                updateGoogleApiStatus('Scripts loaded but APIs not initializing - Try Retry');
+                            }
+                        }, 3000);
+                    }
+                }, 1500);
             }
         }
         
@@ -1090,7 +1116,22 @@
                 document.head.appendChild(apiScript);
                 document.head.appendChild(gsiScript);
                 
-                updateGoogleApiStatus('Loading Google APIs...');
+                updateGoogleApiStatus('Reloading Google APIs...');
+                
+                // Also try a direct check in case the scripts load very quickly
+                setTimeout(() => {
+                    if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
+                        console.log('Google APIs available after manual reload');
+                        updateGoogleApiStatus('Google APIs ready after reload');
+                        
+                        const savedClientId = localStorage.getItem('google_client_id');
+                        if (savedClientId) {
+                            initializeGoogleDriveWithRetry();
+                        } else {
+                            updateGoogleApiStatus('Ready - Click Setup to configure');
+                        }
+                    }
+                }, 2000);
             } catch (error) {
                 console.error('Error reloading Google APIs:', error);
                 updateGoogleApiStatus('Error reloading APIs: ' + error.message);
@@ -1423,12 +1464,18 @@
             // Set initial status
             updateGoogleApiStatus('Checking Google APIs...');
             
-            // Wait a moment for scripts to load
-            setTimeout(async () => {
+            // Polling function to check when APIs become available
+            let apiCheckAttempts = 0;
+            const maxApiCheckAttempts = 10;
+            
+            const checkApiAvailability = async () => {
+                apiCheckAttempts++;
+                console.log(`Checking API availability (attempt ${apiCheckAttempts}/${maxApiCheckAttempts})`);
+                
                 try {
-                    // Check if APIs are available
                     if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-                        updateGoogleApiStatus('Google APIs available');
+                        console.log('Google APIs are now available!');
+                        updateGoogleApiStatus('Google APIs detected');
                         
                         // Try to initialize if we have credentials
                         const savedClientId = localStorage.getItem('google_client_id');
@@ -1437,16 +1484,27 @@
                         } else {
                             updateGoogleApiStatus('Ready - Click Setup to configure');
                         }
+                        updateGoogleSignInUI();
+                        return; // Success, stop checking
+                    }
+                    
+                    // APIs not ready yet
+                    if (apiCheckAttempts < maxApiCheckAttempts) {
+                        updateGoogleApiStatus(`Waiting for APIs... (${apiCheckAttempts}/${maxApiCheckAttempts})`);
+                        setTimeout(checkApiAvailability, 1000);
                     } else {
-                        updateGoogleApiStatus('Google APIs not loaded - Click Retry APIs');
+                        updateGoogleApiStatus('APIs not loading - Click Retry APIs');
+                        updateGoogleSignInUI();
                     }
                 } catch (error) {
-                    console.error('Error in Google Drive initialization:', error);
+                    console.error('Error checking API availability:', error);
                     updateGoogleApiStatus('Error: ' + error.message);
+                    updateGoogleSignInUI();
                 }
-                
-                updateGoogleSignInUI();
-            }, 2000);
+            };
+            
+            // Start checking after a brief delay
+            setTimeout(checkApiAvailability, 1000);
         }
         
         // Phase 4: Add Google Drive UI components
