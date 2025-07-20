@@ -1405,9 +1405,14 @@
                     topicInputContainer.insertAdjacentElement('afterend', recentSection);
                     console.log('Recent topics section added successfully');
                 } else {
-                    // Fallback: append to container
+                    // Fallback: insert before footer to maintain proper order
                     console.log('Using fallback insertion method');
-                    container.appendChild(recentSection);
+                    const footer = container.querySelector('.footer') || container.querySelector('footer');
+                    if (footer) {
+                        container.insertBefore(recentSection, footer);
+                    } else {
+                        container.appendChild(recentSection);
+                    }
                 }
             } catch (error) {
                 console.error('Error adding recent topics section:', error);
@@ -1603,15 +1608,30 @@
                 </div>
             `;
             
-            // Insert after recent topics section if it exists
-            if (document.getElementById('recentTopicsSection')) {
-                const recentTopicsSection = document.getElementById('recentTopicsSection');
-                container.insertBefore(recommendationsSection, recentTopicsSection.nextSibling);
-            } else {
-                // Insert before the main topic input
-                const topicInputDiv = document.getElementById('mathTopic')?.parentElement;
-                if (topicInputDiv) {
-                    container.insertBefore(recommendationsSection, topicInputDiv);
+            // Safer insertion after recent topics section if it exists
+            try {
+                if (document.getElementById('recentTopicsSection')) {
+                    const recentTopicsSection = document.getElementById('recentTopicsSection');
+                    recentTopicsSection.insertAdjacentElement('afterend', recommendationsSection);
+                    console.log('Topic recommendations added after recent topics');
+                } else {
+                    // Fallback: insert before footer to maintain proper order
+                    console.log('Using fallback: inserting recommendations before footer');
+                    const footer = container.querySelector('.footer') || container.querySelector('footer');
+                    if (footer) {
+                        container.insertBefore(recommendationsSection, footer);
+                    } else {
+                        container.appendChild(recommendationsSection);
+                    }
+                }
+            } catch (error) {
+                console.error('Error adding topic recommendations section:', error);
+                // Final fallback - insert before footer
+                const footer = container.querySelector('.footer') || container.querySelector('footer');
+                if (footer) {
+                    container.insertBefore(recommendationsSection, footer);
+                } else {
+                    container.appendChild(recommendationsSection);
                 }
             }
         }
@@ -2669,10 +2689,16 @@
             
             console.log('Preprocessing content:', content.substring(0, 100) + '...');
             
-            // Only do minimal cleanup, preserve all spacing
+            // If content already has math delimiters, return it unchanged
+            if (content.includes('$')) {
+                console.log('Content already has math delimiters, skipping preprocessing');
+                return content;
+            }
+            
+            // Only do minimal cleanup for non-delimited content
             let processed = content;
             
-            // Only clean up \text{} wrappers if they exist
+            // Only clean up \text{} wrappers if they exist  
             if (processed.includes('\\text{')) {
                 processed = processed.replace(/\\text\{([^}]*)\}/g, '$1');
             }
@@ -2682,16 +2708,15 @@
                 processed = processed.replace(/\\n/g, '\n');
             }
             
-            // Much more conservative LaTeX command detection - only obvious math
-            const hasObviousMath = /\\(frac|sqrt|int|sum|lim|cdot|times|pm|infty|alpha|beta|gamma|theta|delta|lambda|mu|sigma|pi|sin|cos|tan|log|ln|exp|left|right|begin\{|end\{)/.test(processed);
+            // Very strict LaTeX command detection - only common math expressions
+            const hasObviousMath = /\\(frac\{|sqrt\{|int_|sum_|lim_|infty|alpha|beta|gamma|theta|delta|lambda|mu|sigma|pi)/.test(processed);
             
-            // Additional check: avoid processing if it looks like regular text
-            const looksLikeRegularText = /^[A-Za-z\s]+/.test(processed.trim()) && !hasObviousMath;
+            // Check if content looks like regular text (words, sentences, normal punctuation)
+            const looksLikeRegularText = /^[A-Za-z0-9\s\.,!?;:()-]+$/.test(processed.trim()) && !hasObviousMath;
             
-            // Only add delimiters if content has obvious LaTeX commands, no existing delimiters, and doesn't look like regular text
-            if (!processed.includes('$') && hasObviousMath && !looksLikeRegularText) {
-                console.log('Adding math delimiters to:', processed.substring(0, 50) + '...');
-                // Wrap the entire content in display math
+            // Very conservative: only add delimiters for clear mathematical expressions without existing delimiters
+            if (hasObviousMath && !looksLikeRegularText && processed.length < 500) {
+                console.log('Adding math delimiters to mathematical content:', processed.substring(0, 50) + '...');
                 return `$$${processed}$$`;
             }
             
@@ -3208,9 +3233,11 @@
                 
                 // Always preprocess the content to ensure proper math handling
                 try {
+                    console.log(`Question ${index + 1} raw content:`, problem.question.substring(0, 150) + '...');
                     const processedQuestion = preprocessMathContent(problem.question);
                     questionRenderedDiv.innerHTML = sanitizeHTML(processedQuestion);
-                    console.log(`Question ${index + 1} processed:`, processedQuestion.substring(0, 100) + '...');
+                    console.log(`Question ${index + 1} after processing:`, processedQuestion.substring(0, 150) + '...');
+                    console.log(`Question ${index + 1} has dollar signs:`, processedQuestion.includes('$'));
                 } catch (error) {
                     console.error(`Error processing question ${index + 1}:`, error);
                     questionRenderedDiv.innerHTML = sanitizeHTML(problem.question);
