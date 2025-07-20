@@ -1240,6 +1240,9 @@
             // Add recently used topics section
             addRecentTopicsSection();
             
+            // Add topic recommendations
+            addTopicRecommendationsSection();
+            
             // Add stats dashboard
             addStatsDashboard();
             
@@ -1286,6 +1289,203 @@
             
             // Provide feedback
             displayMessage(`Selected: ${topic} (${difficulty})`, 'text-green-400');
+        }
+
+        // Phase 3: Topic Recommendation Engine
+        class TopicRecommendationEngine {
+            static getTopicRecommendations(currentTopic = '', limit = 4) {
+                const stats = DataManager.loadStats();
+                const history = DataManager.loadHistory();
+                const preferences = DataManager.loadPreferences();
+                
+                // Base topic suggestions organized by category
+                const topicDatabase = {
+                    algebra: [
+                        "Linear equations for Grade 9",
+                        "Quadratic equations for Form 4", 
+                        "Systems of equations for Grade 10",
+                        "Polynomial operations for Form 5",
+                        "Factoring techniques for Grade 9",
+                        "Inequalities for Grade 10"
+                    ],
+                    geometry: [
+                        "Circle theorems for Form 3",
+                        "Triangle properties for Grade 8",
+                        "Area and perimeter for Grade 7",
+                        "3D shapes and volumes for Form 4",
+                        "Coordinate geometry for Grade 10",
+                        "Trigonometry basics for Form 4"
+                    ],
+                    calculus: [
+                        "Limits and continuity for Form 6",
+                        "Derivatives for A-Level",
+                        "Integration for Form 6",
+                        "Applications of calculus for Grade 12",
+                        "Differential equations for A-Level"
+                    ],
+                    statistics: [
+                        "Data analysis for Grade 9",
+                        "Probability for Form 5",
+                        "Normal distribution for A-Level",
+                        "Hypothesis testing for Grade 12",
+                        "Regression analysis for Form 6"
+                    ],
+                    advanced: [
+                        "Complex numbers for Form 6",
+                        "Vectors for Grade 12",
+                        "Matrices for A-Level",
+                        "Sequences and series for Form 5",
+                        "Logarithms for Grade 11"
+                    ]
+                };
+                
+                let recommendations = [];
+                
+                // 1. Analyze current topic to suggest related topics
+                if (currentTopic) {
+                    const category = this.categorizeTopic(currentTopic);
+                    if (category && topicDatabase[category]) {
+                        recommendations.push(...topicDatabase[category]
+                            .filter(topic => !topic.toLowerCase().includes(currentTopic.toLowerCase().split(' ')[0]))
+                            .slice(0, 2));
+                    }
+                }
+                
+                // 2. Suggest topics based on user's favorite subjects
+                const favoriteTopics = Object.entries(stats.favoriteTopics || {})
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 3)
+                    .map(([topic]) => topic);
+                
+                favoriteTopics.forEach(favTopic => {
+                    const category = this.categorizeTopic(favTopic);
+                    if (category && topicDatabase[category]) {
+                        recommendations.push(...topicDatabase[category]
+                            .filter(topic => !recommendations.includes(topic))
+                            .slice(0, 1));
+                    }
+                });
+                
+                // 3. Progressive difficulty suggestions
+                const userPreferredDifficulty = preferences.preferredDifficulty || 'Medium';
+                const nextLevel = this.getNextDifficultyLevel(userPreferredDifficulty);
+                
+                // 4. Fill remaining slots with popular topics
+                const popularTopics = [
+                    "Linear equations for Grade 9",
+                    "Quadratic functions for Form 4",
+                    "Circle theorems for Form 3",
+                    "Trigonometry basics for Grade 10",
+                    "Probability for Form 5",
+                    "Derivatives for Form 6"
+                ].filter(topic => !recommendations.includes(topic));
+                
+                recommendations.push(...popularTopics);
+                
+                // Remove duplicates and limit results
+                recommendations = [...new Set(recommendations)].slice(0, limit);
+                
+                return recommendations.map(topic => ({
+                    topic,
+                    difficulty: this.suggestDifficulty(topic, userPreferredDifficulty),
+                    reason: this.getRecommendationReason(topic, currentTopic, favoriteTopics)
+                }));
+            }
+            
+            static categorizeTopic(topic) {
+                const topicLower = topic.toLowerCase();
+                if (topicLower.includes('algebra') || topicLower.includes('equation') || topicLower.includes('polynomial')) return 'algebra';
+                if (topicLower.includes('geometry') || topicLower.includes('triangle') || topicLower.includes('circle') || topicLower.includes('area')) return 'geometry';
+                if (topicLower.includes('calculus') || topicLower.includes('derivative') || topicLower.includes('integral') || topicLower.includes('limit')) return 'calculus';
+                if (topicLower.includes('statistic') || topicLower.includes('probability') || topicLower.includes('data')) return 'statistics';
+                if (topicLower.includes('complex') || topicLower.includes('vector') || topicLower.includes('matrix')) return 'advanced';
+                return 'algebra'; // default category
+            }
+            
+            static getNextDifficultyLevel(currentLevel) {
+                const levels = ['Easy', 'Medium', 'Hard', 'Challenging'];
+                const currentIndex = levels.indexOf(currentLevel);
+                return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : currentLevel;
+            }
+            
+            static suggestDifficulty(topic, userPreferred) {
+                // Suggest appropriate difficulty based on topic complexity
+                if (topic.includes('Grade 7') || topic.includes('Grade 8')) return 'Easy';
+                if (topic.includes('Form 6') || topic.includes('A-Level') || topic.includes('Grade 12')) return 'Hard';
+                return userPreferred;
+            }
+            
+            static getRecommendationReason(topic, currentTopic, favoriteTopics) {
+                if (currentTopic && this.categorizeTopic(topic) === this.categorizeTopic(currentTopic)) {
+                    return 'Related to current topic';
+                }
+                if (favoriteTopics.some(fav => this.categorizeTopic(topic) === this.categorizeTopic(fav))) {
+                    return 'Based on your interests';
+                }
+                return 'Popular topic';
+            }
+        }
+
+        // Phase 3: Add topic recommendations section
+        function addTopicRecommendationsSection() {
+            const currentTopic = mathTopicInput.value.trim();
+            const recommendations = TopicRecommendationEngine.getTopicRecommendations(currentTopic, 4);
+            
+            if (recommendations.length === 0) return;
+            
+            const container = document.querySelector('.main-container');
+            const recentSection = document.getElementById('recentTopicsSection') || document.getElementById('mathTopic').parentElement;
+            
+            // Remove existing recommendations section
+            const existingRecommendations = document.getElementById('recommendationsSection');
+            if (existingRecommendations) {
+                existingRecommendations.remove();
+            }
+            
+            const recommendationsSection = document.createElement('div');
+            recommendationsSection.id = 'recommendationsSection';
+            recommendationsSection.className = 'mb-6';
+            recommendationsSection.innerHTML = `
+                <label class="block mb-3 text-sm font-medium text-gray-300">
+                    💡 Recommended Topics for You
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                    ${recommendations.map((item, index) => `
+                        <button type="button" 
+                                class="recommendation-btn p-3 text-left bg-gradient-to-r from-gray-800 to-gray-700 hover:from-red-900 hover:to-red-800 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                                onclick="selectRecommendedTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
+                                title="${item.reason}">
+                            <div class="text-sm font-medium text-gray-200 group-hover:text-white mb-1">${item.topic}</div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs px-2 py-1 bg-red-600 text-white rounded">${item.difficulty}</span>
+                                <span class="text-xs text-gray-400 group-hover:text-gray-300">${item.reason}</span>
+                            </div>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            // Insert after recent topics section or before topic input
+            if (recentSection.nextSibling) {
+                container.insertBefore(recommendationsSection, recentSection.nextSibling);
+            } else {
+                container.insertBefore(recommendationsSection, recentSection);
+            }
+        }
+
+        // Phase 3: Select a recommended topic
+        function selectRecommendedTopic(topic, difficulty) {
+            mathTopicInput.value = topic;
+            difficultySelect.value = difficulty;
+            mathTopicInput.focus();
+            
+            // Provide feedback
+            displayMessage(`Selected recommendation: ${topic} (${difficulty})`, 'text-blue-400');
+            
+            // Update recommendations based on new topic
+            setTimeout(() => {
+                addTopicRecommendationsSection();
+            }, 500);
         }
 
         // Phase 3: Add stats dashboard
@@ -2819,6 +3019,43 @@
 
             questionsContainer.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
+            
+            // Phase 3: Save user preferences and add to history
+            const mathTopic = mathTopicInput.value.trim();
+            const difficulty = difficultySelect.value;
+            
+            // Update and save user preferences
+            const currentPreferences = DataManager.loadPreferences();
+            currentPreferences.preferredDifficulty = difficulty;
+            currentPreferences.lastUsedTopic = mathTopic;
+            
+            // Add to preferred topics if not already there
+            if (!currentPreferences.preferredTopics.includes(mathTopic)) {
+                currentPreferences.preferredTopics.unshift(mathTopic);
+                // Keep only latest 10 preferred topics
+                currentPreferences.preferredTopics = currentPreferences.preferredTopics.slice(0, 10);
+            }
+            
+            DataManager.savePreferences(currentPreferences);
+            
+            // Add to history and update stats
+            DataManager.addToHistory(mathTopic, difficulty, problems.length);
+            
+            // Refresh personalization features
+            setTimeout(() => {
+                // Re-add recent topics section with updated data
+                const existingRecentSection = document.getElementById('recentTopicsSection');
+                if (existingRecentSection) {
+                    existingRecentSection.remove();
+                }
+                addRecentTopicsSection();
+                
+                // Update topic recommendations based on new preferences
+                addTopicRecommendationsSection();
+                
+                // Update stats display
+                updateStatsDisplay();
+            }, 100);
             
             // Initialize question navigation
             if (totalQuestions > 1) {
