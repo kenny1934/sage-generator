@@ -1165,16 +1165,33 @@
                     console.log('Google APIs detected, proceeding with initialization...');
                     
                     // Initialize gapi with timeout (use window.gapi reference)
+                    const gapiRef = window.gapi || gapi;
+                    console.log('Using gapi reference:', typeof gapiRef, 'has load method:', typeof gapiRef.load);
+                    
                     await new Promise((resolve, reject) => {
                         const timeout = setTimeout(() => {
                             reject(new Error('Timeout loading Google API client'));
-                        }, 10000);
+                        }, 15000); // Increased timeout
                         
-                        (window.gapi || gapi).load('client:auth2', () => {
+                        try {
+                            gapiRef.load('client:auth2', {
+                                callback: () => {
+                                    clearTimeout(timeout);
+                                    console.log('Google API client and auth2 loaded successfully');
+                                    resolve();
+                                },
+                                onerror: (error) => {
+                                    clearTimeout(timeout);
+                                    console.error('Error loading Google API client:', error);
+                                    reject(new Error('Failed to load Google API client: ' + error));
+                                },
+                                timeout: 15000
+                            });
+                        } catch (error) {
                             clearTimeout(timeout);
-                            console.log('Google API client loaded successfully');
-                            resolve();
-                        });
+                            console.error('Error calling gapi.load:', error);
+                            reject(new Error('Error calling gapi.load: ' + error.message));
+                        }
                     });
                     
                     // Load credentials from localStorage or config
@@ -1189,7 +1206,12 @@
                     // Update config with loaded credentials
                     CONFIG.GOOGLE_CLIENT_ID = clientId;
                     
-                    await (window.gapi || gapi).client.init({
+                    console.log('Initializing Google client with config...');
+                    console.log('Client ID:', clientId.substring(0, 20) + '...');
+                    console.log('Discovery docs:', CONFIG.DRIVE_DISCOVERY_DOC);
+                    console.log('Scope:', CONFIG.DRIVE_SCOPE);
+                    
+                    await gapiRef.client.init({
                         clientId: clientId,
                         discoveryDocs: [CONFIG.DRIVE_DISCOVERY_DOC],
                         scope: CONFIG.DRIVE_SCOPE
