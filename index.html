@@ -547,35 +547,6 @@
             <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
                 <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently and consult your teacher or textbook for accuracy.
             </div>
-            
-            <!-- Google Drive Setup (hidden by default) -->
-            <div id="googleDriveSetupPanel" class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg hidden">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-blue-200">
-                        ☁️ Google Drive Setup
-                    </h3>
-                    <button type="button" class="text-blue-400 hover:text-blue-300 text-sm" onclick="hideGoogleDriveSetup()">Close</button>
-                </div>
-                <div class="text-sm text-blue-200 mb-4">
-                    <p class="mb-2">Enable multi-device sync for your Google Workspace:</p>
-                    <ol class="list-decimal list-inside space-y-1 text-blue-300 text-xs">
-                        <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="text-blue-400 underline">Google Cloud Console</a></li>
-                        <li>Enable the Google Drive API</li>
-                        <li>Create OAuth 2.0 Client ID (Web application)</li>
-                        <li>Add your domain to authorized origins</li>
-                        <li>Enter Client ID below</li>
-                    </ol>
-                </div>
-                <div class="grid grid-cols-1 gap-3">
-                    <div>
-                        <label for="googleClientId" class="block text-sm font-medium text-blue-200 mb-1">Google OAuth Client ID:</label>
-                        <input type="text" id="googleClientId" class="w-full p-2 text-sm bg-gray-800 border border-blue-500 rounded" placeholder="123456789-abcdefg.apps.googleusercontent.com">
-                    </div>
-                    <button type="button" class="action-btn bg-blue-600 hover:bg-blue-700 text-sm" onclick="saveGoogleDriveConfig()">
-                        Save Configuration
-                    </button>
-                </div>
-            </div>
 
             <!-- API Key Configuration -->
             <div id="apiKeyContainer" class="api-key-container">
@@ -592,6 +563,7 @@
                     Your API key is stored locally and never sent to our servers.
                 </p>
             </div>
+            
 
             <div class="space-y-8">
                 <!-- Example Topics -->
@@ -737,8 +709,6 @@
         // Google Drive integration (optional enhancement)
         let googleDriveAvailable = false;
         let isGoogleSignedIn = false;
-        let googleUser = null;
-        let driveFolder = null;
 
         // Phase 3: Data Management and Personalization
         class DataManager {
@@ -975,28 +945,6 @@
                         statusElement.textContent = 'Available (setup required)';
                         statusElement.className = 'text-blue-400';
                     }
-                    
-                    // Show setup button
-                    const setupBtn = document.getElementById('googleDriveSetupBtn');
-                    if (setupBtn) setupBtn.classList.remove('hidden');
-                    
-                    // Check if already configured
-                    const savedClientId = localStorage.getItem('google_client_id');
-                    if (savedClientId) {
-                        if (statusElement) {
-                            statusElement.textContent = 'Configured (initializing...)';
-                            statusElement.className = 'text-blue-400';
-                        }
-                        
-                        // Try to initialize Google Drive with delay
-                        setTimeout(async () => {
-                            const success = await initializeGoogleDrive(savedClientId);
-                            if (!success) {
-                                // Add retry button on failure
-                                addRetryButton();
-                            }
-                        }, 1000);
-                    }
                 } else {
                     console.log('Google Drive APIs not available - using localStorage only');
                     
@@ -1006,256 +954,6 @@
                     }
                 }
             }, 3000);
-        }
-        
-        // Google Drive setup functions
-        function showGoogleDriveSetup() {
-            const panel = document.getElementById('googleDriveSetupPanel');
-            if (panel) {
-                panel.classList.remove('hidden');
-                
-                // Load saved client ID if exists
-                const savedClientId = localStorage.getItem('google_client_id');
-                if (savedClientId) {
-                    document.getElementById('googleClientId').value = savedClientId;
-                }
-            }
-        }
-        
-        function hideGoogleDriveSetup() {
-            const panel = document.getElementById('googleDriveSetupPanel');
-            if (panel) panel.classList.add('hidden');
-        }
-        
-        function saveGoogleDriveConfig() {
-            const clientId = document.getElementById('googleClientId').value.trim();
-            
-            if (!clientId) {
-                displayMessage('Please enter the Google Client ID', 'text-red-500');
-                return;
-            }
-            
-            if (!clientId.includes('.googleusercontent.com')) {
-                displayMessage('Please enter a valid Google Client ID', 'text-red-500');
-                return;
-            }
-            
-            // Save the client ID
-            localStorage.setItem('google_client_id', clientId);
-            
-            // Update UI
-            const statusElement = document.getElementById('googleDriveStatus');
-            if (statusElement) {
-                statusElement.textContent = 'Configured (ready to connect)';
-                statusElement.className = 'text-green-400';
-            }
-            
-            hideGoogleDriveSetup();
-            displayMessage('Google Drive configured successfully!', 'text-green-400');
-            
-            // Try to initialize with the new client ID
-            initializeGoogleDrive(clientId);
-        }
-        
-        // Initialize Google Drive with client ID
-        async function initializeGoogleDrive(clientId) {
-            if (!googleDriveAvailable) {
-                console.log('Google Drive APIs not available, skipping initialization');
-                return;
-            }
-            
-            try {
-                console.log('Initializing Google Drive with Client ID:', clientId.substring(0, 20) + '...');
-                
-                // Check if gapi.client is already loaded
-                if (window.gapi.client && typeof window.gapi.client.init === 'function') {
-                    console.log('gapi.client already loaded, proceeding to init');
-                } else {
-                    console.log('Loading gapi client...');
-                    // Initialize gapi client
-                    await new Promise((resolve, reject) => {
-                        const timeout = setTimeout(() => reject(new Error('Timeout loading gapi client')), 10000);
-                        
-                        window.gapi.load('client:auth2', {
-                            callback: () => {
-                                clearTimeout(timeout);
-                                console.log('gapi client loaded successfully');
-                                resolve();
-                            },
-                            onerror: (error) => {
-                                clearTimeout(timeout);
-                                console.error('Error loading gapi client:', error);
-                                reject(error);
-                            }
-                        });
-                    });
-                }
-                
-                // Initialize client with proper domain handling
-                const isLocalFile = window.location.protocol === 'file:';
-                const initConfig = {
-                    clientId: clientId,
-                    discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-                    scope: 'https://www.googleapis.com/auth/drive.file'
-                };
-                
-                // Add cookiePolicy for local file access
-                if (isLocalFile) {
-                    initConfig.cookiePolicy = 'single_host_origin';
-                    console.log('Running from local file, using single_host_origin cookiePolicy');
-                } else {
-                    console.log('Running from web server:', window.location.origin);
-                }
-                
-                await window.gapi.client.init(initConfig);
-                
-                console.log('Google Drive initialized successfully');
-                
-                // Update status
-                const statusElement = document.getElementById('googleDriveStatus');
-                if (statusElement) {
-                    statusElement.textContent = 'Ready to connect';
-                    statusElement.className = 'text-green-400';
-                }
-                
-                // Add connect button
-                addGoogleDriveConnectButton();
-                
-                return true;
-                
-            } catch (error) {
-                console.error('Failed to initialize Google Drive:', error);
-                console.error('Error details:', error.message);
-                
-                const statusElement = document.getElementById('googleDriveStatus');
-                if (statusElement) {
-                    if (error.message.includes('Invalid cookiePolicy') || window.location.protocol === 'file:') {
-                        statusElement.textContent = 'Requires web server (not file://)';
-                        statusElement.className = 'text-orange-400';
-                        
-                        // Add helpful message
-                        setTimeout(() => {
-                            displayMessage('Google Drive requires HTTPS or localhost. Try running: python -m http.server 8000', 'text-orange-400');
-                        }, 1000);
-                    } else {
-                        statusElement.textContent = `Setup error: ${error.message}`;
-                        statusElement.className = 'text-red-400';
-                    }
-                }
-                
-                return false;
-            }
-        }
-        
-        // Add connect button to UI
-        function addGoogleDriveConnectButton() {
-            console.log('Adding Google Drive connect button...');
-            
-            const setupBtn = document.getElementById('googleDriveSetupBtn');
-            if (!setupBtn) {
-                console.error('Setup button not found');
-                return;
-            }
-            
-            // Remove existing connect button if any
-            const existingBtn = document.getElementById('googleDriveConnectBtn');
-            if (existingBtn) {
-                existingBtn.remove();
-            }
-            
-            const connectBtn = document.createElement('button');
-            connectBtn.id = 'googleDriveConnectBtn';
-            connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
-            connectBtn.textContent = 'Connect';
-            connectBtn.onclick = connectToGoogleDrive;
-            
-            setupBtn.parentNode.appendChild(connectBtn);
-            
-            console.log('Connect button added successfully');
-        }
-        
-        // Add retry button for failed initialization
-        function addRetryButton() {
-            const setupBtn = document.getElementById('googleDriveSetupBtn');
-            if (setupBtn && !document.getElementById('googleDriveRetryBtn')) {
-                const retryBtn = document.createElement('button');
-                retryBtn.id = 'googleDriveRetryBtn';
-                retryBtn.className = 'text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition-colors ml-2';
-                retryBtn.textContent = 'Retry';
-                retryBtn.onclick = () => {
-                    const savedClientId = localStorage.getItem('google_client_id');
-                    if (savedClientId) {
-                        retryBtn.remove();
-                        initializeGoogleDrive(savedClientId);
-                    }
-                };
-                
-                setupBtn.parentNode.appendChild(retryBtn);
-            }
-        }
-        
-        // Connect to Google Drive
-        async function connectToGoogleDrive() {
-            try {
-                const authInstance = window.gapi.auth2.getAuthInstance();
-                googleUser = await authInstance.signIn();
-                isGoogleSignedIn = true;
-                
-                console.log('Signed in to Google Drive successfully');
-                
-                // Update UI
-                const statusElement = document.getElementById('googleDriveStatus');
-                if (statusElement) {
-                    const profile = googleUser.getBasicProfile();
-                    statusElement.textContent = `Connected as ${profile.getName()}`;
-                    statusElement.className = 'text-green-400';
-                }
-                
-                // Hide connect button, show disconnect
-                const connectBtn = document.getElementById('googleDriveConnectBtn');
-                if (connectBtn) {
-                    connectBtn.textContent = 'Disconnect';
-                    connectBtn.className = 'text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded transition-colors ml-2';
-                    connectBtn.onclick = disconnectFromGoogleDrive;
-                }
-                
-                displayMessage('Connected to Google Drive successfully!', 'text-green-400');
-                
-            } catch (error) {
-                console.error('Failed to connect to Google Drive:', error);
-                displayMessage('Failed to connect to Google Drive', 'text-red-500');
-            }
-        }
-        
-        // Disconnect from Google Drive
-        async function disconnectFromGoogleDrive() {
-            try {
-                const authInstance = window.gapi.auth2.getAuthInstance();
-                await authInstance.signOut();
-                
-                isGoogleSignedIn = false;
-                googleUser = null;
-                
-                // Update UI
-                const statusElement = document.getElementById('googleDriveStatus');
-                if (statusElement) {
-                    statusElement.textContent = 'Ready to connect';
-                    statusElement.className = 'text-green-400';
-                }
-                
-                // Restore connect button
-                const connectBtn = document.getElementById('googleDriveConnectBtn');
-                if (connectBtn) {
-                    connectBtn.textContent = 'Connect';
-                    connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
-                    connectBtn.onclick = connectToGoogleDrive;
-                }
-                
-                displayMessage('Disconnected from Google Drive', 'text-gray-400');
-                
-            } catch (error) {
-                console.error('Failed to disconnect from Google Drive:', error);
-            }
         }
 
         // Phase 3: Load and apply user preferences
