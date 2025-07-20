@@ -931,15 +931,26 @@
         
         // Check if Google Drive APIs are available (non-blocking)
         function checkGoogleDriveAvailability() {
+            const statusElement = document.getElementById('googleDriveStatus');
+            if (statusElement) statusElement.textContent = 'Checking...';
+            
             // Wait a moment for scripts to load
             setTimeout(() => {
                 if (typeof window.gapi !== 'undefined' && typeof window.google !== 'undefined') {
                     googleDriveAvailable = true;
                     console.log('Google Drive APIs detected - multi-device sync available');
                     
-                    // Could add UI indicator here in future
+                    if (statusElement) {
+                        statusElement.textContent = 'Available (setup required)';
+                        statusElement.className = 'text-blue-400';
+                    }
                 } else {
                     console.log('Google Drive APIs not available - using localStorage only');
+                    
+                    if (statusElement) {
+                        statusElement.textContent = 'Not available';
+                        statusElement.className = 'text-gray-500';
+                    }
                 }
             }, 3000);
         }
@@ -1046,6 +1057,14 @@
                 <div id="statsDetails" class="mt-4 space-y-3 hidden">
                     <div id="favoriteTopicsSection"></div>
                     <div id="difficultyDistributionSection"></div>
+                </div>
+                
+                <!-- Google Drive Status (optional) -->
+                <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <span>☁️ Google Drive:</span>
+                        <span id="googleDriveStatus">Checking...</span>
+                    </div>
                 </div>
             `;
             
