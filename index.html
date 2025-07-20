@@ -984,12 +984,18 @@
                     const savedClientId = localStorage.getItem('google_client_id');
                     if (savedClientId) {
                         if (statusElement) {
-                            statusElement.textContent = 'Configured (ready to connect)';
-                            statusElement.className = 'text-green-400';
+                            statusElement.textContent = 'Configured (initializing...)';
+                            statusElement.className = 'text-blue-400';
                         }
                         
-                        // Try to initialize Google Drive
-                        initializeGoogleDrive(savedClientId);
+                        // Try to initialize Google Drive with delay
+                        setTimeout(async () => {
+                            const success = await initializeGoogleDrive(savedClientId);
+                            if (!success) {
+                                // Add retry button on failure
+                                addRetryButton();
+                            }
+                        }, 1000);
                     }
                 } else {
                     console.log('Google Drive APIs not available - using localStorage only');
@@ -1053,26 +1059,37 @@
         
         // Initialize Google Drive with client ID
         async function initializeGoogleDrive(clientId) {
-            if (!googleDriveAvailable) return;
+            if (!googleDriveAvailable) {
+                console.log('Google Drive APIs not available, skipping initialization');
+                return;
+            }
             
             try {
-                console.log('Initializing Google Drive...');
+                console.log('Initializing Google Drive with Client ID:', clientId.substring(0, 20) + '...');
                 
-                // Initialize gapi client
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
-                    
-                    window.gapi.load('client:auth2', {
-                        callback: () => {
-                            clearTimeout(timeout);
-                            resolve();
-                        },
-                        onerror: (error) => {
-                            clearTimeout(timeout);
-                            reject(error);
-                        }
+                // Check if gapi.client is already loaded
+                if (window.gapi.client && typeof window.gapi.client.init === 'function') {
+                    console.log('gapi.client already loaded, proceeding to init');
+                } else {
+                    console.log('Loading gapi client...');
+                    // Initialize gapi client
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => reject(new Error('Timeout loading gapi client')), 10000);
+                        
+                        window.gapi.load('client:auth2', {
+                            callback: () => {
+                                clearTimeout(timeout);
+                                console.log('gapi client loaded successfully');
+                                resolve();
+                            },
+                            onerror: (error) => {
+                                clearTimeout(timeout);
+                                console.error('Error loading gapi client:', error);
+                                reject(error);
+                            }
+                        });
                     });
-                });
+                }
                 
                 // Initialize client
                 await window.gapi.client.init({
@@ -1093,28 +1110,66 @@
                 // Add connect button
                 addGoogleDriveConnectButton();
                 
+                return true;
+                
             } catch (error) {
                 console.error('Failed to initialize Google Drive:', error);
+                console.error('Error details:', error.message);
                 
                 const statusElement = document.getElementById('googleDriveStatus');
                 if (statusElement) {
-                    statusElement.textContent = 'Setup error';
+                    statusElement.textContent = `Setup error: ${error.message}`;
                     statusElement.className = 'text-red-400';
                 }
+                
+                return false;
             }
         }
         
         // Add connect button to UI
         function addGoogleDriveConnectButton() {
+            console.log('Adding Google Drive connect button...');
+            
             const setupBtn = document.getElementById('googleDriveSetupBtn');
-            if (setupBtn && !document.getElementById('googleDriveConnectBtn')) {
-                const connectBtn = document.createElement('button');
-                connectBtn.id = 'googleDriveConnectBtn';
-                connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
-                connectBtn.textContent = 'Connect';
-                connectBtn.onclick = connectToGoogleDrive;
+            if (!setupBtn) {
+                console.error('Setup button not found');
+                return;
+            }
+            
+            // Remove existing connect button if any
+            const existingBtn = document.getElementById('googleDriveConnectBtn');
+            if (existingBtn) {
+                existingBtn.remove();
+            }
+            
+            const connectBtn = document.createElement('button');
+            connectBtn.id = 'googleDriveConnectBtn';
+            connectBtn.className = 'text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded transition-colors ml-2';
+            connectBtn.textContent = 'Connect';
+            connectBtn.onclick = connectToGoogleDrive;
+            
+            setupBtn.parentNode.appendChild(connectBtn);
+            
+            console.log('Connect button added successfully');
+        }
+        
+        // Add retry button for failed initialization
+        function addRetryButton() {
+            const setupBtn = document.getElementById('googleDriveSetupBtn');
+            if (setupBtn && !document.getElementById('googleDriveRetryBtn')) {
+                const retryBtn = document.createElement('button');
+                retryBtn.id = 'googleDriveRetryBtn';
+                retryBtn.className = 'text-xs bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded transition-colors ml-2';
+                retryBtn.textContent = 'Retry';
+                retryBtn.onclick = () => {
+                    const savedClientId = localStorage.getItem('google_client_id');
+                    if (savedClientId) {
+                        retryBtn.remove();
+                        initializeGoogleDrive(savedClientId);
+                    }
+                };
                 
-                setupBtn.parentNode.appendChild(connectBtn);
+                setupBtn.parentNode.appendChild(retryBtn);
             }
         }
         
