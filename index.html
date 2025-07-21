@@ -80,6 +80,213 @@
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Phase 4: Animated Background Mathematical Elements */
+        .math-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-symbol {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--text-muted);
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+            font-family: 'Times New Roman', serif;
+            user-select: none;
+        }
+
+        .floating-symbol.large {
+            font-size: 3rem;
+            opacity: 0.05;
+        }
+
+        .floating-symbol.medium {
+            font-size: 2.5rem;
+            opacity: 0.08;
+        }
+
+        .floating-symbol.small {
+            font-size: 1.5rem;
+            opacity: 0.12;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: var(--symbol-opacity, 0.1);
+            }
+            90% {
+                opacity: var(--symbol-opacity, 0.1);
+            }
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes float-horizontal {
+            0% {
+                transform: translateX(-10vw) translateY(50vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: var(--symbol-opacity, 0.08);
+            }
+            90% {
+                opacity: var(--symbol-opacity, 0.08);
+            }
+            100% {
+                transform: translateX(110vw) translateY(50vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .floating-symbol.horizontal {
+            animation: float-horizontal 20s infinite linear;
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .floating-symbol {
+                animation: none;
+                opacity: 0.05;
+            }
+            .confetti, .celebration-animation {
+                animation: none !important;
+            }
+        }
+
+        /* Phase 4: Celebratory Animations for Achievements */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        .confetti.square {
+            border-radius: 0;
+        }
+
+        .confetti.triangle {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 8px solid;
+            border-radius: 0;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .celebration-burst {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,165,0,0.6) 30%, transparent 70%);
+            animation: burst 0.6s ease-out forwards;
+        }
+
+        @keyframes burst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .achievement-celebration {
+            position: relative;
+            z-index: 1001;
+        }
+
+        .achievement-celebration::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: linear-gradient(45deg, transparent, rgba(255,215,0,0.2), transparent);
+            border-radius: 1rem;
+            animation: achievement-glow 2s ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes achievement-glow {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
         }
 
         /* App Layout Container */
@@ -978,6 +1185,34 @@
                 </p>
             </div>
             
+            <!-- Phase 4: Data Management Section -->
+            <div id="dataManagementContainer" class="mb-6 p-4 rounded-lg" style="background: var(--surface); border: 1px solid var(--border-color);">
+                <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Data Management</h3>
+                <div class="flex gap-2 flex-wrap mb-3">
+                    <button id="exportDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors" 
+                            style="background: #059669; border: 1px solid #047857; color: white;"
+                            onmouseover="this.style.background='#047857'" 
+                            onmouseout="this.style.background='#059669'">
+                        📦 Export All Data
+                    </button>
+                    <button id="importDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                            style="background: #2563eb; border: 1px solid #1d4ed8; color: white;"
+                            onmouseover="this.style.background='#1d4ed8'" 
+                            onmouseout="this.style.background='#2563eb'">
+                        📥 Import Data
+                    </button>
+                    <button id="clearDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                            style="background: #dc2626; border: 1px solid #b91c1c; color: white;"
+                            onmouseover="this.style.background='#b91c1c'" 
+                            onmouseout="this.style.background='#dc2626'">
+                        🗑️ Clear All
+                    </button>
+                </div>
+                <input type="file" id="importFileInput" class="hidden" accept=".json">
+                <p class="text-xs" style="color: var(--text-muted);">
+                    Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
+                </p>
+            </div>
 
             <div class="space-y-8">
 
@@ -1174,7 +1409,13 @@
             PREFERENCES_KEY: 'sage_preferences',
             HISTORY_KEY: 'sage_history',
             FAVORITES_KEY: 'sage_favorites',
-            STATS_KEY: 'sage_stats'
+            STATS_KEY: 'sage_stats',
+            STREAKS_KEY: 'sage-streaks',
+            THEME_KEY: 'sage-theme',
+            // Phase 4: Question caching configuration
+            CACHE_KEY: 'sage_question_cache',
+            CACHE_EXPIRY_HOURS: 24,
+            MAX_CACHE_SIZE: 100
         };
 
         // Get references to DOM elements
@@ -1600,12 +1841,761 @@
             }
         }
 
+        // Phase 4: Question Cache System
+        class QuestionCache {
+            static generateCacheKey(topic, difficulty) {
+                if (!topic || !difficulty) return null;
+                return `${topic.toLowerCase().trim()}_${difficulty.toLowerCase()}`.replace(/\s+/g, '_');
+            }
+
+            static loadCache() {
+                try {
+                    const cacheData = localStorage.getItem(CONFIG.CACHE_KEY);
+                    return cacheData ? JSON.parse(cacheData) : {};
+                } catch (error) {
+                    console.error('Error loading question cache:', error);
+                    return {};
+                }
+            }
+
+            static saveCache(cache) {
+                try {
+                    localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(cache));
+                } catch (error) {
+                    console.error('Error saving question cache:', error);
+                }
+            }
+
+            static isExpired(timestamp) {
+                const expiryTime = CONFIG.CACHE_EXPIRY_HOURS * 60 * 60 * 1000;
+                return Date.now() - timestamp > expiryTime;
+            }
+
+            static get(topic, difficulty) {
+                const cacheKey = this.generateCacheKey(topic, difficulty);
+                if (!cacheKey) return null;
+
+                const cache = this.loadCache();
+                const entry = cache[cacheKey];
+
+                if (!entry) return null;
+
+                if (this.isExpired(entry.timestamp)) {
+                    // Remove expired entry
+                    delete cache[cacheKey];
+                    this.saveCache(cache);
+                    return null;
+                }
+
+                console.log(`Cache hit for: ${topic} (${difficulty})`);
+                return entry.questions;
+            }
+
+            static set(topic, difficulty, questions) {
+                if (!topic || !difficulty || !questions || !Array.isArray(questions)) return;
+
+                const cacheKey = this.generateCacheKey(topic, difficulty);
+                if (!cacheKey) return;
+
+                let cache = this.loadCache();
+
+                // Implement cache size limit
+                const cacheKeys = Object.keys(cache);
+                if (cacheKeys.length >= CONFIG.MAX_CACHE_SIZE) {
+                    // Remove oldest entries
+                    const sortedKeys = cacheKeys.sort((a, b) => cache[a].timestamp - cache[b].timestamp);
+                    const keysToRemove = sortedKeys.slice(0, cacheKeys.length - CONFIG.MAX_CACHE_SIZE + 1);
+                    
+                    keysToRemove.forEach(key => delete cache[key]);
+                }
+
+                // Add new entry
+                cache[cacheKey] = {
+                    questions: questions,
+                    timestamp: Date.now(),
+                    metadata: {
+                        topic: topic,
+                        difficulty: difficulty,
+                        questionsCount: questions.length
+                    }
+                };
+
+                this.saveCache(cache);
+                console.log(`Cached questions for: ${topic} (${difficulty})`);
+            }
+
+            static cleanup() {
+                const cache = this.loadCache();
+                const cleanedCache = {};
+                let removedCount = 0;
+
+                Object.keys(cache).forEach(key => {
+                    if (!this.isExpired(cache[key].timestamp)) {
+                        cleanedCache[key] = cache[key];
+                    } else {
+                        removedCount++;
+                    }
+                });
+
+                if (removedCount > 0) {
+                    this.saveCache(cleanedCache);
+                    console.log(`Cleaned up ${removedCount} expired cache entries`);
+                }
+
+                return removedCount;
+            }
+
+            static getCacheStats() {
+                const cache = this.loadCache();
+                const entries = Object.values(cache);
+                const totalQuestions = entries.reduce((sum, entry) => sum + entry.questions.length, 0);
+                const expiredCount = entries.filter(entry => this.isExpired(entry.timestamp)).length;
+
+                return {
+                    totalEntries: entries.length,
+                    totalQuestions: totalQuestions,
+                    expiredEntries: expiredCount,
+                    activeEntries: entries.length - expiredCount
+                };
+            }
+
+            static clear() {
+                try {
+                    localStorage.removeItem(CONFIG.CACHE_KEY);
+                    console.log('Question cache cleared');
+                } catch (error) {
+                    console.error('Error clearing question cache:', error);
+                }
+            }
+        }
+
+        // Phase 4: Data Export/Import Manager
+        class DataExportManager {
+            static getAllUserData() {
+                const data = {
+                    exportTimestamp: new Date().toISOString(),
+                    exportVersion: '4.2',
+                    data: {
+                        preferences: DataManager.loadPreferences(),
+                        history: DataManager.loadHistory(),
+                        favorites: DataManager.loadFavorites(),
+                        stats: DataManager.loadStats(),
+                        streaks: DataManager.loadStreaksAndMilestones(),
+                        theme: localStorage.getItem(CONFIG.THEME_KEY),
+                        cache: QuestionCache.loadCache()
+                    }
+                };
+                return data;
+            }
+
+            static exportData() {
+                try {
+                    const data = this.getAllUserData();
+                    const jsonString = JSON.stringify(data, null, 2);
+                    const blob = new Blob([jsonString], { type: 'application/json' });
+                    
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `sage-data-export-${new Date().toISOString().split('T')[0]}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    showNetworkMessage('Data exported successfully!', 'success');
+                    console.log('User data exported successfully');
+                } catch (error) {
+                    console.error('Error exporting data:', error);
+                    showNetworkMessage('Error exporting data. Please try again.', 'error');
+                }
+            }
+
+            static importData(file) {
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        this.validateAndImportData(importedData);
+                    } catch (error) {
+                        console.error('Error parsing import file:', error);
+                        showNetworkMessage('Invalid file format. Please select a valid SAGE export file.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            static validateAndImportData(importedData) {
+                try {
+                    // Basic validation
+                    if (!importedData.data || typeof importedData.data !== 'object') {
+                        throw new Error('Invalid data structure');
+                    }
+
+                    const confirmed = confirm(
+                        'This will replace all your current data including preferences, history, favorites, and stats. ' +
+                        'Are you sure you want to continue?\n\n' +
+                        `Import file created: ${importedData.exportTimestamp || 'Unknown date'}`
+                    );
+
+                    if (!confirmed) return;
+
+                    // Import each data type
+                    const { data } = importedData;
+                    
+                    if (data.preferences) {
+                        localStorage.setItem(CONFIG.PREFERENCES_KEY, JSON.stringify(data.preferences));
+                    }
+                    
+                    if (data.history) {
+                        localStorage.setItem(CONFIG.HISTORY_KEY, JSON.stringify(data.history));
+                    }
+                    
+                    if (data.favorites) {
+                        localStorage.setItem(CONFIG.FAVORITES_KEY, JSON.stringify(data.favorites));
+                    }
+                    
+                    if (data.stats) {
+                        localStorage.setItem(CONFIG.STATS_KEY, JSON.stringify(data.stats));
+                    }
+                    
+                    if (data.streaks) {
+                        localStorage.setItem(CONFIG.STREAKS_KEY, JSON.stringify(data.streaks));
+                    }
+                    
+                    if (data.theme) {
+                        localStorage.setItem(CONFIG.THEME_KEY, data.theme);
+                    }
+                    
+                    if (data.cache) {
+                        localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify(data.cache));
+                    }
+
+                    showNetworkMessage('Data imported successfully! Refreshing page...', 'success');
+                    
+                    // Refresh the page to reload all data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    showNetworkMessage('Error importing data. Please check the file format.', 'error');
+                }
+            }
+
+            static clearAllData() {
+                const confirmed = confirm(
+                    'This will permanently delete ALL your data including:\n' +
+                    '• User preferences\n' +
+                    '• Question history\n' +
+                    '• Favorite questions\n' +
+                    '• Usage statistics\n' +
+                    '• Achievement streaks\n' +
+                    '• Cached questions\n\n' +
+                    'This action cannot be undone. Are you absolutely sure?'
+                );
+
+                if (!confirmed) return;
+
+                const doubleConfirm = confirm('Last chance! This will delete everything. Continue?');
+                if (!doubleConfirm) return;
+
+                try {
+                    // Clear all localStorage data except API key
+                    const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+                    
+                    localStorage.removeItem(CONFIG.PREFERENCES_KEY);
+                    localStorage.removeItem(CONFIG.HISTORY_KEY);
+                    localStorage.removeItem(CONFIG.FAVORITES_KEY);
+                    localStorage.removeItem(CONFIG.STATS_KEY);
+                    localStorage.removeItem(CONFIG.STREAKS_KEY);
+                    localStorage.removeItem(CONFIG.THEME_KEY);
+                    localStorage.removeItem(CONFIG.CACHE_KEY);
+                    
+                    showNetworkMessage('All data cleared successfully! Refreshing page...', 'success');
+                    
+                    // Refresh the page
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    showNetworkMessage('Error clearing data. Please try again.', 'error');
+                }
+            }
+
+            static getDataSummary() {
+                const data = this.getAllUserData().data;
+                return {
+                    preferences: Object.keys(data.preferences || {}).length,
+                    history: (data.history || []).length,
+                    favorites: (data.favorites || []).length,
+                    stats: data.stats ? 1 : 0,
+                    streaks: data.streaks ? 1 : 0,
+                    cache: Object.keys(data.cache || {}).length
+                };
+            }
+        }
+
+        // Phase 4: Celebration Engine for Achievement Animations
+        class CelebrationEngine {
+            constructor() {
+                this.confettiContainer = null;
+                this.colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
+                this.isActive = false;
+            }
+
+            init() {
+                this.createConfettiContainer();
+            }
+
+            createConfettiContainer() {
+                this.confettiContainer = document.createElement('div');
+                this.confettiContainer.className = 'confetti-container';
+                document.body.appendChild(this.confettiContainer);
+            }
+
+            celebrate(achievementType = 'default', intensity = 'medium') {
+                if (this.isActive) return;
+                
+                this.isActive = true;
+                
+                // Create celebration burst
+                this.createCelebrationBurst();
+                
+                // Create confetti
+                this.createConfetti(intensity);
+                
+                // Add sparkles
+                this.createSparkles();
+                
+                // Reset active state after animation
+                setTimeout(() => {
+                    this.isActive = false;
+                }, 3000);
+            }
+
+            createCelebrationBurst() {
+                const burst = document.createElement('div');
+                burst.className = 'celebration-burst';
+                
+                // Position at center of screen
+                burst.style.left = '50%';
+                burst.style.top = '50%';
+                burst.style.marginLeft = '-100px';
+                burst.style.marginTop = '-100px';
+                
+                document.body.appendChild(burst);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (burst.parentNode) {
+                        burst.remove();
+                    }
+                }, 600);
+            }
+
+            createConfetti(intensity = 'medium') {
+                const counts = {
+                    low: 30,
+                    medium: 50,
+                    high: 80
+                };
+                
+                const confettiCount = counts[intensity] || counts.medium;
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    setTimeout(() => {
+                        this.createConfettiPiece();
+                    }, i * 50);
+                }
+            }
+
+            createConfettiPiece() {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random shape
+                const shapes = ['circle', 'square', 'triangle'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                if (shape !== 'circle') {
+                    confetti.classList.add(shape);
+                }
+                
+                // Random color
+                const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                if (shape === 'triangle') {
+                    confetti.style.borderBottomColor = color;
+                } else {
+                    confetti.style.backgroundColor = color;
+                }
+                
+                // Random starting position
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                
+                // Random animation duration and delay
+                const duration = 2 + Math.random() * 2; // 2-4 seconds
+                const delay = Math.random() * 0.5; // 0-0.5 second delay
+                confetti.style.animationDuration = duration + 's';
+                confetti.style.animationDelay = delay + 's';
+                
+                // Random horizontal drift
+                const drift = (Math.random() - 0.5) * 200; // -100px to 100px
+                confetti.style.setProperty('--drift', drift + 'px');
+                
+                this.confettiContainer.appendChild(confetti);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.remove();
+                    }
+                }, (duration + delay + 0.5) * 1000);
+            }
+
+            createSparkles() {
+                const sparkleCount = 12;
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                
+                for (let i = 0; i < sparkleCount; i++) {
+                    setTimeout(() => {
+                        this.createSparkle(centerX, centerY, i);
+                    }, i * 100);
+                }
+            }
+
+            createSparkle(centerX, centerY, index) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                // Position sparkles in a circle around the center
+                const angle = (index / 12) * 2 * Math.PI;
+                const radius = 80 + Math.random() * 40;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                sparkle.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                document.body.appendChild(sparkle);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 2000);
+            }
+
+            enhanceAchievementNotification(notification) {
+                notification.classList.add('achievement-celebration');
+                
+                // Add extra sparkles around the notification
+                const rect = notification.getBoundingClientRect();
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle';
+                        sparkle.style.position = 'fixed';
+                        sparkle.style.left = (rect.left + Math.random() * rect.width) + 'px';
+                        sparkle.style.top = (rect.top + Math.random() * rect.height) + 'px';
+                        sparkle.style.zIndex = '1002';
+                        
+                        document.body.appendChild(sparkle);
+                        
+                        setTimeout(() => {
+                            if (sparkle.parentNode) {
+                                sparkle.remove();
+                            }
+                        }, 1500);
+                    }, i * 200);
+                }
+            }
+        }
+
+        // Phase 4: Swipe Gesture Handler for Mobile Question Navigation
+        class SwipeHandler {
+            constructor() {
+                this.startX = 0;
+                this.startY = 0;
+                this.startTime = 0;
+                this.isActive = false;
+                this.minSwipeDistance = 50;
+                this.maxSwipeTime = 300;
+                this.maxVerticalDistance = 100;
+            }
+
+            init() {
+                if (!this.isTouchDevice()) return;
+                
+                this.attachEventListeners();
+                console.log('Swipe gesture handler initialized');
+            }
+
+            isTouchDevice() {
+                return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            }
+
+            attachEventListeners() {
+                const questionsContainer = document.getElementById('mathQuestionsList');
+                if (!questionsContainer) return;
+
+                questionsContainer.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+                questionsContainer.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+                questionsContainer.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
+            }
+
+            handleTouchStart(e) {
+                // Only handle if we have multiple questions
+                if (totalQuestions <= 1) return;
+                
+                const touch = e.touches[0];
+                this.startX = touch.clientX;
+                this.startY = touch.clientY;
+                this.startTime = Date.now();
+                this.isActive = true;
+            }
+
+            handleTouchMove(e) {
+                if (!this.isActive) return;
+                
+                // Prevent default scrolling if we're in a horizontal swipe
+                const touch = e.touches[0];
+                const deltaX = Math.abs(touch.clientX - this.startX);
+                const deltaY = Math.abs(touch.clientY - this.startY);
+                
+                if (deltaX > deltaY && deltaX > 20) {
+                    e.preventDefault();
+                }
+            }
+
+            handleTouchEnd(e) {
+                if (!this.isActive) return;
+                
+                this.isActive = false;
+                
+                // Only handle if we have multiple questions
+                if (totalQuestions <= 1) return;
+                
+                const touch = e.changedTouches[0];
+                const endX = touch.clientX;
+                const endY = touch.clientY;
+                const endTime = Date.now();
+                
+                const deltaX = endX - this.startX;
+                const deltaY = Math.abs(endY - this.startY);
+                const deltaTime = endTime - this.startTime;
+                
+                // Check if this is a valid swipe
+                if (Math.abs(deltaX) < this.minSwipeDistance) return;
+                if (deltaY > this.maxVerticalDistance) return;
+                if (deltaTime > this.maxSwipeTime) return;
+                
+                // Determine swipe direction
+                if (deltaX > 0) {
+                    // Swipe right - go to previous question
+                    this.handleSwipe('right');
+                } else {
+                    // Swipe left - go to next question
+                    this.handleSwipe('left');
+                }
+            }
+
+            handleSwipe(direction) {
+                const canNavigate = this.checkNavigationBounds(direction);
+                
+                if (!canNavigate) {
+                    this.showSwipeFeedback('blocked');
+                    return;
+                }
+                
+                this.showSwipeFeedback('success');
+                
+                // Navigate with a small delay for visual feedback
+                setTimeout(() => {
+                    if (direction === 'left') {
+                        navigateQuestion(1); // Next question
+                    } else {
+                        navigateQuestion(-1); // Previous question
+                    }
+                }, 100);
+                
+                console.log(`Swipe ${direction} - navigating question`);
+            }
+
+            checkNavigationBounds(direction) {
+                if (direction === 'left') {
+                    return currentQuestionIndex < totalQuestions - 1;
+                } else {
+                    return currentQuestionIndex > 0;
+                }
+            }
+
+            showSwipeFeedback(type) {
+                const questionsContainer = document.getElementById('mathQuestionsList');
+                if (!questionsContainer) return;
+                
+                questionsContainer.style.transition = 'transform 0.2s ease';
+                
+                if (type === 'success') {
+                    questionsContainer.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        questionsContainer.style.transform = '';
+                    }, 200);
+                } else if (type === 'blocked') {
+                    questionsContainer.style.transform = 'translateX(10px)';
+                    setTimeout(() => {
+                        questionsContainer.style.transform = 'translateX(-10px)';
+                        setTimeout(() => {
+                            questionsContainer.style.transform = '';
+                        }, 100);
+                    }, 100);
+                }
+            }
+        }
+
+        // Phase 4: Animated Background Mathematical Elements
+        class MathBackground {
+            constructor() {
+                this.container = null;
+                this.symbols = ['π', '∑', '∫', '∞', 'α', 'β', 'γ', 'δ', 'θ', 'λ', 'μ', 'σ', 'φ', 'ψ', 'ω', '√', '∆', '∂', '≈', '≠', '≤', '≥', '∈', '⊂', '∪', '∩', '→', '↔', '±', '×', '÷'];
+                this.isActive = false;
+                this.animationIntervals = [];
+            }
+
+            init() {
+                this.createContainer();
+                this.start();
+            }
+
+            createContainer() {
+                this.container = document.createElement('div');
+                this.container.className = 'math-background';
+                document.body.appendChild(this.container);
+            }
+
+            createFloatingSymbol() {
+                const symbol = document.createElement('div');
+                symbol.className = 'floating-symbol';
+                
+                // Random symbol
+                const randomSymbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
+                symbol.textContent = randomSymbol;
+                
+                // Random size
+                const sizes = ['small', 'medium', 'large'];
+                const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+                symbol.classList.add(randomSize);
+                
+                // Random starting position and animation type
+                const animationType = Math.random() > 0.7 ? 'horizontal' : 'vertical';
+                
+                if (animationType === 'horizontal') {
+                    symbol.classList.add('horizontal');
+                    symbol.style.top = Math.random() * 80 + 10 + '%';
+                    symbol.style.left = '-5%';
+                } else {
+                    symbol.style.left = Math.random() * 90 + 5 + '%';
+                    symbol.style.top = '105%';
+                }
+                
+                // Random delay
+                symbol.style.animationDelay = Math.random() * 5 + 's';
+                
+                // Random duration variation
+                const baseDuration = animationType === 'horizontal' ? 20 : 15;
+                const duration = baseDuration + (Math.random() * 10 - 5);
+                symbol.style.animationDuration = duration + 's';
+                
+                this.container.appendChild(symbol);
+                
+                // Remove symbol after animation
+                setTimeout(() => {
+                    if (symbol.parentNode) {
+                        symbol.remove();
+                    }
+                }, (duration + 2) * 1000);
+            }
+
+            start() {
+                if (this.isActive) return;
+                
+                this.isActive = true;
+                
+                // Create initial symbols
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        if (this.isActive) this.createFloatingSymbol();
+                    }, i * 1000);
+                }
+                
+                // Continue creating symbols at intervals
+                const verticalInterval = setInterval(() => {
+                    if (this.isActive) {
+                        this.createFloatingSymbol();
+                    } else {
+                        clearInterval(verticalInterval);
+                    }
+                }, 3000);
+                
+                const horizontalInterval = setInterval(() => {
+                    if (this.isActive) {
+                        this.createFloatingSymbol();
+                    } else {
+                        clearInterval(horizontalInterval);
+                    }
+                }, 5000);
+                
+                this.animationIntervals.push(verticalInterval, horizontalInterval);
+            }
+
+            stop() {
+                this.isActive = false;
+                this.animationIntervals.forEach(interval => clearInterval(interval));
+                this.animationIntervals = [];
+                
+                if (this.container) {
+                    this.container.innerHTML = '';
+                }
+            }
+
+            toggle() {
+                if (this.isActive) {
+                    this.stop();
+                } else {
+                    this.start();
+                }
+            }
+        }
+
         // Initialize the application
         function initializeApp() {
             console.log('Initializing app...');
             
             // Phase 4: Initialize responsive layout manager
             window.layoutManager = new ResponsiveLayoutManager();
+            
+            // Phase 4: Clean up expired cache entries on startup
+            QuestionCache.cleanup();
+            
+            // Phase 4: Initialize animated background
+            window.mathBackground = new MathBackground();
+            window.mathBackground.init();
+            
+            // Phase 4: Initialize swipe gestures for mobile navigation
+            window.swipeHandler = new SwipeHandler();
+            window.swipeHandler.init();
+            
+            // Phase 4: Initialize celebration engine
+            window.celebrationEngine = new CelebrationEngine();
+            window.celebrationEngine.init();
             
             // Load saved API key first
             const apiKeyInput = document.getElementById('apiKeyInput');
@@ -1664,6 +2654,12 @@
             const apiKeyInput = document.getElementById('apiKeyInput');
             const prevQuestionBtn = document.getElementById('prevQuestionBtn');
             const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+            
+            // Phase 4: Data management buttons
+            const exportDataBtn = document.getElementById('exportDataBtn');
+            const importDataBtn = document.getElementById('importDataBtn');
+            const clearDataBtn = document.getElementById('clearDataBtn');
+            const importFileInput = document.getElementById('importFileInput');
             
             if (generateQuestionsBtn) {
                 generateQuestionsBtn.addEventListener('click', generateMathQuestions);
@@ -1726,6 +2722,39 @@
                 console.error('nextQuestionBtn not found');
             }
             
+            // Phase 4: Data management event handlers
+            if (exportDataBtn) {
+                exportDataBtn.addEventListener('click', () => {
+                    DataExportManager.exportData();
+                });
+                console.log('Attached exportData event');
+            }
+            
+            if (importDataBtn) {
+                importDataBtn.addEventListener('click', () => {
+                    importFileInput.click();
+                });
+                console.log('Attached importData event');
+            }
+            
+            if (clearDataBtn) {
+                clearDataBtn.addEventListener('click', () => {
+                    DataExportManager.clearAllData();
+                });
+                console.log('Attached clearData event');
+            }
+            
+            if (importFileInput) {
+                importFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        DataExportManager.importData(file);
+                        // Reset file input
+                        e.target.value = '';
+                    }
+                });
+                console.log('Attached importFileInput event');
+            }
             
             // Keyboard navigation support
             document.addEventListener('keydown', handleKeyboardNavigation);
@@ -2614,8 +3643,16 @@
             `;
         }
 
-        // Phase 4: Show achievement notifications
+        // Phase 4: Show achievement notifications with celebratory animations
         function showAchievementNotifications(achievements) {
+            if (achievements.length === 0) return;
+            
+            // Trigger celebration animation for first achievement
+            if (window.celebrationEngine) {
+                const intensity = achievements.length > 1 ? 'high' : 'medium';
+                window.celebrationEngine.celebrate('achievement', intensity);
+            }
+            
             achievements.forEach((achievement, index) => {
                 setTimeout(() => {
                     const notification = document.createElement('div');
@@ -2638,12 +3675,17 @@
                     
                     document.body.appendChild(notification);
                     
+                    // Enhance notification with celebration effects
+                    if (window.celebrationEngine) {
+                        window.celebrationEngine.enhanceAchievementNotification(notification);
+                    }
+                    
                     // Animate in
                     setTimeout(() => {
                         notification.style.transform = 'translateX(0)';
                     }, 100);
                     
-                    // Auto-remove after 5 seconds
+                    // Auto-remove after 6 seconds (slightly longer for celebration)
                     setTimeout(() => {
                         notification.style.transform = 'translateX(100%)';
                         setTimeout(() => {
@@ -2651,7 +3693,7 @@
                                 notification.remove();
                             }
                         }, 300);
-                    }, 5000);
+                    }, 6000);
                 }, index * 500); // Stagger notifications
             });
         }
@@ -3995,6 +5037,14 @@
                     }
                 };
 
+                // Phase 4: Check cache before making API call
+                const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
+                if (cachedQuestions) {
+                    console.log('Using cached questions');
+                    displayMathQuestions(cachedQuestions);
+                    return;
+                }
+
                 const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
                 const result = await makeAPICallWithRetry(apiUrl, payload);
 
@@ -4008,6 +5058,8 @@
                         console.log("Parsed math problems:", mathProblems);
                         
                         if (Array.isArray(mathProblems) && mathProblems.length > 0) {
+                            // Phase 4: Cache the questions before displaying
+                            QuestionCache.set(mathTopic, difficulty, mathProblems);
                             displayMathQuestions(mathProblems);
                         } else {
                             console.error("Response is not a valid array:", mathProblems);
@@ -4342,6 +5394,16 @@
                     }
                 };
                 
+                // Phase 4: Check cache for similar question
+                const similarCacheKey = `similar_${btoa(originalProblem.question).substring(0, 20)}`;
+                const cachedSimilar = QuestionCache.get(similarCacheKey, 'similar');
+                if (cachedSimilar && cachedSimilar.length > 0) {
+                    console.log('Using cached similar question');
+                    replaceProblemInList(questionIndex, cachedSimilar[0]);
+                    showNetworkMessage('Similar question generated from cache!', 'success');
+                    return;
+                }
+
                 const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
                 const result = await makeAPICallWithRetry(apiUrl, payload, 2); // Fewer retries for similar questions
                 
@@ -4350,6 +5412,9 @@
                     result.candidates[0].content.parts.length > 0) {
                     const jsonText = result.candidates[0].content.parts[0].text;
                     const newProblem = JSON.parse(jsonText);
+                    
+                    // Phase 4: Cache the similar question
+                    QuestionCache.set(similarCacheKey, 'similar', [newProblem]);
                     
                     // Replace the current question with the similar one
                     replaceProblemInList(questionIndex, newProblem);
