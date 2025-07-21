@@ -22,6 +22,8 @@
     background: var(--surface);
     border-radius: 1rem;
     box-shadow: 0 4px 16px rgba(60, 72, 88, 0.15);
+    position: relative;
+    z-index: 10;
 }
 
 .header-left {
@@ -97,6 +99,8 @@
     border: none;
     padding: 2rem;
     width: 100%;
+    position: relative;
+    z-index: 10;
 }
 
 /* Config Panel Styling */

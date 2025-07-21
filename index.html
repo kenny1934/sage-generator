@@ -122,34 +122,6 @@
                 </p>
             </div>
             
-            <!-- Phase 4: Data Management Section -->
-            <div id="dataManagementContainer" class="mb-6 p-4 rounded-lg" style="background: var(--surface); border: 1px solid var(--border-color);">
-                <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Data Management</h3>
-                <div class="flex gap-2 flex-wrap mb-3">
-                    <button id="exportDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors" 
-                            style="background: #059669; border: 1px solid #047857; color: white;"
-                            onmouseover="this.style.background='#047857'" 
-                            onmouseout="this.style.background='#059669'">
-                        📦 Export All Data
-                    </button>
-                    <button id="importDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
-                            style="background: #2563eb; border: 1px solid #1d4ed8; color: white;"
-                            onmouseover="this.style.background='#1d4ed8'" 
-                            onmouseout="this.style.background='#2563eb'">
-                        📥 Import Data
-                    </button>
-                    <button id="clearDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
-                            style="background: #dc2626; border: 1px solid #b91c1c; color: white;"
-                            onmouseover="this.style.background='#b91c1c'" 
-                            onmouseout="this.style.background='#dc2626'">
-                        🗑️ Clear All
-                    </button>
-                </div>
-                <input type="file" id="importFileInput" class="hidden" accept=".json">
-                <p class="text-xs" style="color: var(--text-muted);">
-                    Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
-                </p>
-            </div>
 
             <div class="space-y-8">
 
@@ -234,6 +206,35 @@
 
                 <div id="messageContainer" class="mt-8" role="alert" aria-live="polite">
                     <p class="text-gray-400 text-center" id="initialMessage">Your generated maths questions will appear here.</p>
+                </div>
+
+                <!-- Phase 4: Data Management Section -->
+                <div id="dataManagementContainer" class="mt-8 p-4 rounded-lg" style="background: var(--surface); border: 1px solid var(--border-color);">
+                    <h3 class="text-lg font-semibold mb-3" style="color: var(--text-primary);">Data Management</h3>
+                    <div class="flex gap-2 flex-wrap mb-3">
+                        <button id="exportDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors" 
+                                style="background: #059669; border: 1px solid #047857; color: white;"
+                                onmouseover="this.style.background='#047857'" 
+                                onmouseout="this.style.background='#059669'">
+                            📦 Export All Data
+                        </button>
+                        <button id="importDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                                style="background: #2563eb; border: 1px solid #1d4ed8; color: white;"
+                                onmouseover="this.style.background='#1d4ed8'" 
+                                onmouseout="this.style.background='#2563eb'">
+                            📥 Import Data
+                        </button>
+                        <button id="clearDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                                style="background: #dc2626; border: 1px solid #b91c1c; color: white;"
+                                onmouseover="this.style.background='#b91c1c'" 
+                                onmouseout="this.style.background='#dc2626'">
+                            🗑️ Clear All
+                        </button>
+                    </div>
+                    <input type="file" id="importFileInput" class="hidden" accept=".json">
+                    <p class="text-xs" style="color: var(--text-muted);">
+                        Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
+                    </p>
                 </div>
             </div>
                 </div>

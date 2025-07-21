@@ -26,7 +26,7 @@ const CONFIG = {
 // Global DOM element references (initialized after DOM loads)
 let mathTopicInput, difficultySelect, generateQuestionsBtn, loadingIndicator;
 let questionsContainer, resetBtn, messageContainer, mathQuestionsList;
-let prevQuestionBtn, nextQuestionBtn;
+let prevQuestionBtn, nextQuestionBtn, initialMessage;
 let toggleMathViewBtn, saveApiKeyBtn, exportQuestionsBtn, apiKeyInput;
 
 // Global state variables
@@ -49,6 +49,7 @@ function initializeDOMReferences() {
     mathQuestionsList = document.getElementById('mathQuestionsList');
     prevQuestionBtn = document.getElementById('prevQuestionBtn');
     nextQuestionBtn = document.getElementById('nextQuestionBtn');
+    initialMessage = document.getElementById('initialMessage');
     toggleMathViewBtn = document.getElementById('toggleMathViewBtn');
     saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
     exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
