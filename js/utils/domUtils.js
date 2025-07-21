@@ -46,7 +46,8 @@ async function copyToClipboard(text) {
     
     // Hide message after timeout
     setTimeout(() => { 
-        if (messageContainer.innerHTML.includes('Copied to clipboard') || messageContainer.innerHTML.includes('Failed to copy')) {
+        const messageContainer = document.getElementById('messageContainer');
+        if (messageContainer && (messageContainer.innerHTML.includes('Copied to clipboard') || messageContainer.innerHTML.includes('Failed to copy'))) {
             messageContainer.innerHTML = ''; 
         }
     }, CONFIG.MESSAGE_TIMEOUT);
@@ -77,18 +78,27 @@ function createCategoryTag(topic, size = 'small') {
 
 // Display message helper function
 function displayMessage(message, colorClass) {
+    // Get DOM elements directly to avoid scope issues
+    const messageContainer = document.getElementById('messageContainer');
+    const initialMessage = document.getElementById('initialMessage');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const questionsContainer = document.getElementById('questionsContainer');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    if (!messageContainer) return; // Graceful failure if elements not found
+    
     const messageElement = document.createElement('p');
     messageElement.className = `text-center ${colorClass} font-medium py-4`;
     messageElement.textContent = message;
     messageContainer.innerHTML = '';
     messageContainer.appendChild(messageElement);
     
-    initialMessage.classList.add('hidden');
-    loadingIndicator.classList.add('hidden');
+    if (initialMessage) initialMessage.classList.add('hidden');
+    if (loadingIndicator) loadingIndicator.classList.add('hidden');
     
     if (colorClass.includes('red') || colorClass.includes('amber')) {
-        questionsContainer.classList.add('hidden'); // Hide questions if error
-        resetBtn.classList.add('hidden');
+        if (questionsContainer) questionsContainer.classList.add('hidden'); // Hide questions if error
+        if (resetBtn) resetBtn.classList.add('hidden');
     }
 }
 
