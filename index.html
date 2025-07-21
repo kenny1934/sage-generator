@@ -310,9 +310,6 @@
                 apiKeyContainer.style.display = 'none';
                 console.log('Loaded saved API key');
             }
-
-            // Attach event listeners first
-            attachEventListeners();
             
             // Initialize core features with delay to ensure DOM is ready
             setTimeout(() => {
@@ -355,8 +352,6 @@
             const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
             const exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
             const apiKeyInput = document.getElementById('apiKeyInput');
-            const prevQuestionBtn = document.getElementById('prevQuestionBtn');
-            const nextQuestionBtn = document.getElementById('nextQuestionBtn');
             
             // Phase 4: Data management buttons
             const exportDataBtn = document.getElementById('exportDataBtn');
@@ -1770,27 +1765,7 @@
         }
 
 
-        // Event listeners setup function
-        function attachEventListeners() {
-            generateQuestionsBtn.addEventListener('click', generateMathQuestions);
-            resetBtn.addEventListener('click', resetGenerator);
-            toggleMathViewBtn.addEventListener('click', toggleMathView);
-            saveApiKeyBtn.addEventListener('click', saveApiKey);
-            exportQuestionsBtn.addEventListener('click', exportQuestions);
-            
-            // Keyboard navigation support
-            document.addEventListener('keydown', handleKeyboardNavigation);
-            
-            // Enter key support for API key input
-            if (apiKeyInput) {
-                apiKeyInput.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        saveApiKey();
-                    }
-                });
-            }
-        }
+        // Note: Event listeners are handled by the main attachEventListeners function above
 
         // Enter key support for topic input is handled in setupAutocomplete()
 
@@ -2616,11 +2591,12 @@
         }
         
         function updateNavigationState() {
-            const prevBtn = document.getElementById('prevQuestionBtn');
-            const nextBtn = document.getElementById('nextQuestionBtn');
-            
-            prevBtn.disabled = currentQuestionIndex === 0;
-            nextBtn.disabled = currentQuestionIndex === totalQuestions - 1;
+            if (prevQuestionBtn) {
+                prevQuestionBtn.disabled = currentQuestionIndex === 0;
+            }
+            if (nextQuestionBtn) {
+                nextQuestionBtn.disabled = currentQuestionIndex === totalQuestions - 1;
+            }
         }
 
         // Generate similar question functionality
