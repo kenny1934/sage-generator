@@ -27,6 +27,7 @@ const CONFIG = {
 let mathTopicInput, difficultySelect, generateQuestionsBtn, loadingIndicator;
 let questionsContainer, resetBtn, messageContainer, mathQuestionsList;
 let prevQuestionBtn, nextQuestionBtn;
+let toggleMathViewBtn, saveApiKeyBtn, exportQuestionsBtn, apiKeyInput;
 
 // Global state variables
 let currentQuestions = [];
@@ -48,4 +49,8 @@ function initializeDOMReferences() {
     mathQuestionsList = document.getElementById('mathQuestionsList');
     prevQuestionBtn = document.getElementById('prevQuestionBtn');
     nextQuestionBtn = document.getElementById('nextQuestionBtn');
+    toggleMathViewBtn = document.getElementById('toggleMathViewBtn');
+    saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
+    apiKeyInput = document.getElementById('apiKeyInput');
 }
