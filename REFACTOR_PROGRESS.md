@@ -31,10 +31,10 @@ The monolithic `index.html` file (5,557 lines) has been successfully refactored 
 - [x] **MathBackground.js** (112 lines): Floating symbol animations ✅
 - [x] **TopicRecommendationEngine.js** (137 lines): Smart suggestions ✅
 
-### 📋 Phase 4: Utility Functions (Planned)
-- [ ] **mathUtils.js**: LaTeX processing, KaTeX rendering
+### 🔄 Phase 4: Utility Functions (In Progress)
+- [x] **mathUtils.js** (148 lines): LaTeX processing, KaTeX rendering, math content handling ✅
+- [x] **apiUtils.js** (116 lines): API calls, retry logic, network monitoring ✅
 - [ ] **domUtils.js**: DOM manipulation helpers
-- [ ] **apiUtils.js**: API calls, retry logic
 - [ ] **validationUtils.js**: Input validation
 
 ### 📋 Phase 5: Component Functions (Planned)
@@ -111,5 +111,6 @@ sage-generator/
 **Target**: Reduce main `index.html` from 5,557 lines to ~500 lines (HTML structure only)
 **Phase 2 Result**: 4,468 lines (1,089 lines of CSS extracted)
 **Phase 3 Result**: 3,631 lines (1,590 lines of JavaScript classes extracted)
-**Total Extracted**: 2,679 lines (48% reduction achieved)
-**Remaining**: ~1,700 lines of utility functions, components, and main logic to extract
+**Phase 4 Progress**: 2,896 lines (264 lines of utility functions extracted so far)
+**Total Extracted**: 2,661 lines (52% reduction achieved)
+**Remaining**: ~1,400 lines of remaining utilities, components, and main logic to extract

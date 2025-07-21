@@ -34,9 +34,9 @@
     <script src="js/classes/MathBackground.js"></script>
     <script src="js/classes/DataExportManager.js"></script>
     <script src="js/classes/TopicRecommendationEngine.js"></script>
-    <!-- <script src="js/utils/mathUtils.js"></script> -->
+    <script src="js/utils/mathUtils.js"></script>
     <!-- <script src="js/utils/domUtils.js"></script> -->
-    <!-- <script src="js/utils/apiUtils.js"></script> -->
+    <script src="js/utils/apiUtils.js"></script>
     <!-- <script src="js/utils/validationUtils.js"></script> -->
     <!-- <script src="js/components/statsDisplay.js"></script> -->
     <!-- <script src="js/components/questionDisplay.js"></script> -->
@@ -1503,26 +1503,6 @@
         }
 
         // Network monitoring and fallback content
-        function initializeNetworkMonitoring() {
-            // Create network status indicator
-            createNetworkStatusIndicator();
-            
-            // Monitor network status
-            window.addEventListener('online', () => {
-                isOnline = true;
-                updateNetworkStatus();
-                showNetworkMessage('🟢 Connection restored!', 'success');
-            });
-            
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateNetworkStatus();
-                showNetworkMessage('🔴 No internet connection. Some features may be limited.', 'warning');
-            });
-            
-            // Initial status update
-            updateNetworkStatus();
-        }
         
         function createNetworkStatusIndicator() {
             networkStatusIndicator = document.createElement('div');
@@ -1624,50 +1604,6 @@
             return questions.map(q => ({ ...q }));
         }
         
-        // Enhanced API call with offline fallback
-        async function makeAPICallWithRetry(url, payload, retries = CONFIG.MAX_RETRIES) {
-            // Check if offline first
-            if (!isOnline) {
-                throw new Error('No internet connection available');
-            }
-            
-            let lastError;
-            
-            for (let i = 0; i < retries; i++) {
-                try {
-                    // Show retry attempt if not first try
-                    if (i > 0) {
-                        updateLoadingMessage(`Retrying... (Attempt ${i + 1}/${retries})`);
-                    }
-                    
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
-                        const errorMessage = errorData.error?.message || response.statusText;
-                        throw new Error(`HTTP ${response.status}: ${errorMessage}`);
-                    }
-
-                    return await response.json();
-                } catch (error) {
-                    lastError = error;
-                    console.error(`API call attempt ${i + 1} failed:`, error);
-                    
-                    if (i === retries - 1) {
-                        throw error; // Last attempt failed
-                    }
-                    
-                    // Progressive backoff: wait longer for each retry
-                    const delay = CONFIG.RETRY_DELAY * Math.pow(2, i);
-                    updateLoadingMessage(`Network issue detected. Retrying in ${delay/1000}s...`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                }
-            }
-        }
 
         // Smart input features: autocomplete
         function initializeSmartInput() {
@@ -1833,17 +1769,6 @@
             });
         }
 
-        // Check if KaTeX is properly loaded
-        function checkKaTeXLoaded() {
-            if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
-                isKaTeXLoaded = true;
-                console.log('KaTeX loaded successfully');
-            } else {
-                isKaTeXLoaded = false;
-                displayMessage('Warning: Math rendering library failed to load. Math expressions may not display correctly.', 'text-amber-400');
-                console.error('KaTeX failed to load');
-            }
-        }
 
         // Event listeners setup function
         function attachEventListeners() {
@@ -2082,12 +2007,6 @@
             return null;
         }
 
-        // Sanitize HTML content
-        function sanitizeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
 
         // Save API key with validation
         function saveApiKey() {
@@ -2105,157 +2024,6 @@
             displayMessage('API key saved successfully!', 'text-green-400');
         }
 
-        // Smart math preprocessing - handles API responses with math delimiters
-        function preprocessMathContent(content) {
-            if (!content) return content;
-            
-            console.log('🔍 MATH PREPROCESSING DEBUG:');
-            console.log('Raw content:', content.substring(0, 150));
-            console.log('Content type:', typeof content);
-            console.log('Content length:', content.length);
-            
-            // SMART HANDLING: If content has math delimiters, validate and fix them
-            if (content.includes('$') || content.includes('\\[') || content.includes('\\(')) {
-                console.log('📐 Content has math delimiters - performing smart validation');
-                
-                // Fix common issues with $$ \text{ patterns
-                if (content.includes('$$ \\text{') || content.includes('$$\\text{')) {
-                    console.log('🔧 Fixing $$ \\text{ pattern');
-                    let processed = content;
-                    
-                    // Handle $$ \text{...} $$ patterns - extract text content
-                    processed = processed.replace(/\$\$\s*\\text\{([^}]*)\}\s*\$\$/g, '$1');
-                    console.log('✅ Fixed $$ \\text{} pattern:', processed);
-                    return processed;
-                }
-                
-                // For other math patterns, return as-is
-                console.log('✅ Valid math delimiters found - returning unchanged');
-                return content;
-            }
-            
-            // ULTRA-CONSERVATIVE: Only process if content is CLEARLY mathematical
-            // Must have explicit mathematical structures, not just backslashes
-            const hasClearMathStructure = /\\frac\{.*\}.*\{.*\}|\\sqrt\{.*\}|\\int.*d[xyz]|\\sum.*=.*\^.*|\\lim.*\\to/.test(content);
-            
-            if (!hasClearMathStructure) {
-                console.log('✅ No clear math structure detected - returning as regular text');
-                return content;
-            }
-            
-            // Additional safety: ensure it's not just regular text with escaped characters
-            const wordCount = content.split(/\s+/).length;
-            const hasRegularWords = /\b(the|and|or|in|on|at|to|for|of|with|by|from|about|into|through|during|before|after|above|below|up|down|out|off|over|under|again|further|then|once)\b/i.test(content);
-            
-            if (wordCount > 10 && hasRegularWords) {
-                console.log('✅ Detected regular sentence structure - returning as text');
-                return content;
-            }
-            
-            // Only now do minimal cleanup
-            let processed = content;
-            
-            // Clean up \text{} wrappers ONLY if they exist (but preserve context)
-            if (processed.includes('\\text{')) {
-                const beforeCleanup = processed;
-                processed = processed.replace(/\\text\{([^}]*)\}/g, '$1');
-                console.log('🧹 Cleaned \\text{} wrappers:', beforeCleanup, '->', processed);
-            }
-            
-            // Convert \n to line breaks ONLY if they exist
-            if (processed.includes('\\n')) {
-                processed = processed.replace(/\\n/g, '\n');
-                console.log('🧹 Converted \\n to line breaks');
-            }
-            
-            // FINAL CHECK: Only add delimiters if we're absolutely sure it's math
-            if (hasClearMathStructure && processed.length < 200) {
-                console.log('🔢 ADDING math delimiters to confirmed mathematical content');
-                console.log('Final processed:', processed);
-                return `$$${processed}$$`;
-            }
-            
-            console.log('✅ Final result: returning as regular text');
-            return processed;
-        }
-        
-        // Function to render math when content is added to the DOM
-        function renderMathContent(element) {
-            if (!isKaTeXLoaded) {
-                console.warn('KaTeX not loaded, skipping math rendering');
-                return;
-            }
-
-            const mathElements = element.querySelectorAll('.math-rendered');
-            mathElements.forEach(mathEl => {
-                const originalContent = mathEl.innerHTML;
-                const cacheKey = originalContent;
-                
-                if (mathRenderCache.has(cacheKey)) {
-                    mathEl.innerHTML = mathRenderCache.get(cacheKey);
-                } else {
-                    try {
-                        // Only render if content has math delimiters or LaTeX commands
-                        if (originalContent.includes('$') || originalContent.includes('\\frac') || originalContent.includes('\\int') || originalContent.includes('\\sum')) {
-                            // Render with KaTeX - let it handle the content naturally
-                            renderMathInElement(mathEl, {
-                                delimiters: [
-                                    {left: "$$", right: "$$", display: true},
-                                    {left: "$", right: "$", display: false}
-                                ],
-                                throwOnError: false,
-                                errorColor: '#ef4444',
-                                strict: false,
-                                trust: false
-                            });
-                            
-                            mathRenderCache.set(cacheKey, mathEl.innerHTML);
-                        }
-                        // If no math indicators, leave content as-is (don't process regular text)
-                    } catch (error) {
-                        console.error('Error rendering math:', error);
-                        // Keep original content on error
-                        mathEl.innerHTML = originalContent;
-                    }
-                }
-            });
-        }
-
-        // Retry math rendering with delay
-        function retryMathRendering(element, maxRetries = 3, delay = 500) {
-            let retries = 0;
-            
-            const attemptRender = () => {
-                if (retries >= maxRetries) {
-                    console.warn('Max retries reached for math rendering');
-                    return;
-                }
-                
-                retries++;
-                
-                if (isKaTeXLoaded) {
-                    renderMathContent(element);
-                } else {
-                    console.log(`Math rendering retry ${retries}/${maxRetries} - KaTeX not ready`);
-                    setTimeout(attemptRender, delay);
-                }
-            };
-            
-            attemptRender();
-        }
-
-        // Function to toggle between rendered math and raw LaTeX
-        function toggleMathView() {
-            isMathRendered = !isMathRendered;
-            toggleMathViewBtn.textContent = isMathRendered ? 'Toggle Math View (Rendered)' : 'Toggle Math View (Raw LaTeX)';
-
-            document.querySelectorAll('.math-rendered').forEach(renderedDiv => {
-                renderedDiv.style.display = isMathRendered ? 'block' : 'none';
-            });
-            document.querySelectorAll('.latex-view').forEach(latexDiv => {
-                latexDiv.style.display = isMathRendered ? 'none' : 'block';
-            });
-        }
 
         // Modern clipboard API with fallback
         async function copyToClipboard(text) {
@@ -2333,65 +2101,10 @@
             }
         }
 
-        // Enhanced loading management with progress tracking
-        let loadingProgress = 0;
-        let loadingInterval;
-        const loadingMessages = [
-            "Analyzing your math topic...",
-            "Consulting mathematical knowledge base...",
-            "Crafting problems for your level...",
-            "Adding solution steps...",
-            "Formatting mathematical expressions...",
-            "Almost ready!"
-        ];
 
-        function updateLoadingMessage(message) {
-            const loadingMessageEl = document.getElementById('loadingMessage');
-            if (loadingMessageEl) {
-                loadingMessageEl.textContent = message;
-            }
-        }
 
-        function updateProgress(percent) {
-            const progressFill = document.getElementById('progressFill');
-            if (progressFill) {
-                progressFill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
-            }
-        }
 
-        function startLoadingAnimation() {
-            loadingProgress = 0;
-            updateProgress(0);
-            updateLoadingMessage(loadingMessages[0]);
-            
-            // Simulate realistic progress
-            loadingInterval = setInterval(() => {
-                loadingProgress += Math.random() * 15 + 5; // 5-20% increments
-                
-                if (loadingProgress >= 100) {
-                    loadingProgress = 100;
-                    updateProgress(100);
-                    updateLoadingMessage("Finalizing your questions...");
-                    clearInterval(loadingInterval);
-                } else {
-                    updateProgress(loadingProgress);
-                    const messageIndex = Math.min(
-                        Math.floor(loadingProgress / 20), 
-                        loadingMessages.length - 1
-                    );
-                    updateLoadingMessage(loadingMessages[messageIndex]);
-                }
-            }, 800 + Math.random() * 400); // 800-1200ms intervals
-        }
 
-        function stopLoadingAnimation() {
-            if (loadingInterval) {
-                clearInterval(loadingInterval);
-                loadingInterval = null;
-            }
-            loadingProgress = 0;
-            updateProgress(0);
-        }
 
         // Get user-friendly error message with actionable suggestions
         function getErrorMessage(error) {
