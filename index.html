@@ -1526,7 +1526,7 @@
 
             // Phase 4: Topic Categorization System
             static categorizeTopicByKeywords(topic) {
-                if (!topic) return 'General';
+                if (!topic || typeof topic !== 'string') return 'General';
                 
                 const topicLower = topic.toLowerCase();
                 
@@ -2658,6 +2658,13 @@
 
         // Phase 4: Create category tag HTML
         function createCategoryTag(topic, size = 'small') {
+            // Defensive coding: handle undefined/null topic
+            if (!topic || typeof topic !== 'string') {
+                // Fallback to getting current topic from input field
+                const mathTopicInput = document.getElementById('mathTopic');
+                topic = mathTopicInput && mathTopicInput.value ? mathTopicInput.value.trim() : 'General';
+            }
+            
             const category = DataManager.categorizeTopicByKeywords(topic);
             const color = DataManager.getCategoryColor(category);
             const icon = DataManager.getCategoryIcon(category);
