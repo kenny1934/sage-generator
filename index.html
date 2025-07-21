@@ -17,7 +17,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <style>
-        /* CSS Custom Properties for Responsive Design */
+        /* CSS Custom Properties for Responsive Design & Theming */
         :root {
             --breakpoint-mobile: 768px;
             --breakpoint-tablet: 1024px;
@@ -27,13 +27,50 @@
             --container-gap: 2rem;
             --config-panel-width: 350px;
             --questions-canvas-width: 1fr;
-            
-            /* Theme colors */
+        }
+
+        /* Dark Theme (Default) */
+        :root,
+        [data-theme="dark"] {
             --bg-primary: #23272f;
             --bg-secondary: #18181b;
             --surface: rgba(44, 46, 56, 0.98);
+            --surface-elevated: rgba(55, 58, 68, 0.98);
             --accent: #f87171;
+            --accent-hover: #ef4444;
             --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border-color: rgba(248, 113, 113, 0.2);
+            --border-hover: rgba(248, 113, 113, 0.4);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --input-bg: #23272f;
+            --button-bg: rgba(248, 113, 113, 0.1);
+            --button-hover: rgba(248, 113, 113, 0.2);
+        }
+
+        /* Light Theme */
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.98);
+            --surface-elevated: rgba(248, 250, 252, 0.98);
+            --accent: #dc2626;
+            --accent-hover: #b91c1c;
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-muted: #4b5563;
+            --border-color: rgba(17, 24, 39, 0.2);
+            --border-hover: rgba(220, 38, 38, 0.4);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --input-bg: #f9fafb;
+            --button-bg: rgba(220, 38, 38, 0.1);
+            --button-hover: rgba(220, 38, 38, 0.2);
+        }
+
+        /* Theme Transition */
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
         }
 
         body {
@@ -54,44 +91,70 @@
             gap: var(--container-gap);
         }
 
-        /* Header Section - Compact Design */
+        /* Header Section - Clean Branding Layout */
         .app-header {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
-            margin-bottom: 1rem;
-            padding: 1rem 0;
+            padding: 1rem 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(60, 72, 88, 0.15);
         }
 
-        .header-content {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-text {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            max-width: 100%;
+            gap: 0.1rem;
         }
 
-        /* Desktop: Horizontal header layout */
-        @media (min-width: 1024px) {
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--button-hover);
+            border-color: var(--border-hover);
+            transform: scale(1.05);
+        }
+
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover .theme-icon {
+            transform: rotate(20deg);
+        }
+
+        /* Mobile: Same clean layout */
+        @media (max-width: 1023px) {
             .app-header {
-                padding: 0.75rem 0;
-                margin-bottom: 0.5rem;
-            }
-            
-            .header-content {
-                flex-direction: row;
-                justify-content: center;
-                gap: 1.5rem;
-                align-items: center;
-            }
-            
-            .header-text {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
-                gap: 0.25rem;
+                padding: 1.5rem;
             }
         }
 
@@ -147,106 +210,6 @@
             font-style: italic;
         }
 
-        /* Collapsible Popular Topics Styles */
-        .example-topics {
-            margin-bottom: 1.5rem;
-        }
-
-        .example-topics-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .example-topics-header:hover {
-            background: rgba(248, 113, 113, 0.2);
-            border-color: rgba(248, 113, 113, 0.4);
-        }
-
-        .example-topics-title {
-            flex: 1;
-            text-align: left;
-        }
-
-        .toggle-icon {
-            transition: transform 0.2s ease;
-            font-size: 0.8rem;
-            color: var(--accent);
-        }
-
-        .toggle-icon.expanded {
-            transform: rotate(180deg);
-        }
-
-        .example-topics-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .example-topics-content.expanded {
-            max-height: 400px;
-            padding-top: 0.75rem;
-        }
-
-        /* Compact Grid Layout */
-        .example-topics-grid.compact {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .example-topic {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.2);
-            color: #e5e7eb;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.8rem;
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .example-topic:hover {
-            background: rgba(248, 113, 113, 0.2);
-            border-color: rgba(248, 113, 113, 0.4);
-            color: #f87171;
-            transform: translateY(-1px);
-        }
-
-        .example-topic.hidden {
-            display: none;
-        }
-
-        .show-more-topics {
-            width: 100%;
-            padding: 0.5rem;
-            background: transparent;
-            border: 1px dashed rgba(248, 113, 113, 0.3);
-            color: var(--accent);
-            border-radius: 0.375rem;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-        }
-
-        .show-more-topics:hover {
-            background: rgba(248, 113, 113, 0.1);
-            border-color: rgba(248, 113, 113, 0.5);
-        }
 
         .sidebar {
             display: flex;
@@ -269,165 +232,12 @@
             }
         }
 
-        /* Mobile Menu Styles */
-        .mobile-menu-btn {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 40px;
-            height: 40px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-        }
-
-        .hamburger-line {
-            width: 24px;
-            height: 2px;
-            background: var(--accent);
-            margin: 2px 0;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-menu-btn.active .hamburger-line:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-
-        .mobile-menu-btn.active .hamburger-line:nth-child(2) {
-            opacity: 0;
-        }
-
-        .mobile-menu-btn.active .hamburger-line:nth-child(3) {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-
-        .mobile-menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-menu-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .mobile-menu-content {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 100%;
-            background: var(--surface);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .mobile-menu-overlay.active .mobile-menu-content {
-            transform: translateX(0);
-        }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(248, 113, 113, 0.2);
-        }
-
-        .mobile-menu-header h3 {
-            color: var(--text-primary);
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .mobile-menu-close {
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mobile-menu-sections {
-            padding: 1rem;
-        }
-
-        .collapsible-section {
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.2);
-        }
-
-        .collapsible-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: rgba(248, 113, 113, 0.1);
-            cursor: pointer;
-            border: none;
-            width: 100%;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .collapsible-header:hover {
-            background: rgba(248, 113, 113, 0.2);
-        }
-
-        .collapsible-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .collapsible-content.expanded {
-            max-height: 500px;
-        }
-
-        .collapsible-content > div {
-            padding: 1rem;
-        }
-
-        /* Show mobile menu button on mobile */
-        @media (max-width: 1023px) {
-            .mobile-menu-btn {
-                display: flex;
-            }
-            
-            .app-header {
-                position: relative;
-            }
-        }
 
         /* Footer Styling */
         .footer {
             text-align: center;
             padding: 1.5rem;
-            color: #9ca3af;
+            color: var(--text-muted);
             font-size: 0.875rem;
             margin-top: auto;
         }
@@ -469,10 +279,10 @@
                 --container-gap: 2.5rem;
             }
         }
-        /* Compact Logo */
+        /* Header Logo */
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 45px;
+            height: 45px;
             margin: 0;
             display: block;
             border-radius: 50%;
@@ -483,71 +293,69 @@
             flex-shrink: 0;
         }
 
-        /* Compact Title */
+        /* Header Title */
         .sage-title {
-            color: #fff;
+            color: var(--text-primary);
             font-family: 'Georgia', serif;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: 900;
             margin: 0;
-            letter-spacing: 1px;
-            text-align: center;
+            letter-spacing: 0.5px;
             line-height: 1.1;
         }
 
-        /* Compact Divider */
+        /* Header Divider */
         .divider {
-            width: 40px;
-            height: 3px;
+            width: 25px;
+            height: 2px;
             background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
-            border-radius: 2px;
-            margin: 0.25rem 0;
+            border-radius: 1px;
+            margin: 0;
         }
 
-        /* Compact Full Name */
+        /* Header Subtitle */
         .full-name {
-            color: #f87171;
+            color: var(--accent);
             font-family: 'Georgia', serif;
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             margin: 0;
             font-weight: normal;
-            text-align: center;
-            letter-spacing: 0.3px;
-            line-height: 1.2;
+            letter-spacing: 0.2px;
+            line-height: 1.1;
         }
 
-        /* Desktop: Further optimizations */
-        @media (min-width: 1024px) {
+        /* Mobile: Larger sizes */
+        @media (max-width: 1023px) {
             .logo {
-                width: 50px;
-                height: 50px;
+                width: 55px;
+                height: 55px;
             }
             
             .sage-title {
                 font-size: 1.6rem;
-                text-align: left;
             }
             
             .divider {
-                width: 30px;
-                height: 2px;
-                margin: 0.15rem 0;
+                width: 35px;
+                height: 3px;
+                margin: 0.2rem 0;
             }
             
             .full-name {
-                font-size: 0.8rem;
-                text-align: left;
+                font-size: 0.85rem;
             }
         }
         .full-name .em {
-            color: #ef4444;
+            color: var(--accent-hover);
             font-weight: bold;
             font-size: 1.15em;
             font-family: 'Georgia', serif;
             margin-right: 2px;
         }
+
+
         .subtitle-edu {
-            color: #e5e7eb;
+            color: var(--text-secondary);
             font-size: 1.1rem;
             text-align: center;
             margin-bottom: 2.2rem;
@@ -556,23 +364,23 @@
             letter-spacing: 0.2px;
         }
         label {
-            color: #e5e7eb;
+            color: var(--text-primary);
             font-weight: 500;
             font-size: 1.08rem;
         }
         input[type="text"], input[type="password"], textarea, select {
-            background: #23272f;
-            border: 1px solid #f87171;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
             padding: 0.85rem 1.1rem;
             border-radius: 0.85rem;
             width: 100%;
-            color: #e5e7eb;
+            color: var(--text-primary);
             margin-bottom: 0.7rem;
             font-size: 1.08rem;
             transition: border-color 0.2s;
         }
         input:focus, textarea:focus, select:focus {
-            border-color: #ef4444;
+            border-color: var(--accent);
             outline: none;
         }
         .action-btn {
@@ -604,32 +412,34 @@
             opacity: 0.85;
         }
         .question-item {
-            background: #23272f;
+            background: var(--surface);
             border-radius: 1rem;
-            border: 1px solid #f87171;
+            border: 1px solid var(--border-color);
             padding: 1.15rem;
             margin-bottom: 1.2rem;
-            box-shadow: 0 2px 8px rgba(60, 72, 88, 0.06);
+            box-shadow: 0 2px 8px var(--shadow-color);
             word-wrap: break-word;
             overflow-wrap: break-word;
             max-width: 100%;
+            color: var(--text-primary);
         }
         .answer-content {
-            background: #23272f;
-            border-left: 4px solid #ef4444;
+            background: var(--surface-elevated);
+            border-left: 4px solid var(--accent);
             padding: 1rem;
             border-radius: 0.5rem;
             margin-top: 1rem;
             display: none;
+            color: var(--text-primary);
         }
         .latex-view {
             font-family: 'Courier New', monospace;
-            background: #18181b;
+            background: var(--surface-elevated);
             padding: 0.75rem;
             border-radius: 0.5rem;
             margin-top: 0.5rem;
             font-size: 0.95rem;
-            color: #e5e7eb;
+            color: var(--text-secondary);
             display: none;
             overflow-x: auto;
             word-wrap: break-word;
@@ -862,6 +672,110 @@
             }
         }
         
+        /* Recently Used Topics Section */
+        .recent-topics-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        .recent-topic-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100%;
+            min-height: 60px;
+        }
+        
+        .recent-topic-btn:hover {
+            background: var(--button-hover);
+            border-color: var(--accent);
+        }
+        
+        .recent-topic-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+        
+        .recent-topic-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+        
+        /* Recommended Topics Section */
+        .recommendation-topics-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        .recommendation-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+            min-height: 80px;
+        }
+        
+        .recommendation-btn:hover {
+            background: var(--button-hover);
+            border-color: var(--accent);
+        }
+        
+        .recommendation-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        .recommendation-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        
+        .recommendation-difficulty {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background: var(--accent);
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .recommendation-reason {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
         /* Autocomplete and example topics styling */
         .autocomplete-container {
             position: relative;
@@ -872,8 +786,8 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: #23272f;
-            border: 1px solid #f87171;
+            background: var(--surface);
+            border: 1px solid var(--border-color);
             border-top: none;
             border-radius: 0 0 0.85rem 0.85rem;
             max-height: 200px;
@@ -885,14 +799,14 @@
         .autocomplete-item {
             padding: 0.75rem 1.1rem;
             cursor: pointer;
-            color: #e5e7eb;
-            border-bottom: 1px solid rgba(248, 113, 113, 0.2);
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
             transition: background-color 0.2s;
         }
         
         .autocomplete-item:hover, .autocomplete-item.selected {
-            background: rgba(248, 113, 113, 0.1);
-            color: #f87171;
+            background: var(--button-hover);
+            color: var(--accent);
         }
         
         .autocomplete-item:last-child {
@@ -911,27 +825,27 @@
         }
         
         .example-topic {
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
             padding: 0.5rem 0.75rem;
             border-radius: 0.5rem;
             cursor: pointer;
             font-size: 0.875rem;
-            color: #e5e7eb;
+            color: var(--text-primary);
             transition: all 0.2s;
             text-align: center;
         }
         
         .example-topic:hover {
-            background: rgba(248, 113, 113, 0.2);
-            border-color: #f87171;
-            color: #f87171;
+            background: var(--button-hover);
+            border-color: var(--accent);
+            color: var(--accent);
             transform: translateY(-1px);
         }
         
         .difficulty-description {
             font-size: 0.875rem;
-            color: #9ca3af;
+            color: var(--text-secondary);
             margin-top: 0.25rem;
             font-style: italic;
         }
@@ -943,15 +857,15 @@
             justify-content: space-between;
             margin-bottom: 2rem;
             padding: 1rem;
-            background: rgba(248, 113, 113, 0.1);
-            border: 1px solid rgba(248, 113, 113, 0.3);
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
             border-radius: 0.75rem;
         }
         
         .nav-button {
-            background: rgba(248, 113, 113, 0.2);
-            border: 1px solid #f87171;
-            color: #e5e7eb;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
             cursor: pointer;
@@ -961,8 +875,9 @@
         }
         
         .nav-button:hover:not(:disabled) {
-            background: rgba(248, 113, 113, 0.3);
-            color: #f87171;
+            background: var(--button-hover);
+            border-color: var(--accent);
+            color: var(--accent);
         }
         
         .nav-button:disabled {
@@ -971,7 +886,7 @@
         }
         
         .question-counter {
-            color: #f87171;
+            color: var(--accent);
             font-weight: 600;
             font-size: 1rem;
         }
@@ -989,7 +904,8 @@
     <div class="app-layout">
         <!-- App Header -->
         <header class="app-header">
-            <div class="header-content">
+            <!-- Left: Logo & Branding -->
+            <div class="header-left">
                 <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
                 <div class="header-text">
                     <h1 class="sage-title">SAGE</h1>
@@ -1000,26 +916,14 @@
                 </div>
             </div>
             
-            <!-- Mobile Menu Button -->
-            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-            </button>
+            <!-- Right: Theme Toggle -->
+            <div class="header-right">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Mobile Menu Overlay -->
-        <div class="mobile-menu-overlay" id="mobileMenuOverlay">
-            <div class="mobile-menu-content">
-                <div class="mobile-menu-header">
-                    <h3>Menu</h3>
-                    <button class="mobile-menu-close" id="mobileMenuClose">&times;</button>
-                </div>
-                <div class="mobile-menu-sections" id="mobileMenuSections">
-                    <!-- Collapsible sections will be populated here -->
-                </div>
-            </div>
-        </div>
 
         <!-- Main Content Area -->
         <div class="app-main">
@@ -1028,10 +932,6 @@
                 <div class="config-content">
                     <!-- Configuration sections will go here -->
 
-            <!-- AI Disclaimer -->
-            <div class="mb-6 p-3 bg-yellow-900/20 border border-yellow-600/30 rounded-lg text-yellow-200 text-sm text-center">
-                <span class="font-semibold">⚠️ Educational Tool Notice:</span> This AI-powered generator creates practice problems for learning purposes. Always verify answers independently for accuracy.
-            </div>
             
             <!-- Google Drive Setup (hidden by default) -->
             <div id="googleDriveSetupPanel" class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-lg hidden">
@@ -1080,24 +980,6 @@
             
 
             <div class="space-y-8">
-                <!-- Popular Topics - Collapsible -->
-                <div class="example-topics">
-                    <button class="example-topics-header" id="exampleTopicsToggle" type="button">
-                        <span class="example-topics-title">
-                            📚 Popular Topics 
-                            <span class="text-gray-400 text-xs">(click to select)</span>
-                        </span>
-                        <span class="toggle-icon" id="exampleTopicsIcon">▼</span>
-                    </button>
-                    <div class="example-topics-content" id="exampleTopicsContent">
-                        <div class="example-topics-grid compact" id="exampleTopicsGrid">
-                            <!-- Example topics will be populated here -->
-                        </div>
-                        <button class="show-more-topics" id="showMoreTopics" style="display: none;">
-                            Show More Topics
-                        </button>
-                    </div>
-                </div>
 
                 <div>
                     <label for="mathTopic" class="block text-lg font-semibold mb-2">
@@ -1143,7 +1025,7 @@
 
                 <div id="questionsContainer" class="hidden mt-10 border-t-2 border-gray-700 pt-10">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                        <h2 class="text-3xl font-bold text-white text-center sm:text-left flex-grow">Your Generated Questions</h2>
+                        <h2 class="text-3xl font-bold text-center sm:text-left flex-grow" style="color: var(--text-primary);">Your Generated Questions</h2>
                         <div class="flex gap-2 flex-wrap">
                             <button id="exportQuestionsBtn" class="action-btn bg-red-500 hover:bg-red-600 text-sm sm:text-base" aria-label="Export questions to text file">
                                 Export Questions
@@ -1280,123 +1162,10 @@
             }
         }
 
-        // Phase 4: Mobile Menu Management
-        class MobileMenuManager {
-            constructor() {
-                this.menuBtn = document.getElementById('mobileMenuBtn');
-                this.menuOverlay = document.getElementById('mobileMenuOverlay');
-                this.menuClose = document.getElementById('mobileMenuClose');
-                this.menuSections = document.getElementById('mobileMenuSections');
-                this.isOpen = false;
-                
-                this.init();
-            }
-            
-            init() {
-                if (this.menuBtn) {
-                    this.menuBtn.addEventListener('click', () => this.toggleMenu());
-                }
-                if (this.menuClose) {
-                    this.menuClose.addEventListener('click', () => this.closeMenu());
-                }
-                if (this.menuOverlay) {
-                    this.menuOverlay.addEventListener('click', (e) => {
-                        if (e.target === this.menuOverlay) {
-                            this.closeMenu();
-                        }
-                    });
-                }
-                
-                // Close menu on escape key
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.isOpen) {
-                        this.closeMenu();
-                    }
-                });
-                
-                console.log('Mobile Menu Manager initialized');
-            }
-            
-            toggleMenu() {
-                if (this.isOpen) {
-                    this.closeMenu();
-                } else {
-                    this.openMenu();
-                }
-            }
-            
-            openMenu() {
-                this.isOpen = true;
-                this.menuBtn.classList.add('active');
-                this.menuOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                this.populateMenuSections();
-            }
-            
-            closeMenu() {
-                this.isOpen = false;
-                this.menuBtn.classList.remove('active');
-                this.menuOverlay.classList.remove('active');
-                document.body.style.overflow = ''; // Restore scrolling
-            }
-            
-            populateMenuSections() {
-                this.menuSections.innerHTML = '';
-                
-                // Get sections to show in mobile menu
-                const sections = [
-                    { 
-                        title: '📚 Recent Topics', 
-                        elementId: 'recentTopicsSection',
-                        icon: '▼'
-                    },
-                    { 
-                        title: '💡 Recommendations', 
-                        elementId: 'recommendationsSection',
-                        icon: '▼'
-                    },
-                    { 
-                        title: '📊 Your Progress', 
-                        elementId: 'statsOverview',
-                        icon: '▼'
-                    }
-                ];
-                
-                sections.forEach(section => {
-                    const element = document.querySelector(`#${section.elementId}`);
-                    if (element && element.style.display !== 'none') {
-                        this.createCollapsibleSection(section.title, element.cloneNode(true), section.icon);
-                    }
-                });
-            }
-            
-            createCollapsibleSection(title, content, icon) {
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'collapsible-section';
-                
-                const header = document.createElement('button');
-                header.className = 'collapsible-header';
-                header.innerHTML = `<span>${title}</span><span class="collapse-icon">${icon}</span>`;
-                
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'collapsible-content';
-                contentDiv.appendChild(content);
-                
-                header.addEventListener('click', () => {
-                    const isExpanded = contentDiv.classList.contains('expanded');
-                    contentDiv.classList.toggle('expanded');
-                    header.querySelector('.collapse-icon').textContent = isExpanded ? '▼' : '▲';
-                });
-                
-                sectionDiv.appendChild(header);
-                sectionDiv.appendChild(contentDiv);
-                this.menuSections.appendChild(sectionDiv);
-            }
-        }
 
         // Configuration constants
         const CONFIG = {
-            API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent',
+            API_BASE_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             MAX_RETRIES: 3,
             RETRY_DELAY: 1000,
             STORAGE_KEY: 'sage_api_key',
@@ -1630,9 +1399,8 @@
         function initializeApp() {
             console.log('Initializing app...');
             
-            // Phase 4: Initialize responsive layout and mobile menu managers
+            // Phase 4: Initialize responsive layout manager
             window.layoutManager = new ResponsiveLayoutManager();
-            window.mobileMenuManager = new MobileMenuManager();
             
             // Load saved API key first
             const apiKeyInput = document.getElementById('apiKeyInput');
@@ -1673,6 +1441,9 @@
                     console.log('Initializing personalization features...');
                     initializePersonalizationFeatures();
                 }, 200);
+                
+                // Phase 4: Initialize theme system
+                initializeThemeSystem();
             }, 150);
         }
         
@@ -1749,6 +1520,7 @@
             } else {
                 console.error('nextQuestionBtn not found');
             }
+            
             
             // Keyboard navigation support
             document.addEventListener('keydown', handleKeyboardNavigation);
@@ -2036,6 +1808,48 @@
             }
         }
 
+        // Phase 4: Theme System Functions
+        function initializeThemeSystem() {
+            console.log('Initializing theme system...');
+            
+            // Load saved theme preference or default to dark
+            const savedTheme = localStorage.getItem('sage-theme') || 'dark';
+            applyTheme(savedTheme);
+            
+            // Set up theme toggle button
+            const themeToggleBtn = document.getElementById('themeToggle');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', toggleTheme);
+                console.log('Theme toggle button initialized');
+            } else {
+                console.error('Theme toggle button not found');
+            }
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+            
+            // Save preference
+            localStorage.setItem('sage-theme', newTheme);
+            
+            console.log(`Theme switched to: ${newTheme}`);
+        }
+        
+        function applyTheme(theme) {
+            // Apply theme to document root
+            document.documentElement.setAttribute('data-theme', theme);
+            
+            // Update theme icon
+            const themeIcon = document.querySelector('#themeToggle .theme-icon');
+            if (themeIcon) {
+                themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+            }
+            
+            console.log(`Applied ${theme} theme`);
+        }
+
         // Phase 3: Initialize personalization features
         function initializePersonalizationFeatures() {
             try {
@@ -2084,17 +1898,17 @@
             const recentSection = document.createElement('div');
             recentSection.className = 'mb-6';
             recentSection.innerHTML = `
-                <label class="block mb-3 text-sm font-medium text-gray-300">
+                <label class="recent-topics-label">
                     📚 Recently Used Topics
                 </label>
-                <div class="grid grid-cols-2 gap-2 mb-4" id="recentTopicsGrid">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 1rem;" id="recentTopicsGrid">
                     ${recentTopics.map((item, index) => `
                         <button type="button" 
-                                class="recent-topic-btn p-3 text-left bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                                class="recent-topic-btn"
                                 onclick="selectRecentTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
                                 title="Last used: ${item.lastUsed}">
-                            <div class="text-sm font-medium text-gray-200 group-hover:text-white truncate">${item.topic}</div>
-                            <div class="text-xs text-gray-400 mt-1">${item.difficulty} • ${item.lastUsed}</div>
+                            <div class="recent-topic-title">${item.topic}</div>
+                            <div class="recent-topic-meta">${item.difficulty} • ${item.lastUsed}</div>
                         </button>
                     `).join('')}
                 </div>
@@ -2291,19 +2105,19 @@
             recommendationsSection.id = 'recommendationsSection';
             recommendationsSection.className = 'mb-6';
             recommendationsSection.innerHTML = `
-                <label class="block mb-3 text-sm font-medium text-gray-300">
+                <label class="recommendation-topics-label">
                     💡 Recommended Topics for You
                 </label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1rem;">
                     ${recommendations.map((item, index) => `
                         <button type="button" 
-                                class="recommendation-btn p-3 text-left bg-gradient-to-r from-gray-800 to-gray-700 hover:from-red-900 hover:to-red-800 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                                class="recommendation-btn"
                                 onclick="selectRecommendedTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
                                 title="${item.reason}">
-                            <div class="text-sm font-medium text-gray-200 group-hover:text-white mb-1">${item.topic}</div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs px-2 py-1 bg-red-600 text-white rounded">${item.difficulty}</span>
-                                <span class="text-xs text-gray-400 group-hover:text-gray-300">${item.reason}</span>
+                            <div class="recommendation-title">${item.topic}</div>
+                            <div class="recommendation-meta">
+                                <span class="recommendation-difficulty">${item.difficulty}</span>
+                                <span class="recommendation-reason">${item.reason}</span>
                             </div>
                         </button>
                     `).join('')}
@@ -2474,7 +2288,7 @@
         function updateStatsDisplay() {
             const stats = DataManager.loadStats();
             
-            // Safely update stats elements with null checks
+            // Update main dashboard stats
             const totalQuestionsEl = document.getElementById('totalQuestions');
             const totalSessionsEl = document.getElementById('totalSessions');
             const topicsExploredEl = document.getElementById('topicsExplored');
@@ -2488,6 +2302,7 @@
             if (topicsExploredEl) {
                 topicsExploredEl.textContent = Object.keys(stats.favoriteTopics).length;
             }
+            
             
             // Update detailed stats if visible (with small delay to ensure DOM is ready)
             setTimeout(() => {
@@ -2552,6 +2367,7 @@
                 toggleBtn.textContent = 'Show Details';
             }
         }
+
         
         // Phase 3: Update recent topics display
         function updateRecentTopicsDisplay() {
@@ -2915,9 +2731,8 @@
             }
         }
 
-        // Smart input features: autocomplete and example topics
+        // Smart input features: autocomplete
         function initializeSmartInput() {
-            populateExampleTopics();
             setupAutocomplete();
             setupDifficultyDescriptions();
         }
@@ -2971,96 +2786,6 @@
             "Pythagoras theorem"
         ];
         
-        function populateExampleTopics() {
-            console.log('Attempting to populate example topics...');
-            const grid = document.getElementById('exampleTopicsGrid');
-            const toggle = document.getElementById('exampleTopicsToggle');
-            const content = document.getElementById('exampleTopicsContent');
-            const icon = document.getElementById('exampleTopicsIcon');
-            const showMoreBtn = document.getElementById('showMoreTopics');
-            
-            if (!grid || !toggle || !content) {
-                console.error('Example topics elements not found - DOM might not be ready');
-                setTimeout(() => {
-                    console.log('Retrying populateExampleTopics...');
-                    populateExampleTopics();
-                }, 100);
-                return;
-            }
-            
-            console.log('Found example topics elements, setting up...');
-            
-            // Set up toggle functionality
-            let isExpanded = false;
-            let showingAll = false;
-            const INITIAL_DISPLAY = 6; // Show only 6 topics initially
-            
-            toggle.addEventListener('click', () => {
-                isExpanded = !isExpanded;
-                content.classList.toggle('expanded', isExpanded);
-                icon.classList.toggle('expanded', isExpanded);
-                icon.textContent = isExpanded ? '▲' : '▼';
-                
-                if (isExpanded && !grid.children.length) {
-                    populateTopicButtons();
-                }
-            });
-            
-            function populateTopicButtons() {
-                grid.innerHTML = '';
-                
-                exampleTopics.forEach((topic, index) => {
-                    const topicButton = document.createElement('div');
-                    topicButton.className = 'example-topic';
-                    topicButton.textContent = topic;
-                    
-                    // Hide topics beyond initial display count
-                    if (index >= INITIAL_DISPLAY && !showingAll) {
-                        topicButton.classList.add('hidden');
-                    }
-                    
-                    topicButton.addEventListener('click', () => {
-                        console.log('Topic clicked:', topic);
-                        const mathTopicInput = document.getElementById('mathTopic');
-                        if (mathTopicInput) {
-                            mathTopicInput.value = topic;
-                            mathTopicInput.focus();
-                            // Hide autocomplete dropdown if visible
-                            const dropdown = document.getElementById('autocompleteDropdown');
-                            if (dropdown) dropdown.style.display = 'none';
-                            console.log('Topic set successfully:', topic);
-                        } else {
-                            console.error('mathTopic input not found when clicking topic');
-                        }
-                    });
-                    
-                    grid.appendChild(topicButton);
-                });
-                
-                // Show "Show More" button if there are hidden topics
-                if (exampleTopics.length > INITIAL_DISPLAY && !showingAll && showMoreBtn) {
-                    showMoreBtn.style.display = 'block';
-                    showMoreBtn.textContent = `Show ${exampleTopics.length - INITIAL_DISPLAY} More Topics`;
-                }
-            }
-            
-            // Set up "Show More" functionality
-            if (showMoreBtn) {
-                showMoreBtn.addEventListener('click', () => {
-                    showingAll = !showingAll;
-                    const hiddenTopics = grid.querySelectorAll('.example-topic.hidden');
-                    
-                    hiddenTopics.forEach(topic => {
-                        topic.classList.toggle('hidden', !showingAll);
-                    });
-                    
-                    showMoreBtn.textContent = showingAll ? 'Show Less' : `Show ${hiddenTopics.length} More Topics`;
-                    if (showingAll) showMoreBtn.style.display = 'none';
-                });
-            }
-            
-            console.log(`Example topics setup complete - ${exampleTopics.length} topics available`);
-        }
         
         function setupAutocomplete() {
             const dropdown = document.getElementById('autocompleteDropdown');
@@ -4012,13 +3737,15 @@
                 problemDiv.setAttribute('role', 'listitem');
 
                 const questionHeader = document.createElement('h3');
-                questionHeader.className = 'text-xl font-semibold text-white mb-4';
+                questionHeader.className = 'text-xl font-semibold mb-4';
+                questionHeader.style.color = 'var(--text-primary)';
                 questionHeader.textContent = `Problem ${index + 1}:`;
                 problemDiv.appendChild(questionHeader);
 
                 // Container for rendered math
                 const questionRenderedDiv = document.createElement('div');
-                questionRenderedDiv.className = 'text-lg text-gray-200 mb-4 math-rendered';
+                questionRenderedDiv.className = 'text-lg mb-4 math-rendered';
+                questionRenderedDiv.style.color = 'var(--text-primary)';
                 
                 // Always preprocess the content to ensure proper math handling
                 try {
@@ -4091,12 +3818,12 @@
                 // Convert \n to line breaks but preserve other formatting
                 processedSolution = processedSolution.replace(/\\n/g, '<br>');
                 
-                answerContentDiv.innerHTML = `<div class="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-yellow-200 text-xs">
+                answerContentDiv.innerHTML = `<div class="mb-3 p-2 rounded text-xs" style="background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary);">
                                                  <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
                                              </div>` +
-                                             `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
+                                             `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${sanitizeHTML(processedAnswer)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
-                                             `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
+                                             `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${sanitizeHTML(processedSolution)}</div>` +
                                              `<div class="latex-view">${sanitizeHTML(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`; // Raw LaTeX for solution
                 problemDiv.appendChild(answerContentDiv);
 
@@ -4337,12 +4064,12 @@
                     // Convert \n to line breaks
                     processedSolution = processedSolution.replace(/\\n/g, '<br>');
                     
-                    answerContentDiv.innerHTML = `<div class="mb-3 p-2 bg-yellow-900/20 border border-yellow-600/30 rounded text-yellow-200 text-xs">
+                    answerContentDiv.innerHTML = `<div class="mb-3 p-2 rounded text-xs" style="background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary);">
                                                      <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
                                                  </div>` +
-                                                 `<p class="font-bold text-red-400 mb-2">Correct Answer:</p><div class="mb-4 math-rendered">${sanitizeHTML(processedAnswer)}</div>` +
+                                                 `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${sanitizeHTML(processedAnswer)}</div>` +
                                                  `<div class="latex-view">${sanitizeHTML(newProblem.correctAnswer)}</div>` +
-                                                 `<p class="font-bold text-red-400 mb-2">Step-by-Step Solution:</p><div class="math-rendered">${sanitizeHTML(processedSolution)}</div>` +
+                                                 `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${sanitizeHTML(processedSolution)}</div>` +
                                                  `<div class="latex-view">${sanitizeHTML(newProblem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`;
                     
                     // Hide the answer initially
