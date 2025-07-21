@@ -1,0 +1,72 @@
+/**
+ * SAGE - Themes and CSS Custom Properties
+ * Contains theme variables, color schemes, and global design tokens
+ */
+
+/* CSS Custom Properties for Responsive Design & Theming */
+:root {
+    --breakpoint-mobile: 768px;
+    --breakpoint-tablet: 1024px;
+    --breakpoint-desktop: 1200px;
+    
+    --container-padding: 1rem;
+    --container-gap: 2rem;
+    --config-panel-width: 350px;
+    --questions-canvas-width: 1fr;
+}
+
+/* Dark Theme (Default) */
+:root,
+[data-theme="dark"] {
+    --bg-primary: #23272f;
+    --bg-secondary: #18181b;
+    --surface: rgba(44, 46, 56, 0.98);
+    --surface-elevated: rgba(55, 58, 68, 0.98);
+    --accent: #f87171;
+    --accent-hover: #ef4444;
+    --text-primary: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --border-color: rgba(248, 113, 113, 0.2);
+    --border-hover: rgba(248, 113, 113, 0.4);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --input-bg: #23272f;
+    --button-bg: rgba(248, 113, 113, 0.1);
+    --button-hover: rgba(248, 113, 113, 0.2);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --surface: rgba(255, 255, 255, 0.98);
+    --surface-elevated: rgba(248, 250, 252, 0.98);
+    --accent: #dc2626;
+    --accent-hover: #b91c1c;
+    --text-primary: #111827;
+    --text-secondary: #374151;
+    --text-muted: #4b5563;
+    --border-color: rgba(17, 24, 39, 0.2);
+    --border-hover: rgba(220, 38, 38, 0.4);
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-bg: #f9fafb;
+    --button-bg: rgba(220, 38, 38, 0.1);
+    --button-hover: rgba(220, 38, 38, 0.2);
+}
+
+/* Theme Transition */
+* {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Base Body Styling */
+body {
+    font-family: 'Inter', 'Georgia', serif;
+    background: radial-gradient(ellipse at top left, var(--bg-primary) 60%, var(--bg-secondary) 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow-x: hidden;
+}

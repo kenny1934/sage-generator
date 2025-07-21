@@ -1,0 +1,276 @@
+/**
+ * SAGE - Animations and Visual Effects
+ * Contains keyframes, transitions, celebratory animations, and background effects
+ */
+
+/* Phase 4: Animated Background Mathematical Elements */
+.math-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.floating-symbol {
+    position: absolute;
+    font-size: 2rem;
+    color: var(--text-muted);
+    opacity: 0.1;
+    animation: float 15s infinite linear;
+    font-family: 'Times New Roman', serif;
+    user-select: none;
+}
+
+.floating-symbol.large {
+    font-size: 3rem;
+    opacity: 0.05;
+}
+
+.floating-symbol.medium {
+    font-size: 2.5rem;
+    opacity: 0.08;
+}
+
+.floating-symbol.small {
+    font-size: 1.5rem;
+    opacity: 0.12;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: var(--symbol-opacity, 0.1);
+    }
+    90% {
+        opacity: var(--symbol-opacity, 0.1);
+    }
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+@keyframes float-horizontal {
+    0% {
+        transform: translateX(-10vw) translateY(50vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: var(--symbol-opacity, 0.08);
+    }
+    90% {
+        opacity: var(--symbol-opacity, 0.08);
+    }
+    100% {
+        transform: translateX(110vw) translateY(50vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.floating-symbol.horizontal {
+    animation: float-horizontal 20s infinite linear;
+}
+
+/* Phase 4: Celebratory Animations for Achievements */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.confetti {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: confetti-fall 3s linear forwards;
+}
+
+.confetti.square {
+    border-radius: 0;
+}
+
+.confetti.triangle {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 8px solid;
+    border-radius: 0;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.celebration-burst {
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 999;
+    background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,165,0,0.6) 30%, transparent 70%);
+    animation: burst 0.6s ease-out forwards;
+}
+
+@keyframes burst {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.achievement-celebration {
+    position: relative;
+    z-index: 1001;
+}
+
+.achievement-celebration::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: linear-gradient(45deg, transparent, rgba(255,215,0,0.2), transparent);
+    border-radius: 1rem;
+    animation: achievement-glow 2s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes achievement-glow {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ffd700;
+    border-radius: 50%;
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1) rotate(180deg);
+    }
+}
+
+/* Loading Animations */
+@keyframes slideInDown {
+    from {
+        transform: translate3d(0, -100%, 0);
+        visibility: visible;
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 100%, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animation Classes */
+.slide-in-down {
+    animation: slideInDown 0.5s ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+.rotate-animation {
+    animation: rotate 2s linear infinite;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .floating-symbol {
+        animation: none;
+        opacity: 0.05;
+    }
+    .confetti, .celebration-animation {
+        animation: none !important;
+    }
+    .slide-in-down, .fade-in-up, .pulse-animation, .rotate-animation {
+        animation: none;
+    }
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

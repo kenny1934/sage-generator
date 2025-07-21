@@ -1,0 +1,550 @@
+/**
+ * SAGE - Main Styles and Utilities  
+ * Contains global styles, mobile responsiveness, and utility classes
+ */
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 1.5rem;
+    }
+    
+    .sage-title {
+        font-size: 2rem;
+    }
+    
+    .full-name {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Improve touch targets */
+    .action-btn {
+        min-height: 48px;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        touch-action: manipulation;
+    }
+    
+    input[type="text"], input[type="password"], textarea, select {
+        min-height: 48px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        touch-action: manipulation;
+    }
+    
+    /* Better spacing for mobile */
+    .space-y-8 > * + * {
+        margin-top: 1.5rem;
+    }
+    
+    /* Optimize button layout on mobile */
+    .flex.gap-2.flex-wrap {
+        gap: 0.75rem;
+    }
+    
+    .flex.gap-2.flex-wrap .action-btn {
+        flex: 1;
+        min-width: 140px;
+    }
+    
+    /* Improve question cards on mobile */
+    .question-item {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .question-item .math-rendered {
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+    
+    /* Mobile-specific math symbol sizing */
+    .math-symbol {
+        font-size: 1.5rem;
+    }
+    
+    /* Better progress bar visibility */
+    .progress-bar {
+        height: 6px;
+        margin: 1.25rem 0;
+    }
+    
+    /* Optimize keyboard shortcuts overlay for mobile */
+    .fixed.inset-0 .bg-gray-800 {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .main-container {
+        padding: 1.25rem;
+        margin: 1rem;
+        border-radius: 1rem;
+    }
+    
+    .sage-title {
+        font-size: 1.8rem;
+    }
+    
+    .full-name {
+        font-size: 0.95rem;
+    }
+    
+    /* Stack buttons vertically on small screens */
+    .flex.flex-col.sm\\:flex-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .flex.flex-col.sm\\:flex-row .action-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Smaller math symbols for very small screens */
+    .math-symbol {
+        font-size: 1.25rem;
+        gap: 0.25rem;
+    }
+    
+    /* Compact question cards */
+    .question-item {
+        padding: 0.875rem;
+    }
+    
+    .question-item h3 {
+        font-size: 1.125rem;
+    }
+    
+    .question-item .math-rendered {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+}
+
+/* Touch-specific improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover effects on touch devices */
+    .action-btn:hover {
+        transform: none;
+        background: inherit;
+    }
+    
+    /* Add press feedback instead */
+    .action-btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s;
+    }
+    
+    /* Improve touch scroll */
+    .main-container {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better touch targets for copy buttons */
+    .action-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.items-end {
+    align-items: flex-end;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.justify-start {
+    justify-content: flex-start;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+.gap-1 {
+    gap: 0.25rem;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.grid {
+    display: grid;
+}
+
+.space-y-8 > * + * {
+    margin-top: 2rem;
+}
+
+.space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+/* Text Utilities */
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.text-base {
+    font-size: 1rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+/* Margin and Padding Utilities */
+.m-0 {
+    margin: 0;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.px-3 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.py-2 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Border Utilities */
+.rounded {
+    border-radius: 0.25rem;
+}
+
+.rounded-lg {
+    border-radius: 0.5rem;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+/* Position Utilities */
+.fixed {
+    position: fixed;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.relative {
+    position: relative;
+}
+
+.top-4 {
+    top: 1rem;
+}
+
+.right-4 {
+    right: 1rem;
+}
+
+.left-4 {
+    left: 1rem;
+}
+
+/* Z-index Utilities */
+.z-50 {
+    z-index: 50;
+}
+
+.z-40 {
+    z-index: 40;
+}
+
+.z-30 {
+    z-index: 30;
+}
+
+/* Shadow Utilities */
+.shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Overflow Utilities */
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.overflow-x-auto {
+    overflow-x: auto;
+}
+
+.overflow-y-auto {
+    overflow-y: auto;
+}
+
+/* Transform Utilities */
+.transform {
+    transform: translateX(var(--tw-translate-x, 0)) translateY(var(--tw-translate-y, 0)) rotate(var(--tw-rotate, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1));
+}
+
+.translate-x-full {
+    --tw-translate-x: 100%;
+}
+
+.-translate-x-1\/2 {
+    --tw-translate-x: -50%;
+}
+
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+.transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+.duration-300 {
+    transition-duration: 300ms;
+}
+
+/* Display Utilities */
+.block {
+    display: block;
+}
+
+.inline {
+    display: inline;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.inline-flex {
+    display: inline-flex;
+}
+
+/* Width and Height Utilities */
+.w-full {
+    width: 100%;
+}
+
+.w-auto {
+    width: auto;
+}
+
+.h-full {
+    height: 100%;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+}
+
+/* Color Text Utilities (These will use CSS custom properties) */
+.text-red-400 {
+    color: var(--accent);
+}
+
+.text-red-500 {
+    color: var(--accent-hover);
+}
+
+.text-gray-200 {
+    color: var(--text-primary);
+}
+
+.text-gray-400 {
+    color: var(--text-secondary);
+}
+
+.text-gray-500 {
+    color: var(--text-muted);
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+/* Background Color Utilities */
+.bg-red-600 {
+    background-color: var(--accent);
+}
+
+.bg-gray-800 {
+    background-color: var(--surface);
+}
+
+/* Responsive prefixes for mobile-first design */
+@media (min-width: 640px) {
+    .sm\\:flex-row {
+        flex-direction: row;
+    }
+    
+    .sm\\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    
+    .sm\\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .md\\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .lg\\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
