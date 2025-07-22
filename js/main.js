@@ -866,11 +866,16 @@ async function generateMathQuestions() {
             }
         };
 
-        // Phase 4: Check cache before making API call
-        const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
-        if (cachedQuestions) {
-            displayMathQuestions(cachedQuestions);
-            return;
+        // Check force new questions option
+        const forceNewQuestions = document.getElementById('forceNewQuestions')?.checked || false;
+        
+        // Phase 4: Check cache before making API call (unless forced to skip)
+        if (!forceNewQuestions) {
+            const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
+            if (cachedQuestions) {
+                displayMathQuestions(cachedQuestions, true); // Pass true to indicate cached
+                return;
+            }
         }
 
         const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
@@ -886,7 +891,7 @@ async function generateMathQuestions() {
                 if (Array.isArray(mathProblems) && mathProblems.length > 0) {
                     // Phase 4: Cache the questions before displaying
                     QuestionCache.set(mathTopic, difficulty, mathProblems);
-                    displayMathQuestions(mathProblems);
+                    displayMathQuestions(mathProblems, false); // Pass false to indicate newly generated
                 } else {
                     console.error("Response is not a valid array:", mathProblems);
                     throw new Error('Invalid response format - not an array or empty');
@@ -909,7 +914,7 @@ async function generateMathQuestions() {
             updateLoadingMessage("Using offline fallback questions...");
             setTimeout(() => {
                 const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
-                displayMathQuestions(fallbackQuestions);
+                displayMathQuestions(fallbackQuestions, false); // Fallback questions count as new
                 showNetworkMessage('📚 Showing sample questions (offline mode)', 'warning');
             }, 1000);
         } else {
@@ -932,7 +937,7 @@ async function generateMathQuestions() {
 }
 
 // Display generated math questions
-function displayMathQuestions(problems) {
+function displayMathQuestions(problems, isFromCache = false) {
     const mathQuestionsList = document.getElementById('mathQuestionsList');
     const questionsContainer = document.getElementById('questionsContainer');
     const resetBtn = document.getElementById('resetBtn');
@@ -986,8 +991,15 @@ function displayMathQuestions(problems) {
     const topic = mathTopicInput.value.trim();
     const difficulty = difficultySelect.value;
     
-    // Update history and stats
-    DataManager.addToHistory(topic, difficulty, problems.length);
+    // Only update history and stats for newly generated questions, not cached ones
+    if (!isFromCache) {
+        DataManager.addToHistory(topic, difficulty, problems.length);
+        console.log('Stats updated for newly generated questions');
+    } else {
+        console.log('Serving cached questions - stats not updated');
+        // Show a subtle indicator that these are cached questions
+        showNetworkMessage('📋 Showing cached questions (tip: check "Force generate new questions" to bypass cache)', 'info');
+    }
     
     // Update user preferences
     const preferences = DataManager.loadPreferences();
