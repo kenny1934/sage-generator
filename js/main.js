@@ -998,7 +998,7 @@ function displayMathQuestions(problems, isFromCache = false) {
     } else {
         console.log('Serving cached questions - stats not updated');
         // Show a subtle indicator that these are cached questions
-        showNetworkMessage('📋 Showing cached questions (tip: check "Force generate new questions" to bypass cache)', 'info');
+        showNetworkMessage('📋 Showing previous questions (tip: check "Generate fresh questions" for new ones)', 'info');
     }
     
     // Update user preferences
