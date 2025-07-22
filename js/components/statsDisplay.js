@@ -59,18 +59,6 @@ function addStatsDashboard() {
             <div id="streakDetailsSection"></div>
         </div>
         
-        <!-- Google Drive Status (optional) -->
-        <div class="mt-3 pt-3 text-xs" style="border-top: 1px solid var(--border-color); color: var(--text-secondary);">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span>☁️ Google Drive:</span>
-                    <span id="googleDriveStatus">Checking...</span>
-                </div>
-                <button id="googleDriveSetupBtn" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors hidden" onclick="showGoogleDriveSetup()">
-                    Setup
-                </button>
-            </div>
-        </div>
     `;
     
     // Create Data Management section that will be added below stats
