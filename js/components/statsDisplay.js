@@ -105,7 +105,7 @@ function addStatsDashboard() {
         </div>
         <input type="file" id="importFileInput" class="hidden" accept=".json">
         <p class="text-xs" style="color: var(--text-secondary);">
-            Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
+            Export your preferences, history, favourites, streaks, and stats for backup or transfer between devices.
         </p>
     `;
     

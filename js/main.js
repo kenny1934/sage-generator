@@ -266,7 +266,7 @@ function handleKeyboardNavigation(e) {
         showKeyboardShortcuts();
     }
     
-    // Ctrl+F to show favorites
+    // Ctrl+F to show favourites
     if (e.ctrlKey && e.key === 'f') {
         e.preventDefault();
         showFavoritesPanel();
