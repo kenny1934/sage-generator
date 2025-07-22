@@ -523,12 +523,16 @@
 }
 
 /* Force transparency for glass-morphism effect */
+.bg-gray-800 {
+    background-color: rgba(44, 46, 56, 0.3) !important;
+}
+
 [data-theme="dark"] .bg-gray-800 {
-    background-color: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.3) !important;
 }
 
 [data-theme="light"] .bg-gray-800 {
-    background-color: rgba(255, 255, 255, 0.85) !important;
+    background-color: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Responsive prefixes for mobile-first design */

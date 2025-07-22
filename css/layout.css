@@ -30,12 +30,16 @@
 }
 
 /* Force transparency for header */
+.app-header {
+    background: rgba(44, 46, 56, 0.3) !important;
+}
+
 [data-theme="dark"] .app-header {
-    background: rgba(44, 46, 56, 0.85) !important;
+    background: rgba(44, 46, 56, 0.3) !important;
 }
 
 [data-theme="light"] .app-header {
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 .header-left {
@@ -118,12 +122,16 @@
 }
 
 /* Force transparency for glass-morphism effect */
+.main-container {
+    background: rgba(44, 46, 56, 0.3) !important;
+}
+
 [data-theme="dark"] .main-container {
-    background: rgba(44, 46, 56, 0.85) !important;
+    background: rgba(44, 46, 56, 0.3) !important;
 }
 
 [data-theme="light"] .main-container {
-    background: rgba(255, 255, 255, 0.85) !important;
+    background: rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Config Panel Styling */
