@@ -28,17 +28,28 @@ class MathBackground {
     }
 
     createContainer() {
+        console.log('Creating math background container...');
         this.container = document.createElement('div');
         this.container.className = 'math-background';
+        this.container.style.background = 'rgba(255, 0, 0, 0.1)'; // Debug: red tint
         document.body.appendChild(this.container);
+        console.log('Math background container created and appended');
+        
+        // Add test element
+        const testElement = document.createElement('div');
+        testElement.style.cssText = 'position: fixed; top: 100px; left: 100px; background: red; color: white; padding: 10px; z-index: 9999; font-weight: bold;';
+        testElement.textContent = 'MATH BACKGROUND TEST - If you see this, container works';
+        this.container.appendChild(testElement);
     }
 
     createFloatingSymbol() {
         // Limit concurrent symbols for performance
         if (this.symbolCount >= this.maxSymbols) return;
         
+        console.log('Creating floating symbol...');
         const symbol = document.createElement('div');
         symbol.className = 'floating-symbol';
+        symbol.style.border = '2px solid lime'; // Debug: green border
         
         // Random symbol
         const randomSymbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
@@ -76,11 +87,14 @@ class MathBackground {
         this.container.appendChild(symbol);
         this.symbolCount++;
         
+        console.log('Symbol appended:', symbol.textContent, 'Position:', symbol.style.left, symbol.style.top);
+        
         // Remove symbol after animation with cleanup
         setTimeout(() => {
             if (symbol.parentNode) {
                 symbol.remove();
                 this.symbolCount--;
+                console.log('Symbol removed');
             }
         }, (duration + 3) * 1000);
     }
