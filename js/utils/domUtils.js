@@ -70,7 +70,7 @@ function createCategoryTag(topic, size = 'small') {
     const sizeClasses = isSmall ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5';
     
     return `<span class="${sizeClasses} rounded-full font-medium inline-flex items-center gap-1" 
-                  style="background-color: ${color}20; border: 1px solid ${color}40; color: ${color};">
+                  style="background: var(--surface-elevated); border: 1px solid var(--border-color); color: var(--text-secondary);">
                 <span>${icon}</span>
                 <span>${category}</span>
             </span>`;

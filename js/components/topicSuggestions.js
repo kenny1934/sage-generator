@@ -78,10 +78,7 @@ function addRecentTopicsSection() {
                         onclick="selectRecentTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
                         title="Last used: ${item.lastUsed}">
                     <div class="recent-topic-title">${item.topic}</div>
-                    <div class="flex items-center gap-2 mt-1">
-                        ${createCategoryTag(item.topic)}
-                        <div class="recent-topic-meta flex-1">${item.difficulty} • ${item.lastUsed}</div>
-                    </div>
+                    <div class="recent-topic-meta">${item.difficulty} • ${item.lastUsed}</div>
                 </button>
             `).join('')}
         </div>
@@ -234,11 +231,11 @@ function updateRecentTopicsDisplay() {
     
     recentTopicsGrid.innerHTML = recentTopics.map((item, index) => `
         <button type="button" 
-                class="recent-topic-btn p-3 text-left bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-red-500 rounded-lg transition-all duration-200 group"
+                class="recent-topic-btn"
                 onclick="selectRecentTopic('${item.topic.replace(/'/g, "\\'").replace(/"/g, '&quot;')}', '${item.difficulty}')"
                 title="Last used: ${item.lastUsed}">
-            <div class="text-sm font-medium text-gray-200 group-hover:text-white truncate">${item.topic}</div>
-            <div class="text-xs text-gray-400 mt-1">${item.difficulty} • ${item.lastUsed}</div>
+            <div class="recent-topic-title">${item.topic}</div>
+            <div class="recent-topic-meta">${item.difficulty} • ${item.lastUsed}</div>
         </button>
     `).join('');
     

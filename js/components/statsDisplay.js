@@ -17,14 +17,19 @@ function addStatsDashboard() {
     }
     
     const statsSection = document.createElement('div');
-    statsSection.className = 'mt-8 p-4 bg-gray-800 rounded-lg border border-gray-700';
+    statsSection.className = 'mt-8 p-4 rounded-lg border';
+    statsSection.style.background = 'var(--surface)';
+    statsSection.style.borderColor = 'var(--border-color)';
     statsSection.innerHTML = `
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-semibold text-white flex items-center gap-2">
+            <h3 class="text-lg font-semibold flex items-center gap-2" style="color: var(--text-primary);">
                 📊 Your Progress
             </h3>
             <button type="button" 
-                    class="text-xs text-gray-400 hover:text-gray-200 transition-colors"
+                    class="text-xs transition-colors"
+                    style="color: var(--text-secondary);"
+                    onmouseover="this.style.color='var(--text-primary)'" 
+                    onmouseout="this.style.color='var(--text-secondary)'"
                     onclick="toggleStatsDetails()"
                     id="statsToggleBtn">
                 Show Details
@@ -32,20 +37,20 @@ function addStatsDashboard() {
         </div>
         <div id="statsOverview" class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             <div class="stats-item">
-                <div class="text-2xl font-bold text-red-400" id="totalQuestions">0</div>
-                <div class="text-xs text-gray-400">Questions Generated</div>
+                <div class="text-2xl font-bold" style="color: var(--accent);" id="totalQuestions">0</div>
+                <div class="text-xs" style="color: var(--text-secondary);">Questions Generated</div>
             </div>
             <div class="stats-item">
-                <div class="text-2xl font-bold text-red-400" id="totalSessions">0</div>
-                <div class="text-xs text-gray-400">Study Sessions</div>
+                <div class="text-2xl font-bold" style="color: var(--accent);" id="totalSessions">0</div>
+                <div class="text-xs" style="color: var(--text-secondary);">Study Sessions</div>
             </div>
             <div class="stats-item">
-                <div class="text-2xl font-bold text-red-400" id="topicsExplored">0</div>
-                <div class="text-xs text-gray-400">Topics Explored</div>
+                <div class="text-2xl font-bold" style="color: var(--accent);" id="topicsExplored">0</div>
+                <div class="text-xs" style="color: var(--text-secondary);">Topics Explored</div>
             </div>
             <div class="stats-item">
                 <div class="text-2xl font-bold text-orange-400" id="currentStreak">0</div>
-                <div class="text-xs text-gray-400">Day Streak 🔥</div>
+                <div class="text-xs" style="color: var(--text-secondary);">Day Streak 🔥</div>
             </div>
         </div>
         <div id="statsDetails" class="mt-4 space-y-3 hidden">
@@ -55,7 +60,7 @@ function addStatsDashboard() {
         </div>
         
         <!-- Google Drive Status (optional) -->
-        <div class="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
+        <div class="mt-3 pt-3 text-xs" style="border-top: 1px solid var(--border-color); color: var(--text-secondary);">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span>☁️ Google Drive:</span>
@@ -71,9 +76,11 @@ function addStatsDashboard() {
     // Create Data Management section that will be added below stats
     const dataManagementSection = document.createElement('div');
     dataManagementSection.id = 'dataManagementContainer';
-    dataManagementSection.className = 'mt-6 p-4 rounded-lg border border-gray-700 bg-gray-800';
+    dataManagementSection.className = 'mt-6 p-4 rounded-lg border';
+    dataManagementSection.style.background = 'var(--surface)';
+    dataManagementSection.style.borderColor = 'var(--border-color)';
     dataManagementSection.innerHTML = `
-        <h3 class="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+        <h3 class="text-lg font-semibold mb-3 flex items-center gap-2" style="color: var(--text-primary);">
             🗄️ Data Management
         </h3>
         <div class="flex gap-2 flex-wrap mb-3">
@@ -97,7 +104,7 @@ function addStatsDashboard() {
             </button>
         </div>
         <input type="file" id="importFileInput" class="hidden" accept=".json">
-        <p class="text-xs text-gray-400">
+        <p class="text-xs" style="color: var(--text-secondary);">
             Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
         </p>
     `;
@@ -212,30 +219,30 @@ function updateDetailedStats(stats) {
         .slice(0, 3);
     
     favoriteTopicsSection.innerHTML = topTopics.length > 0 ? `
-        <div class="text-sm font-medium text-gray-300 mb-2">Most Practiced Topics:</div>
+        <div class="text-sm font-medium mb-2" style="color: var(--text-primary);">Most Practiced Topics:</div>
         <div class="space-y-1">
             ${topTopics.map(([topic, count]) => `
                 <div class="flex justify-between text-xs">
-                    <span class="text-gray-400 truncate">${topic}</span>
-                    <span class="text-red-400">${count} times</span>
+                    <span class="truncate" style="color: var(--text-secondary);">${topic}</span>
+                    <span style="color: var(--accent);">${count} times</span>
                 </div>
             `).join('')}
         </div>
-    ` : '<div class="text-xs text-gray-500">No topics practiced yet</div>';
+    ` : '<div class="text-xs" style="color: var(--text-muted);">No topics practiced yet</div>';
     
     // Difficulty distribution
     const difficultyEntries = Object.entries(stats.difficultyDistribution);
     difficultyDistributionSection.innerHTML = difficultyEntries.length > 0 ? `
-        <div class="text-sm font-medium text-gray-300 mb-2">Difficulty Breakdown:</div>
+        <div class="text-sm font-medium mb-2" style="color: var(--text-primary);">Difficulty Breakdown:</div>
         <div class="grid grid-cols-2 gap-2">
             ${difficultyEntries.map(([difficulty, count]) => `
                 <div class="flex justify-between text-xs">
-                    <span class="text-gray-400">${difficulty}:</span>
-                    <span class="text-red-400">${count}</span>
+                    <span style="color: var(--text-secondary);">${difficulty}:</span>
+                    <span style="color: var(--accent);">${count}</span>
                 </div>
             `).join('')}
         </div>
-    ` : '<div class="text-xs text-gray-500">No difficulty data yet</div>';
+    ` : '<div class="text-xs" style="color: var(--text-muted);">No difficulty data yet</div>';
 }
 
 // Phase 4: Update streak details
@@ -253,28 +260,28 @@ function updateStreakDetails(streakData) {
         .slice(0, 3);
     
     streakDetailsSection.innerHTML = `
-        <div class="text-sm font-medium text-gray-300 mb-2">Streak Stats:</div>
+        <div class="text-sm font-medium mb-2" style="color: var(--text-primary);">Streak Stats:</div>
         <div class="grid grid-cols-2 gap-2 mb-3">
             <div class="flex justify-between text-xs">
-                <span class="text-gray-400">Longest Streak:</span>
+                <span style="color: var(--text-secondary);">Longest Streak:</span>
                 <span class="text-orange-400">${streakData.longestStreak} days</span>
             </div>
             <div class="flex justify-between text-xs">
-                <span class="text-gray-400">Total Days:</span>
+                <span style="color: var(--text-secondary);">Total Days:</span>
                 <span class="text-orange-400">${streakData.totalDaysUsed}</span>
             </div>
         </div>
         ${recentAchievements.length > 0 ? `
-            <div class="text-sm font-medium text-gray-300 mb-2">Recent Achievements:</div>
+            <div class="text-sm font-medium mb-2" style="color: var(--text-primary);">Recent Achievements:</div>
             <div class="space-y-1">
                 ${recentAchievements.map(achievement => `
-                    <div class="flex items-center justify-between text-xs p-2 bg-yellow-900/20 border border-yellow-600/30 rounded">
-                        <span class="text-yellow-200 font-medium">🏆 ${achievement.name}</span>
-                        <span class="text-gray-400">${achievement.description}</span>
+                    <div class="flex items-center justify-between text-xs p-2 rounded" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3);">
+                        <span class="font-medium text-yellow-500">🏆 ${achievement.name}</span>
+                        <span style="color: var(--text-secondary);">${achievement.description}</span>
                     </div>
                 `).join('')}
             </div>
-        ` : '<div class="text-xs text-gray-500">No achievements yet - keep using SAGE!</div>'}
+        ` : '<div class="text-xs" style="color: var(--text-muted);">No achievements yet - keep using SAGE!</div>'}
     `;
 }
 
