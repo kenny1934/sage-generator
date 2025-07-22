@@ -29,17 +29,23 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Working header transparency */
+/* Higher specificity header transparency */
+header.app-header,
 .app-header {
     background: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.85) !important;
 }
 
+[data-theme="dark"] header.app-header,
 [data-theme="dark"] .app-header {
     background: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.85) !important;
 }
 
+[data-theme="light"] header.app-header,
 [data-theme="light"] .app-header {
     background: rgba(255, 255, 255, 0.85) !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
 }
 
 .header-left {
@@ -121,17 +127,40 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Working transparency - restored proper styling */
-.main-container {
+/* Nuclear option - maximum specificity transparency */
+body .app-layout .main-container,
+html body .main-container,
+body div.main-container {
     background: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.85) !important;
 }
 
-[data-theme="dark"] .main-container {
+/* Higher specificity transparency overrides */
+.config-panel.main-container,
+.questions-canvas.main-container,
+aside.main-container,
+main.main-container,
+div.main-container {
     background: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.85) !important;
 }
 
-[data-theme="light"] .main-container {
+[data-theme="dark"] .config-panel.main-container,
+[data-theme="dark"] .questions-canvas.main-container,
+[data-theme="dark"] aside.main-container,
+[data-theme="dark"] main.main-container,
+[data-theme="dark"] div.main-container {
+    background: rgba(44, 46, 56, 0.85) !important;
+    background-color: rgba(44, 46, 56, 0.85) !important;
+}
+
+[data-theme="light"] .config-panel.main-container,
+[data-theme="light"] .questions-canvas.main-container,
+[data-theme="light"] aside.main-container,
+[data-theme="light"] main.main-container,
+[data-theme="light"] div.main-container {
     background: rgba(255, 255, 255, 0.85) !important;
+    background-color: rgba(255, 255, 255, 0.85) !important;
 }
 
 /* Config Panel Styling */
