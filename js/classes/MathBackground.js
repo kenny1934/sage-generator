@@ -35,12 +35,8 @@ class MathBackground {
 
     createFloatingSymbol() {
         // Limit concurrent symbols for performance
-        if (this.symbolCount >= this.maxSymbols) {
-            console.log('Max symbols reached:', this.symbolCount);
-            return;
-        }
+        if (this.symbolCount >= this.maxSymbols) return;
         
-        console.log('Creating floating symbol');
         const symbol = document.createElement('div');
         symbol.className = 'floating-symbol';
         
@@ -80,14 +76,11 @@ class MathBackground {
         this.container.appendChild(symbol);
         this.symbolCount++;
         
-        console.log('Symbol created and appended:', symbol.textContent, 'Classes:', symbol.className, 'Count:', this.symbolCount);
-        
         // Remove symbol after animation with cleanup
         setTimeout(() => {
             if (symbol.parentNode) {
                 symbol.remove();
                 this.symbolCount--;
-                console.log('Symbol removed, count:', this.symbolCount);
             }
         }, (duration + 3) * 1000);
     }
@@ -96,27 +89,22 @@ class MathBackground {
         if (this.isActive) return;
         
         this.isActive = true;
-        console.log('MathBackground starting...');
         
         // Create initial symbols
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
             setTimeout(() => {
-                if (this.isActive) {
-                    console.log('Creating symbol', i);
-                    this.createFloatingSymbol();
-                }
+                if (this.isActive) this.createFloatingSymbol();
             }, i * 1000);
         }
         
         // Continue creating symbols at intervals
         const interval = setInterval(() => {
             if (this.isActive && this.symbolCount < this.maxSymbols) {
-                console.log('Creating symbol, count:', this.symbolCount);
                 this.createFloatingSymbol();
             } else if (!this.isActive) {
                 clearInterval(interval);
             }
-        }, 3000);
+        }, 2500);
         
         this.animationIntervals.push(interval);
     }
