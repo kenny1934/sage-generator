@@ -6,9 +6,20 @@
 class MathBackground {
     constructor() {
         this.container = null;
-        this.symbols = ['π', '∑', '∫', '∞', 'α', 'β', 'γ', 'δ', 'θ', 'λ', 'μ', 'σ', 'φ', 'ψ', 'ω', '√', '∆', '∂', '≈', '≠', '≤', '≥', '∈', '⊂', '∪', '∩', '→', '↔', '±', '×', '÷'];
+        this.symbols = [
+            // Basic symbols
+            'π', '∑', '∫', '∞', 'α', 'β', 'γ', 'δ', 'θ', 'λ', 'μ', 'σ', 'φ', 'ψ', 'ω',
+            // Operations and relations
+            '√', '∆', '∂', '≈', '≠', '≤', '≥', '∈', '⊂', '∪', '∩', '→', '↔', '±', '×', '÷',
+            // Advanced symbols
+            '∇', '∃', '∀', '⟨', '⟩', '⊕', '⊗', '⊥', '∥', '∴', '∵', '⇒', '⇔', '℃', '℉', '°',
+            // Mathematical constants
+            'ℝ', 'ℂ', 'ℕ', 'ℤ', 'ℚ', '∅', '℮', 'ℏ', '⊤', '⊥', '∣', '∤', '∝', '≡', '≢', '≍'
+        ];
         this.isActive = false;
         this.animationIntervals = [];
+        this.symbolCount = 0; // Track active symbols for performance
+        this.maxSymbols = 15; // Limit concurrent symbols
     }
 
     init() {
@@ -23,6 +34,9 @@ class MathBackground {
     }
 
     createFloatingSymbol() {
+        // Limit concurrent symbols for performance
+        if (this.symbolCount >= this.maxSymbols) return;
+        
         const symbol = document.createElement('div');
         symbol.className = 'floating-symbol';
         
@@ -30,16 +44,37 @@ class MathBackground {
         const randomSymbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
         symbol.textContent = randomSymbol;
         
-        // Random size
-        const sizes = ['small', 'medium', 'large'];
-        const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
-        symbol.classList.add(randomSize);
+        // Enhanced size and animation variety
+        const sizeAnimationPairs = [
+            { size: 'small', animation: ['', 'pulse'], weight: 35 },
+            { size: 'medium', animation: ['', 'drift', 'pulse'], weight: 30 },
+            { size: 'large', animation: ['', 'drift'], weight: 20 },
+            { size: 'extra-large', animation: ['spiral'], weight: 10 },
+            { size: 'horizontal', animation: ['horizontal'], weight: 5 }
+        ];
         
-        // Random starting position and animation type
-        const animationType = Math.random() > 0.7 ? 'horizontal' : 'vertical';
+        // Weighted random selection for more interesting variety
+        const totalWeight = sizeAnimationPairs.reduce((sum, pair) => sum + pair.weight, 0);
+        let random = Math.random() * totalWeight;
+        let selectedPair;
         
-        if (animationType === 'horizontal') {
-            symbol.classList.add('horizontal');
+        for (const pair of sizeAnimationPairs) {
+            random -= pair.weight;
+            if (random <= 0) {
+                selectedPair = pair;
+                break;
+            }
+        }
+        
+        // Apply size and animation
+        symbol.classList.add(selectedPair.size);
+        if (selectedPair.animation.length > 0) {
+            const randomAnimation = selectedPair.animation[Math.floor(Math.random() * selectedPair.animation.length)];
+            if (randomAnimation) symbol.classList.add(randomAnimation);
+        }
+        
+        // Position based on animation type
+        if (selectedPair.size === 'horizontal' || symbol.classList.contains('horizontal')) {
             symbol.style.top = Math.random() * 80 + 10 + '%';
             symbol.style.left = '-5%';
         } else {
@@ -47,22 +82,29 @@ class MathBackground {
             symbol.style.top = '105%';
         }
         
-        // Random delay
-        symbol.style.animationDelay = Math.random() * 5 + 's';
+        // Random delay and duration with improved variety
+        symbol.style.animationDelay = Math.random() * 8 + 's';
         
-        // Random duration variation
-        const baseDuration = animationType === 'horizontal' ? 20 : 15;
-        const duration = baseDuration + (Math.random() * 10 - 5);
+        // Adjust duration based on size and animation type
+        let baseDuration = 15;
+        if (symbol.classList.contains('horizontal')) baseDuration = 20;
+        if (symbol.classList.contains('spiral')) baseDuration = 30;
+        if (symbol.classList.contains('drift')) baseDuration = 22;
+        if (symbol.classList.contains('pulse')) baseDuration = 16;
+        
+        const duration = baseDuration + (Math.random() * 8 - 4);
         symbol.style.animationDuration = duration + 's';
         
         this.container.appendChild(symbol);
+        this.symbolCount++;
         
-        // Remove symbol after animation
+        // Remove symbol after animation with cleanup
         setTimeout(() => {
             if (symbol.parentNode) {
                 symbol.remove();
+                this.symbolCount--;
             }
-        }, (duration + 2) * 1000);
+        }, (duration + 3) * 1000);
     }
 
     start() {
@@ -70,31 +112,45 @@ class MathBackground {
         
         this.isActive = true;
         
-        // Create initial symbols
-        for (let i = 0; i < 5; i++) {
+        // Create initial symbols with staggered timing
+        for (let i = 0; i < 8; i++) {
             setTimeout(() => {
                 if (this.isActive) this.createFloatingSymbol();
-            }, i * 1000);
+            }, i * 800);
         }
         
-        // Continue creating symbols at intervals
-        const verticalInterval = setInterval(() => {
-            if (this.isActive) {
+        // More frequent and varied symbol creation
+        const primaryInterval = setInterval(() => {
+            if (this.isActive && this.symbolCount < this.maxSymbols) {
                 this.createFloatingSymbol();
-            } else {
-                clearInterval(verticalInterval);
+            } else if (!this.isActive) {
+                clearInterval(primaryInterval);
             }
-        }, 3000);
+        }, 2000); // More frequent spawning
         
-        const horizontalInterval = setInterval(() => {
-            if (this.isActive) {
+        const secondaryInterval = setInterval(() => {
+            if (this.isActive && this.symbolCount < this.maxSymbols - 2) {
                 this.createFloatingSymbol();
-            } else {
-                clearInterval(horizontalInterval);
+            } else if (!this.isActive) {
+                clearInterval(secondaryInterval);
             }
-        }, 5000);
+        }, 3500);
         
-        this.animationIntervals.push(verticalInterval, horizontalInterval);
+        // Occasional burst of symbols for visual interest
+        const burstInterval = setInterval(() => {
+            if (this.isActive && this.symbolCount < this.maxSymbols - 3) {
+                // Create 2-3 symbols quickly
+                for (let i = 0; i < Math.random() * 3 + 1; i++) {
+                    setTimeout(() => {
+                        if (this.isActive) this.createFloatingSymbol();
+                    }, i * 200);
+                }
+            } else if (!this.isActive) {
+                clearInterval(burstInterval);
+            }
+        }, 15000); // Every 15 seconds
+        
+        this.animationIntervals.push(primaryInterval, secondaryInterval, burstInterval);
     }
 
     stop() {

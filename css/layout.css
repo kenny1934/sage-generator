@@ -22,8 +22,11 @@
     background: var(--surface);
     border-radius: 1rem;
     box-shadow: 0 4px 16px rgba(60, 72, 88, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     z-index: 10;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .header-left {
@@ -96,11 +99,13 @@
     background: var(--surface);
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 2rem;
     width: 100%;
     position: relative;
     z-index: 10;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 /* Config Panel Styling */
