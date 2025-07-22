@@ -45,7 +45,7 @@ function updateNavigationState() {
     }
 }
 
-// Phase 3: Add question to favorites
+// Phase 3: Add question to favourites
 function addToFavorites(problem, questionIndex, favoriteBtn) {
     const topic = mathTopicInput.value.trim();
     const difficulty = difficultySelect.value;
@@ -59,12 +59,12 @@ function addToFavorites(problem, questionIndex, favoriteBtn) {
     );
     
     // Update button state
-    favoriteBtn.textContent = '✓ Favorited';
+    favoriteBtn.textContent = '✓ Favourited';
     favoriteBtn.disabled = true;
     favoriteBtn.className = 'action-btn bg-green-600 hover:bg-green-700';
     
     // Show success message
-    displayMessage(`Question ${questionIndex + 1} added to favorites!`, 'text-green-400');
+    displayMessage(`Question ${questionIndex + 1} added to favourites!`, 'text-green-400');
 }
 
 // Generate similar question functionality
@@ -317,11 +317,11 @@ function createQuestionButtons(problem, index) {
     similarBtn.addEventListener('click', () => generateSimilarQuestion(problem, index));
     buttonContainer.appendChild(similarBtn);
     
-    // Phase 3: Add favorite button
+    // Phase 3: Add favourite button
     const favoriteBtn = document.createElement('button');
     favoriteBtn.className = 'action-btn bg-yellow-600 hover:bg-yellow-700';
-    favoriteBtn.textContent = '⭐ Favorite';
-    favoriteBtn.setAttribute('aria-label', `Add question ${index + 1} to favorites`);
+    favoriteBtn.textContent = '⭐ Favourite';
+    favoriteBtn.setAttribute('aria-label', `Add question ${index + 1} to favourites`);
     favoriteBtn.addEventListener('click', () => addToFavorites(problem, index, favoriteBtn));
     buttonContainer.appendChild(favoriteBtn);
 
