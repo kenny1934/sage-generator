@@ -29,17 +29,20 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Force transparency for header */
+/* EMERGENCY: Try opacity for header */
 .app-header {
-    background: rgba(44, 46, 56, 0.3) !important;
+    background: var(--surface) !important;
+    opacity: 0.5 !important;
 }
 
 [data-theme="dark"] .app-header {
-    background: rgba(44, 46, 56, 0.3) !important;
+    background: var(--surface) !important;
+    opacity: 0.5 !important;
 }
 
 [data-theme="light"] .app-header {
-    background: rgba(255, 255, 255, 0.3) !important;
+    background: var(--surface) !important;
+    opacity: 0.5 !important;
 }
 
 .header-left {
@@ -121,17 +124,30 @@
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Force transparency for glass-morphism effect */
+/* EMERGENCY: Multiple transparency tests */
 .main-container {
-    background: rgba(44, 46, 56, 0.3) !important;
+    background: red !important;
+    opacity: 0.3 !important;
+}
+
+.transparency-test {
+    background: rgba(255, 0, 0, 0.3) !important;
+    opacity: 0.7 !important;
+    border: 3px solid yellow !important;
+}
+
+* {
+    opacity: 0.8 !important;
 }
 
 [data-theme="dark"] .main-container {
-    background: rgba(44, 46, 56, 0.3) !important;
+    background: blue !important;
+    opacity: 0.3 !important;
 }
 
 [data-theme="light"] .main-container {
-    background: rgba(255, 255, 255, 0.3) !important;
+    background: green !important;
+    opacity: 0.3 !important;
 }
 
 /* Config Panel Styling */
