@@ -3,9 +3,7 @@
  * Centralized initialization, event handling, and app coordination
  */
 
-// EMERGENCY: Basic JavaScript test
-console.log('🚨 EMERGENCY: main.js is loading!');
-alert('JavaScript is working! Check console for more details.');
+// Main JavaScript file loading
 
 // Initialize DOM references from config.js
 let isMathRendered = true; // Default state: math is rendered
@@ -19,8 +17,7 @@ let googleUser = null;
 
 // Initialize the application
 function initializeApp() {
-    console.log('🚨 EMERGENCY: initializeApp() is running!');
-    alert('initializeApp() called - MathBackground should initialize now!');
+    // Initialize the main application
     
     // Initialize DOM references from config.js
     initializeDOMReferences();
@@ -35,15 +32,11 @@ function initializeApp() {
     QuestionCache.cleanup();
     
     // Phase 4: Initialize animated background
-    console.log('🚨 EMERGENCY: About to create MathBackground...');
     try {
         window.mathBackground = new MathBackground();
-        console.log('🚨 EMERGENCY: MathBackground created successfully!');
         window.mathBackground.init();
-        console.log('🚨 EMERGENCY: MathBackground.init() completed!');
     } catch (error) {
-        console.error('🚨 EMERGENCY: MathBackground failed!', error);
-        alert('MathBackground error: ' + error.message);
+        console.error('MathBackground initialization failed:', error);
     }
     
     // Phase 4: Initialize swipe gestures for mobile navigation
@@ -62,12 +55,10 @@ function initializeApp() {
     if (savedApiKey && apiKeyInput && apiKeyContainer) {
         apiKeyInput.value = savedApiKey;
         apiKeyContainer.style.display = 'none';
-        console.log('Loaded saved API key');
     }
     
     // Initialize core features with delay to ensure DOM is ready
     setTimeout(() => {
-        console.log('Initializing smart input features...');
         initializeSmartInput();
         
         // Check if KaTeX is loaded
@@ -87,7 +78,6 @@ function initializeApp() {
         
         // Phase 3: Initialize personalization features AFTER core features
         setTimeout(() => {
-            console.log('Initializing personalization features...');
             initializePersonalizationFeatures();
         }, 200);
         
@@ -98,7 +88,6 @@ function initializeApp() {
 
 // Attach all event listeners with proper null checks
 function attachEventListeners() {
-    console.log('Attaching event listeners...');
     
     const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
     const resetBtn = document.getElementById('resetBtn');
@@ -115,37 +104,27 @@ function attachEventListeners() {
     
     if (generateQuestionsBtn) {
         generateQuestionsBtn.addEventListener('click', generateMathQuestions);
-        console.log('Attached generateMathQuestions event');
     } else {
-        console.error('generateQuestionsBtn not found');
     }
     
     if (resetBtn) {
         resetBtn.addEventListener('click', resetGenerator);
-        console.log('Attached resetGenerator event');
     } else {
-        console.error('resetBtn not found');
     }
     
     if (toggleMathViewBtn) {
         toggleMathViewBtn.addEventListener('click', toggleMathView);
-        console.log('Attached toggleMathView event');
     } else {
-        console.error('toggleMathViewBtn not found');
     }
     
     if (saveApiKeyBtn) {
         saveApiKeyBtn.addEventListener('click', saveApiKey);
-        console.log('Attached saveApiKey event');
     } else {
-        console.error('saveApiKeyBtn not found');
     }
     
     if (exportQuestionsBtn) {
         exportQuestionsBtn.addEventListener('click', exportQuestions);
-        console.log('Attached exportQuestions event');
     } else {
-        console.error('exportQuestionsBtn not found');
     }
     
     if (apiKeyInput) {
@@ -155,23 +134,17 @@ function attachEventListeners() {
                 saveApiKey();
             }
         });
-        console.log('Attached apiKeyInput Enter key event');
     } else {
-        console.error('apiKeyInput not found');
     }
     
     if (prevQuestionBtn) {
         prevQuestionBtn.addEventListener('click', () => navigateQuestion(-1));
-        console.log('Attached prevQuestion event');
     } else {
-        console.error('prevQuestionBtn not found');
     }
     
     if (nextQuestionBtn) {
         nextQuestionBtn.addEventListener('click', () => navigateQuestion(1));
-        console.log('Attached nextQuestion event');
     } else {
-        console.error('nextQuestionBtn not found');
     }
     
     // Phase 4: Data management event handlers
@@ -179,21 +152,18 @@ function attachEventListeners() {
         exportDataBtn.addEventListener('click', () => {
             DataExportManager.exportData();
         });
-        console.log('Attached exportData event');
     }
     
     if (importDataBtn) {
         importDataBtn.addEventListener('click', () => {
             importFileInput.click();
         });
-        console.log('Attached importData event');
     }
     
     if (clearDataBtn) {
         clearDataBtn.addEventListener('click', () => {
             DataExportManager.clearAllData();
         });
-        console.log('Attached clearData event');
     }
     
     if (importFileInput) {
@@ -205,12 +175,10 @@ function attachEventListeners() {
                 e.target.value = '';
             }
         });
-        console.log('Attached importFileInput event');
     }
     
     // Keyboard navigation support
     document.addEventListener('keydown', handleKeyboardNavigation);
-    console.log('Attached keyboard navigation');
 }
 
 // Network monitoring and initialization
@@ -375,7 +343,6 @@ function checkKaTeXLoaded() {
     function tryLoadKaTeX() {
         if (typeof window.katex !== 'undefined' && window.katex.render) {
             isKaTeXLoaded = true;
-            console.log('KaTeX loaded successfully');
             
             // Re-render any existing math content
             const mathElements = document.querySelectorAll('.math-rendered');
@@ -388,7 +355,6 @@ function checkKaTeXLoaded() {
         
         retryCount++;
         if (retryCount < maxRetries) {
-            console.log(`KaTeX not ready yet, retrying... (${retryCount}/${maxRetries})`);
             setTimeout(tryLoadKaTeX, 500);
         } else {
             console.warn('KaTeX failed to load after multiple attempts. Math rendering will be limited.');
@@ -501,7 +467,6 @@ function loadAndApplyUserPreferences() {
 
 // Phase 4: Theme System Functions
 function initializeThemeSystem() {
-    console.log('Initializing theme system...');
     
     // Load saved theme preference or default to dark
     const savedTheme = localStorage.getItem('sage-theme') || 'dark';
@@ -511,9 +476,7 @@ function initializeThemeSystem() {
     const themeToggleBtn = document.getElementById('themeToggle');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', toggleTheme);
-        console.log('Theme toggle button initialized');
     } else {
-        console.error('Theme toggle button not found');
     }
 }
 
@@ -525,7 +488,6 @@ function toggleTheme() {
     // Save preference
     localStorage.setItem('sage-theme', newTheme);
     
-    console.log(`Theme switched to: ${newTheme}`);
 }
 
 function applyTheme(theme) {
@@ -538,13 +500,11 @@ function applyTheme(theme) {
         themeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
     }
     
-    console.log(`Applied ${theme} theme`);
 }
 
 // Phase 3: Initialize personalization features
 function initializePersonalizationFeatures() {
     try {
-        console.log('Adding personalization features...');
         
         // Add recently used topics section
         addRecentTopicsSection();
@@ -559,14 +519,12 @@ function initializePersonalizationFeatures() {
         setTimeout(() => {
             try {
                 updateStatsDisplay();
-                console.log('Stats display updated successfully');
             } catch (statsError) {
                 console.error('Error updating stats display:', statsError);
                 // Don't let stats errors break the app
             }
         }, 100);
         
-        console.log('Personalization features initialized successfully');
     } catch (error) {
         console.error('Error initializing personalization features:', error);
         // Don't let personalization errors break core functionality
@@ -582,7 +540,6 @@ function checkGoogleDriveAvailability() {
     setTimeout(() => {
         if (typeof window.gapi !== 'undefined' && typeof window.google !== 'undefined') {
             googleDriveAvailable = true;
-            console.log('Google Drive APIs detected - multi-device sync available');
             
             if (statusElement) {
                 statusElement.textContent = 'Available (setup required)';
@@ -605,7 +562,6 @@ function checkGoogleDriveAvailability() {
                 initializeGoogleDrive(savedClientId);
             }
         } else {
-            console.log('Google Drive APIs not available - using localStorage only');
             
             if (statusElement) {
                 statusElement.textContent = 'Not available';
@@ -674,7 +630,6 @@ async function initializeGoogleDrive(clientId) {
     if (!googleDriveAvailable) return;
     
     try {
-        console.log('Initializing Google Drive...');
         
         // Check if running from file:// protocol
         const isLocalFile = window.location.protocol === 'file:';
@@ -720,7 +675,6 @@ async function initializeGoogleDrive(clientId) {
         
         await window.gapi.client.init(initConfig);
         
-        console.log('Google Drive initialized successfully');
         
         // Update status and add connect button
         const statusElement = document.getElementById('googleDriveStatus');
@@ -780,7 +734,6 @@ async function connectToGoogleDrive() {
         googleUser = await authInstance.signIn();
         isGoogleSignedIn = true;
         
-        console.log('Signed in to Google Drive successfully');
         
         // Update UI
         const statusElement = document.getElementById('googleDriveStatus');
@@ -950,7 +903,6 @@ async function generateMathQuestions() {
         // Phase 4: Check cache before making API call
         const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
         if (cachedQuestions) {
-            console.log('Using cached questions');
             displayMathQuestions(cachedQuestions);
             return;
         }
@@ -963,9 +915,7 @@ async function generateMathQuestions() {
             result.candidates[0].content.parts.length > 0) {
             const jsonText = result.candidates[0].content.parts[0].text;
             try {
-                console.log("Raw API response text:", jsonText);
                 const mathProblems = JSON.parse(jsonText);
-                console.log("Parsed math problems:", mathProblems);
                 
                 if (Array.isArray(mathProblems) && mathProblems.length > 0) {
                     // Phase 4: Cache the questions before displaying

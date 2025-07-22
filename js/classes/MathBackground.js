@@ -18,8 +18,9 @@ class MathBackground {
         ];
         this.isActive = false;
         this.animationIntervals = [];
-        this.symbolCount = 0; // Track active symbols for performance
-        this.maxSymbols = 15; // Limit concurrent symbols
+        this.symbolCount = 0;
+        this.maxSymbols = 30; // Increased for better visibility
+        this.createdSymbols = 0; // Debug counter
     }
 
     init() {
@@ -28,75 +29,83 @@ class MathBackground {
     }
 
     createContainer() {
-        console.log('Creating math background container...');
         this.container = document.createElement('div');
         this.container.className = 'math-background';
-        this.container.style.background = 'rgba(255, 0, 0, 0.1)'; // Debug: red tint
         document.body.appendChild(this.container);
-        console.log('Math background container created and appended');
-        
-        // Add test element
-        const testElement = document.createElement('div');
-        testElement.style.cssText = 'position: fixed; top: 100px; left: 100px; background: red; color: white; padding: 10px; z-index: 9999; font-weight: bold;';
-        testElement.textContent = 'MATH BACKGROUND TEST - If you see this, container works';
-        this.container.appendChild(testElement);
     }
 
     createFloatingSymbol() {
         // Limit concurrent symbols for performance
         if (this.symbolCount >= this.maxSymbols) return;
         
-        console.log('Creating floating symbol...');
         const symbol = document.createElement('div');
         symbol.className = 'floating-symbol';
-        symbol.style.border = '2px solid lime'; // Debug: green border
         
         // Random symbol
         const randomSymbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
         symbol.textContent = randomSymbol;
         
-        // Simplified approach to ensure animations work
-        const sizes = ['small', 'medium', 'large'];
-        const animations = ['', 'horizontal'];
+        // Enhanced animation variety with longer durations
+        const sizes = ['small', 'medium', 'large', 'extra-large'];
+        const animations = ['', 'horizontal', 'drift', 'spiral', 'pulse'];
         
         // Random size
         const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
         symbol.classList.add(randomSize);
         
-        // Random animation (20% chance for horizontal)
-        if (Math.random() < 0.2) {
+        // Random animation with better distribution
+        const animationType = Math.random();
+        if (animationType < 0.15) {
             symbol.classList.add('horizontal');
+        } else if (animationType < 0.3) {
+            symbol.classList.add('drift');
+        } else if (animationType < 0.45) {
+            symbol.classList.add('spiral');
+        } else if (animationType < 0.6) {
+            symbol.classList.add('pulse');
         }
+        // 40% chance for default vertical float animation
         
-        // Position based on animation type
+        // Position based on animation type for better distribution
         if (symbol.classList.contains('horizontal')) {
+            // Horizontal symbols: start from left, random vertical position
             symbol.style.top = Math.random() * 80 + 10 + '%';
             symbol.style.left = '-5%';
         } else {
+            // Vertical symbols: start from bottom, random horizontal position
             symbol.style.left = Math.random() * 90 + 5 + '%';
             symbol.style.top = '105%';
         }
         
-        // Simplified timing
-        symbol.style.animationDelay = Math.random() * 3 + 's';
+        // Add some symbols starting from different positions for immediate visibility
+        if (Math.random() < 0.3) {
+            // 30% chance to start symbols at random screen positions for immediate visibility
+            symbol.style.left = Math.random() * 90 + 5 + '%';
+            symbol.style.top = Math.random() * 80 + 10 + '%';
+            // Reduce animation delay for these visible symbols
+            symbol.style.animationDelay = Math.random() * 2 + 's';
+        }
         
-        // Simple duration based on animation type
-        const duration = symbol.classList.contains('horizontal') ? 20 : 15;
-        symbol.style.animationDuration = duration + 's';
+        // Varied animation delay for natural flow
+        symbol.style.animationDelay = Math.random() * 5 + 's';
         
         this.container.appendChild(symbol);
         this.symbolCount++;
+        this.createdSymbols++;
         
-        console.log('Symbol appended:', symbol.textContent, 'Position:', symbol.style.left, symbol.style.top);
+        // Debug: Log symbol creation
+        if (this.createdSymbols <= 10 || this.createdSymbols % 10 === 0) {
+            console.log(`Created symbol #${this.createdSymbols}: ${randomSymbol}, active: ${this.symbolCount}`);
+        }
         
-        // Remove symbol after animation with cleanup
+        // Remove symbol after much longer time for better density
+        const cleanupTime = symbol.classList.contains('horizontal') ? 60000 : 50000;
         setTimeout(() => {
             if (symbol.parentNode) {
                 symbol.remove();
                 this.symbolCount--;
-                console.log('Symbol removed');
             }
-        }, (duration + 3) * 1000);
+        }, cleanupTime);
     }
 
     start() {
@@ -104,21 +113,21 @@ class MathBackground {
         
         this.isActive = true;
         
-        // Create initial symbols
-        for (let i = 0; i < 5; i++) {
+        // Create initial burst of symbols
+        for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 if (this.isActive) this.createFloatingSymbol();
-            }, i * 1000);
+            }, i * 300);
         }
         
-        // Continue creating symbols at intervals
+        // Continue creating symbols at frequent intervals for better density
         const interval = setInterval(() => {
             if (this.isActive && this.symbolCount < this.maxSymbols) {
                 this.createFloatingSymbol();
             } else if (!this.isActive) {
                 clearInterval(interval);
             }
-        }, 2500);
+        }, 800);
         
         this.animationIntervals.push(interval);
     }

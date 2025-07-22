@@ -11,7 +11,7 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 50;
+    z-index: 100;
     overflow: hidden;
 }
 
@@ -19,37 +19,38 @@
     position: absolute;
     font-size: 2rem;
     color: var(--accent);
-    opacity: 0.2;
-    animation: float 15s infinite linear;
+    opacity: 0.6;
+    animation: float 25s infinite linear;
     font-family: 'Times New Roman', serif;
     user-select: none;
     filter: blur(0px);
     transition: opacity 0.3s ease;
-    mix-blend-mode: overlay;
+    mix-blend-mode: normal;
+    will-change: transform, opacity;
 }
 
 .floating-symbol.extra-large {
     font-size: 5rem;
-    opacity: 0.15;
-    animation: float 25s infinite linear;
+    opacity: 0.4;
+    animation: float-spiral 35s infinite linear;
 }
 
 .floating-symbol.large {
     font-size: 3.5rem;
-    opacity: 0.18;
-    animation: float 20s infinite linear;
+    opacity: 0.5;
+    animation: float-drift 30s infinite linear;
 }
 
 .floating-symbol.medium {
     font-size: 2.5rem;
-    opacity: 0.2;
-    animation: float 18s infinite linear;
+    opacity: 0.6;
+    animation: float-pulse 25s infinite linear;
 }
 
 .floating-symbol.small {
     font-size: 1.5rem;
-    opacity: 0.25;
-    animation: float 12s infinite linear;
+    opacity: 0.7;
+    animation: float 20s infinite linear;
 }
 
 /* Theme-aware symbol coloring */
@@ -65,135 +66,137 @@
 
 @keyframes float {
     0% {
-        transform: translateY(100vh) rotate(0deg);
+        transform: translateY(0) rotate(0deg);
         opacity: 0;
     }
-    10% {
+    5% {
         opacity: var(--symbol-opacity, 0.6);
     }
-    90% {
+    95% {
         opacity: var(--symbol-opacity, 0.6);
     }
     100% {
-        transform: translateY(-10vh) rotate(360deg);
+        transform: translateY(-110vh) rotate(360deg);
         opacity: 0;
     }
 }
 
 @keyframes float-horizontal {
     0% {
-        transform: translateX(-10vw) translateY(50vh) rotate(0deg);
+        transform: translateX(0) translateY(0) rotate(0deg);
         opacity: 0;
     }
-    10% {
-        opacity: var(--symbol-opacity, 0.2);
+    5% {
+        opacity: var(--symbol-opacity, 0.6);
     }
-    90% {
-        opacity: var(--symbol-opacity, 0.2);
+    95% {
+        opacity: var(--symbol-opacity, 0.6);
     }
     100% {
-        transform: translateX(110vw) translateY(50vh) rotate(360deg);
+        transform: translateX(110vw) translateY(0) rotate(360deg);
         opacity: 0;
     }
 }
 
 .floating-symbol.horizontal {
-    animation: float-horizontal 20s infinite linear;
+    animation: float-horizontal 35s infinite linear;
 }
 
 /* New drift animation for more dynamic movement */
 @keyframes float-drift {
     0% {
-        transform: translateY(100vh) translateX(0px) rotate(0deg);
+        transform: translateY(0) translateX(0px) rotate(0deg);
         opacity: 0;
     }
-    10% {
-        opacity: var(--symbol-opacity, 0.25);
+    5% {
+        opacity: var(--symbol-opacity, 0.6);
     }
-    30% {
-        transform: translateY(70vh) translateX(50px) rotate(90deg);
+    25% {
+        transform: translateY(-30vh) translateX(50px) rotate(90deg);
     }
-    60% {
-        transform: translateY(40vh) translateX(-30px) rotate(180deg);
+    50% {
+        transform: translateY(-60vh) translateX(-30px) rotate(180deg);
     }
-    90% {
-        opacity: var(--symbol-opacity, 0.25);
-        transform: translateY(10vh) translateX(20px) rotate(270deg);
+    75% {
+        transform: translateY(-90vh) translateX(20px) rotate(270deg);
+    }
+    95% {
+        opacity: var(--symbol-opacity, 0.6);
     }
     100% {
-        transform: translateY(-10vh) translateX(0px) rotate(360deg);
+        transform: translateY(-110vh) translateX(0px) rotate(360deg);
         opacity: 0;
     }
 }
 
 .floating-symbol.drift {
-    animation: float-drift 22s infinite ease-in-out;
+    animation: float-drift 30s infinite ease-in-out;
 }
 
 /* Spiral animation for extra-large symbols */
 @keyframes float-spiral {
     0% {
-        transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0.5);
+        transform: translateY(0) translateX(0px) rotate(0deg) scale(0.5);
         opacity: 0;
     }
-    15% {
-        opacity: var(--symbol-opacity, 0.15);
-        transform: translateY(85vh) translateX(30px) rotate(45deg) scale(0.7);
+    10% {
+        opacity: var(--symbol-opacity, 0.4);
+        transform: translateY(-15vh) translateX(30px) rotate(45deg) scale(0.7);
     }
-    30% {
-        transform: translateY(70vh) translateX(-40px) rotate(90deg) scale(0.9);
+    25% {
+        transform: translateY(-30vh) translateX(-40px) rotate(90deg) scale(0.9);
     }
     50% {
-        transform: translateY(50vh) translateX(60px) rotate(180deg) scale(1);
+        transform: translateY(-50vh) translateX(60px) rotate(180deg) scale(1);
     }
-    70% {
-        transform: translateY(30vh) translateX(-50px) rotate(270deg) scale(1);
+    75% {
+        transform: translateY(-70vh) translateX(-50px) rotate(270deg) scale(1);
     }
-    85% {
-        opacity: var(--symbol-opacity, 0.15);
-        transform: translateY(15vh) translateX(20px) rotate(315deg) scale(0.8);
+    90% {
+        opacity: var(--symbol-opacity, 0.4);
+        transform: translateY(-85vh) translateX(20px) rotate(315deg) scale(0.8);
     }
     100% {
-        transform: translateY(-10vh) translateX(0px) rotate(360deg) scale(0.5);
+        transform: translateY(-110vh) translateX(0px) rotate(360deg) scale(0.5);
         opacity: 0;
     }
 }
 
 .floating-symbol.spiral {
-    animation: float-spiral 30s infinite ease-in-out;
+    animation: float-spiral 35s infinite ease-in-out;
 }
 
 /* Pulse animation for medium symbols */
 @keyframes float-pulse {
     0% {
-        transform: translateY(100vh) rotate(0deg) scale(1);
+        transform: translateY(0) rotate(0deg) scale(1);
         opacity: 0;
     }
     10% {
-        opacity: var(--symbol-opacity, 0.25);
-        transform: translateY(90vh) rotate(36deg) scale(1);
+        opacity: var(--symbol-opacity, 0.6);
+        transform: translateY(-10vh) rotate(36deg) scale(1);
     }
     25% {
-        transform: translateY(75vh) rotate(90deg) scale(1.1);
+        transform: translateY(-25vh) rotate(90deg) scale(1.1);
     }
     50% {
-        transform: translateY(50vh) rotate(180deg) scale(0.9);
+        transform: translateY(-50vh) rotate(180deg) scale(0.9);
     }
     75% {
-        transform: translateY(25vh) rotate(270deg) scale(1.1);
+        transform: translateY(-75vh) rotate(270deg) scale(1.1);
     }
     90% {
-        opacity: var(--symbol-opacity, 0.25);
-        transform: translateY(10vh) rotate(324deg) scale(1);
+        opacity: var(--symbol-opacity, 0.6);
+        transform: translateY(-90vh) rotate(324deg) scale(1);
     }
     100% {
-        transform: translateY(-10vh) rotate(360deg) scale(1);
+        transform: translateY(-110vh) rotate(360deg) scale(1);
         opacity: 0;
     }
 }
 
 .floating-symbol.pulse {
-    animation: float-pulse 16s infinite ease-in-out;
+    animation: float-pulse 25s infinite ease-in-out;
 }
 
 /* Phase 4: Celebratory Animations for Achievements */
