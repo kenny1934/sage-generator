@@ -68,7 +68,7 @@ class DataExportManager {
             }
 
             const confirmed = confirm(
-                'This will replace all your current data including preferences, history, favorites, and stats. ' +
+                'This will replace all your current data including preferences, history, favourites, and stats. ' +
                 'Are you sure you want to continue?\n\n' +
                 `Import file created: ${importedData.exportTimestamp || 'Unknown date'}`
             );

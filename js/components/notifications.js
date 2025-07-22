@@ -8,7 +8,7 @@ function showFavoritesPanel() {
     const favorites = DataManager.loadFavorites();
     
     if (favorites.length === 0) {
-        displayMessage('No favorite questions yet. Click the star button on any question to add it to favorites!', 'text-yellow-400');
+        displayMessage('No favourite questions yet. Click the star button on any question to add it to favourites!', 'text-yellow-400');
         return;
     }
     
@@ -18,7 +18,7 @@ function showFavoritesPanel() {
         <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto border border-red-500/30">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    ⭐ Your Favorite Questions (${favorites.length})
+                    ⭐ Your Favourite Questions (${favorites.length})
                 </h3>
                 <button class="action-btn bg-red-600 hover:bg-red-700" onclick="this.closest('.fixed').remove()">
                     Close
