@@ -7,12 +7,12 @@
 function addStatsDashboard() {
     console.log('Adding stats dashboard...');
     
-    const container = document.querySelector('.main-container');
+    const container = document.querySelector('.config-panel');
     
-    console.log('Container found:', !!container);
+    console.log('Config panel container found:', !!container);
     
     if (!container) {
-        console.error('Main container not found for stats dashboard');
+        console.error('Config panel container not found for stats dashboard');
         return;
     }
     
@@ -68,6 +68,40 @@ function addStatsDashboard() {
         </div>
     `;
     
+    // Create Data Management section that will be added below stats
+    const dataManagementSection = document.createElement('div');
+    dataManagementSection.id = 'dataManagementContainer';
+    dataManagementSection.className = 'mt-6 p-4 rounded-lg border border-gray-700 bg-gray-800';
+    dataManagementSection.innerHTML = `
+        <h3 class="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+            🗄️ Data Management
+        </h3>
+        <div class="flex gap-2 flex-wrap mb-3">
+            <button id="exportDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors" 
+                    style="background: #059669; border: 1px solid #047857; color: white;"
+                    onmouseover="this.style.background='#047857'" 
+                    onmouseout="this.style.background='#059669'">
+                📦 Export All Data
+            </button>
+            <button id="importDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                    style="background: #2563eb; border: 1px solid #1d4ed8; color: white;"
+                    onmouseover="this.style.background='#1d4ed8'" 
+                    onmouseout="this.style.background='#2563eb'">
+                📥 Import Data
+            </button>
+            <button id="clearDataBtn" class="action-btn text-sm px-3 py-2 rounded transition-colors"
+                    style="background: #dc2626; border: 1px solid #b91c1c; color: white;"
+                    onmouseover="this.style.background='#b91c1c'" 
+                    onmouseout="this.style.background='#dc2626'">
+                🗑️ Clear All
+            </button>
+        </div>
+        <input type="file" id="importFileInput" class="hidden" accept=".json">
+        <p class="text-xs text-gray-400">
+            Export your preferences, history, favorites, streaks, and stats for backup or transfer between devices.
+        </p>
+    `;
+    
     try {
         // Always ensure dashboard is positioned at the bottom of the container
         const existingDashboard = container.querySelector('#statsOverview')?.parentElement;
@@ -76,40 +110,57 @@ function addStatsDashboard() {
             console.log('Removed existing dashboard to reposition');
         }
         
-        // Simply append to the end of the container
+        // Append stats section to the container
         container.appendChild(statsSection);
         console.log('Stats dashboard added successfully at bottom position');
         
-        // Immediate verification
-        const insertedDashboard = document.querySelector('#statsOverview');
-        const insertedDetails = document.querySelector('#statsDetails');
-        const insertedFavorites = document.querySelector('#favoriteTopicsSection');
-        const insertedDifficulty = document.querySelector('#difficultyDistributionSection');
-        
-        console.log('Dashboard verification:');
-        console.log('- statsOverview found:', !!insertedDashboard);
-        console.log('- statsDetails found:', !!insertedDetails);
-        console.log('- favoriteTopicsSection found:', !!insertedFavorites);
-        console.log('- difficultyDistributionSection found:', !!insertedDifficulty);
-        
-        if (insertedDashboard) {
-            console.log('Dashboard HTML structure confirmed in DOM');
-        
-        // Check if dashboard is visible (not hidden by CSS)
-        const computedStyle = window.getComputedStyle(insertedDashboard);
-        console.log('Dashboard display style:', computedStyle.display);
-        console.log('Dashboard visibility:', computedStyle.visibility);
-        console.log('Dashboard opacity:', computedStyle.opacity);
-        
-        // Check dashboard position in DOM
-        console.log('Dashboard parent:', insertedDashboard.parentElement);
-        console.log('Dashboard next sibling:', insertedDashboard.nextElementSibling);
-        console.log('Dashboard class list:', insertedDashboard.className);
-        } else {
-            console.error('Dashboard was not inserted properly into DOM');
+        // Remove existing data management section if it exists
+        const existingDataManagement = container.querySelector('#dataManagementContainer');
+        if (existingDataManagement) {
+            existingDataManagement.remove();
         }
+        
+        // Add Data Management section after stats
+        container.appendChild(dataManagementSection);
+        console.log('Data Management section added after stats dashboard');
+        
+        // Set up event listeners for data management buttons
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const importDataBtn = document.getElementById('importDataBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        
+        if (exportDataBtn) {
+            exportDataBtn.addEventListener('click', () => {
+                DataExportManager.exportData();
+            });
+        }
+        
+        if (importDataBtn) {
+            importDataBtn.addEventListener('click', () => {
+                importFileInput.click();
+            });
+        }
+        
+        if (clearDataBtn) {
+            clearDataBtn.addEventListener('click', () => {
+                DataExportManager.clearAllData();
+            });
+        }
+        
+        if (importFileInput) {
+            importFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    DataExportManager.importData(file);
+                    // Reset file input
+                    e.target.value = '';
+                }
+            });
+        }
+        
     } catch (error) {
-        console.error('Error inserting stats dashboard:', error);
+        console.error('Error in addStatsDashboard function:', error);
     }
 }
 

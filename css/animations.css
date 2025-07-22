@@ -19,7 +19,7 @@
     position: absolute;
     font-size: 2rem;
     color: var(--accent);
-    opacity: 0.6;
+    opacity: 0.25;
     animation: float 25s infinite linear;
     font-family: 'Times New Roman', serif;
     user-select: none;
@@ -31,37 +31,61 @@
 
 .floating-symbol.extra-large {
     font-size: 5rem;
-    opacity: 0.4;
+    opacity: 0.15;
     animation: float-spiral 35s infinite linear;
 }
 
 .floating-symbol.large {
     font-size: 3.5rem;
-    opacity: 0.5;
+    opacity: 0.2;
     animation: float-drift 30s infinite linear;
 }
 
 .floating-symbol.medium {
     font-size: 2.5rem;
-    opacity: 0.6;
+    opacity: 0.25;
     animation: float-pulse 25s infinite linear;
 }
 
 .floating-symbol.small {
     font-size: 1.5rem;
-    opacity: 0.7;
+    opacity: 0.3;
     animation: float 20s infinite linear;
 }
 
-/* Theme-aware symbol coloring */
+/* Theme-aware symbol styling */
 [data-theme="dark"] .floating-symbol {
     color: var(--accent);
     filter: hue-rotate(0deg) brightness(0.8);
+    /* Keep original opacity for good visibility in dark theme */
 }
 
 [data-theme="light"] .floating-symbol {
-    color: var(--accent);
-    filter: hue-rotate(10deg) brightness(0.6);
+    color: #cbd5e1; /* Light gray instead of accent color */
+    filter: none; /* Remove filters for cleaner appearance */
+    /* Reduce opacity significantly for light theme subtlety */
+    opacity: 0.08 !important;
+}
+
+[data-theme="light"] .floating-symbol.extra-large {
+    opacity: 0.05 !important;
+}
+
+[data-theme="light"] .floating-symbol.large {
+    opacity: 0.06 !important;
+}
+
+[data-theme="light"] .floating-symbol.medium {
+    opacity: 0.08 !important;
+}
+
+[data-theme="light"] .floating-symbol.small {
+    opacity: 0.1 !important;
+}
+
+/* Light theme keyframe opacity overrides */
+[data-theme="light"] .floating-symbol {
+    --symbol-opacity: 0.08;
 }
 
 @keyframes float {
@@ -70,10 +94,10 @@
         opacity: 0;
     }
     5% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     95% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     100% {
         transform: translateY(-110vh) rotate(360deg);
@@ -87,10 +111,10 @@
         opacity: 0;
     }
     5% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     95% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     100% {
         transform: translateX(110vw) translateY(0) rotate(360deg);
@@ -109,7 +133,7 @@
         opacity: 0;
     }
     5% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     25% {
         transform: translateY(-30vh) translateX(50px) rotate(90deg);
@@ -121,7 +145,7 @@
         transform: translateY(-90vh) translateX(20px) rotate(270deg);
     }
     95% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
     }
     100% {
         transform: translateY(-110vh) translateX(0px) rotate(360deg);
@@ -173,7 +197,7 @@
         opacity: 0;
     }
     10% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
         transform: translateY(-10vh) rotate(36deg) scale(1);
     }
     25% {
@@ -186,7 +210,7 @@
         transform: translateY(-75vh) rotate(270deg) scale(1.1);
     }
     90% {
-        opacity: var(--symbol-opacity, 0.6);
+        opacity: var(--symbol-opacity, 0.25);
         transform: translateY(-90vh) rotate(324deg) scale(1);
     }
     100% {

@@ -19,8 +19,7 @@ class MathBackground {
         this.isActive = false;
         this.animationIntervals = [];
         this.symbolCount = 0;
-        this.maxSymbols = 30; // Increased for better visibility
-        this.createdSymbols = 0; // Debug counter
+        this.maxSymbols = 10; // Optimal balance for clean appearance
     }
 
     init() {
@@ -91,12 +90,7 @@ class MathBackground {
         
         this.container.appendChild(symbol);
         this.symbolCount++;
-        this.createdSymbols++;
         
-        // Debug: Log symbol creation
-        if (this.createdSymbols <= 10 || this.createdSymbols % 10 === 0) {
-            console.log(`Created symbol #${this.createdSymbols}: ${randomSymbol}, active: ${this.symbolCount}`);
-        }
         
         // Remove symbol after much longer time for better density
         const cleanupTime = symbol.classList.contains('horizontal') ? 60000 : 50000;
@@ -114,20 +108,20 @@ class MathBackground {
         this.isActive = true;
         
         // Create initial burst of symbols
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 5; i++) {
             setTimeout(() => {
                 if (this.isActive) this.createFloatingSymbol();
-            }, i * 300);
+            }, i * 500);
         }
         
-        // Continue creating symbols at frequent intervals for better density
+        // Continue creating symbols at moderate intervals for clean appearance
         const interval = setInterval(() => {
             if (this.isActive && this.symbolCount < this.maxSymbols) {
                 this.createFloatingSymbol();
             } else if (!this.isActive) {
                 clearInterval(interval);
             }
-        }, 800);
+        }, 1500);
         
         this.animationIntervals.push(interval);
     }

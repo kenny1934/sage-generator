@@ -96,11 +96,6 @@ function attachEventListeners() {
     const exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
     const apiKeyInput = document.getElementById('apiKeyInput');
     
-    // Phase 4: Data management buttons
-    const exportDataBtn = document.getElementById('exportDataBtn');
-    const importDataBtn = document.getElementById('importDataBtn');
-    const clearDataBtn = document.getElementById('clearDataBtn');
-    const importFileInput = document.getElementById('importFileInput');
     
     if (generateQuestionsBtn) {
         generateQuestionsBtn.addEventListener('click', generateMathQuestions);
@@ -147,35 +142,6 @@ function attachEventListeners() {
     } else {
     }
     
-    // Phase 4: Data management event handlers
-    if (exportDataBtn) {
-        exportDataBtn.addEventListener('click', () => {
-            DataExportManager.exportData();
-        });
-    }
-    
-    if (importDataBtn) {
-        importDataBtn.addEventListener('click', () => {
-            importFileInput.click();
-        });
-    }
-    
-    if (clearDataBtn) {
-        clearDataBtn.addEventListener('click', () => {
-            DataExportManager.clearAllData();
-        });
-    }
-    
-    if (importFileInput) {
-        importFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                DataExportManager.importData(file);
-                // Reset file input
-                e.target.value = '';
-            }
-        });
-    }
     
     // Keyboard navigation support
     document.addEventListener('keydown', handleKeyboardNavigation);
