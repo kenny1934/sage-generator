@@ -3,6 +3,10 @@
  * Centralized initialization, event handling, and app coordination
  */
 
+// EMERGENCY: Basic JavaScript test
+console.log('🚨 EMERGENCY: main.js is loading!');
+alert('JavaScript is working! Check console for more details.');
+
 // Initialize DOM references from config.js
 let isMathRendered = true; // Default state: math is rendered
 let isKaTeXLoaded = false;
@@ -15,7 +19,8 @@ let googleUser = null;
 
 // Initialize the application
 function initializeApp() {
-    console.log('Initializing app...');
+    console.log('🚨 EMERGENCY: initializeApp() is running!');
+    alert('initializeApp() called - MathBackground should initialize now!');
     
     // Initialize DOM references from config.js
     initializeDOMReferences();
@@ -30,8 +35,16 @@ function initializeApp() {
     QuestionCache.cleanup();
     
     // Phase 4: Initialize animated background
-    window.mathBackground = new MathBackground();
-    window.mathBackground.init();
+    console.log('🚨 EMERGENCY: About to create MathBackground...');
+    try {
+        window.mathBackground = new MathBackground();
+        console.log('🚨 EMERGENCY: MathBackground created successfully!');
+        window.mathBackground.init();
+        console.log('🚨 EMERGENCY: MathBackground.init() completed!');
+    } catch (error) {
+        console.error('🚨 EMERGENCY: MathBackground failed!', error);
+        alert('MathBackground error: ' + error.message);
+    }
     
     // Phase 4: Initialize swipe gestures for mobile navigation
     window.swipeHandler = new SwipeHandler();
