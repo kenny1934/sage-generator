@@ -237,21 +237,45 @@ function handleKeyboardNavigation(e) {
         exportQuestions();
     }
     
-    // Arrow keys for question navigation (if multiple questions)
+    // Arrow keys for question navigation (if multiple questions and not typing in input field)
     if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && totalQuestions > 1 && !questionsContainer.classList.contains('hidden')) {
-        e.preventDefault();
-        const direction = e.key === 'ArrowLeft' ? -1 : 1;
-        navigateQuestion(direction);
+        // Check if user is currently typing in an input field
+        const activeElement = document.activeElement;
+        const isTypingInInput = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' || 
+            activeElement.tagName === 'SELECT' ||
+            activeElement.isContentEditable
+        );
+        
+        // Only navigate if not typing in an input field
+        if (!isTypingInInput) {
+            e.preventDefault();
+            const direction = e.key === 'ArrowLeft' ? -1 : 1;
+            navigateQuestion(direction);
+        }
     }
     
-    // Number keys 1-3 to reveal specific answers (if questions are visible)
+    // Number keys 1-3 to reveal specific answers (if questions are visible and not typing in input field)
     if (['1', '2', '3'].includes(e.key) && questionsContainer.classList.contains('hidden') === false) {
-        const questionIndex = parseInt(e.key) - 1;
-        const questions = document.querySelectorAll('.question-item');
-        if (questions[questionIndex]) {
-            const revealBtn = questions[questionIndex].querySelector('.action-btn:last-child');
-            if (revealBtn) {
-                revealBtn.click();
+        // Check if user is currently typing in an input field
+        const activeElement = document.activeElement;
+        const isTypingInInput = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' || 
+            activeElement.tagName === 'SELECT' ||
+            activeElement.isContentEditable
+        );
+        
+        // Only reveal answers if not typing in an input field
+        if (!isTypingInInput) {
+            const questionIndex = parseInt(e.key) - 1;
+            const questions = document.querySelectorAll('.question-item');
+            if (questions[questionIndex]) {
+                const revealBtn = questions[questionIndex].querySelector('.action-btn:last-child');
+                if (revealBtn) {
+                    revealBtn.click();
+                }
             }
         }
     }
