@@ -366,7 +366,7 @@ function exportQuestions() {
         exportContent += `Problem ${index + 1}:\n`;
         exportContent += `${problem.question}\n\n`;
         exportContent += `Answer:\n${problem.correctAnswer}\n\n`;
-        exportContent += `Solution:\n${problem.stepByStepSolution.replace(/\\n/g, '\n')}\n\n`;
+        exportContent += `Solution:\n${problem.stepByStepSolution}\n\n`;
         exportContent += `${'-'.repeat(30)}\n\n`;
     });
 
@@ -554,8 +554,9 @@ async function generateMathQuestions() {
     // Start enhanced loading animation
     startLoadingAnimation();
 
-    // Construct the prompt for the Gemini API
-    const prompt = `
+    // BACKUP - Original working prompt (saved before improvements):
+    /*
+    const originalPrompt = `
         Generate 3 math problems for the following topic and grade level, with a difficulty level of "${difficulty}".
         For each problem, provide:
         - A "question" in LaTeX format (use $$ for display math, $ for inline math).
@@ -580,6 +581,63 @@ async function generateMathQuestions() {
           }
         ]
         Ensure the LaTeX is correctly escaped for JSON strings.
+    `;
+    */
+
+    // Detect if the query contains Chinese characters
+    const containsChinese = /[\u4e00-\u9fff]/.test(mathTopic);
+    const languageInstruction = containsChinese ? 
+        "LANGUAGE: Respond in Traditional Chinese (繁體中文). Use Traditional Chinese characters for all text content." :
+        "";
+
+    // Improved prompt with quality standards and format enforcement
+    const prompt = `
+You are an expert mathematics educator and curriculum designer with extensive experience creating high-quality assessment materials. You specialize in generating pedagogically sound problems with consistent formatting and clear solutions for teaching purposes.
+
+CRITICAL: You MUST return a valid JSON array with exactly 3 objects. Each object must contain exactly these three fields: "question", "correctAnswer", "stepByStepSolution".
+
+${languageInstruction}
+
+Generate 3 math problems for: ${sanitizeString(mathTopic)}
+Difficulty Level: ${difficulty}
+
+QUESTION STANDARDS:
+- Match real textbook difficulty - include challenging computational work where appropriate
+- Use realistic numbers that may require substantial calculation (authentic to curriculum)
+- Problems should reflect actual classroom/exam standards, not simplified versions
+
+TEACHING SOLUTIONS:
+- Show complete mathematical steps with clear reasoning
+- Keep explanations concise and focused
+- Mention one common student error if relevant (use \\n for line breaks)
+- Include key teaching point when helpful (use \\n for line breaks)
+
+Math Topic & Grade Level: ${sanitizeString(mathTopic)}
+Difficulty: ${difficulty}
+
+REQUIRED OUTPUT FORMAT - DO NOT DEVIATE:
+- Valid JSON array with exactly 3 problem objects
+- Each object has: "question", "correctAnswer", "stepByStepSolution"  
+- All LaTeX properly escaped: use \\n for line breaks, \\text{} for units
+- Use $$ for display math, $ for inline math
+- Use \\implies for logical steps
+- NEVER use HTML tags like <br> - ONLY use \\n for line breaks
+
+Provide the output as a JSON array of objects. Each object in the array represents one problem.
+Example JSON structure:
+[
+  {
+    "question": "$$2x + 5 = 11$$ Solve for x.",
+    "correctAnswer": "$$x = 3$$",
+    "stepByStepSolution": "To solve $2x + 5 = 11$: \\n 1. Subtract 5 from both sides: $2x = 11 - 5 \\implies 2x = 6$. \\n 2. Divide by 2: $x = 6 / 2 \\implies x = 3$."
+  },
+  {
+    "question": "What is the area of a rectangle with length $l = 5$ cm and width $w = 3$ cm?",
+    "correctAnswer": "$$15 \\text{ cm}^2$$",
+    "stepByStepSolution": "The area of a rectangle is given by the formula $A = l \\times w$. \\n Given $l=5$ cm and $w=3$ cm, \\n $A = 5 \\times 3 = 15 \\text{ cm}^2$."
+  }
+]
+Ensure the LaTeX is correctly escaped for JSON strings.
     `;
 
     try {
@@ -609,12 +667,34 @@ async function generateMathQuestions() {
         const forceNewQuestions = document.getElementById('forceNewQuestions')?.checked || false;
         
         // Phase 4: Check cache before making API call (unless forced to skip)
-        if (!forceNewQuestions) {
+        // TEMPORARY: Force fresh questions for debugging
+        const debugFreshQuestions = true; // Set to false to re-enable cache
+        const debugForceFallback = false; // Set to true to test fallback questions
+        
+        if (!forceNewQuestions && !debugFreshQuestions) {
             const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
             if (cachedQuestions) {
+                console.log('🔍 DEBUG: Using cached questions (first solution):');
+                console.log('Cached stepByStepSolution:', cachedQuestions[0]?.stepByStepSolution);
+                console.log('Contains \\\\n:', cachedQuestions[0]?.stepByStepSolution?.includes('\\n'));
+                console.log('Has actual newlines:', cachedQuestions[0]?.stepByStepSolution?.includes('\n'));
+                console.log('Newline count:', (cachedQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
                 displayMathQuestions(cachedQuestions, true); // Pass true to indicate cached
                 return;
             }
+        }
+
+        // TEMPORARY: Force fallback for testing
+        if (debugForceFallback) {
+            console.log('🔍 DEBUG: Forcing fallback questions for testing');
+            const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
+            console.log('🔍 DEBUG: Forced fallback questions (first solution):');
+            console.log('Fallback stepByStepSolution:', fallbackQuestions[0]?.stepByStepSolution);
+            console.log('Contains \\\\n:', fallbackQuestions[0]?.stepByStepSolution?.includes('\\n'));
+            console.log('Has actual newlines:', fallbackQuestions[0]?.stepByStepSolution?.includes('\n'));
+            console.log('Newline count:', (fallbackQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
+            displayMathQuestions(fallbackQuestions, false);
+            return;
         }
 
         const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
@@ -628,6 +708,44 @@ async function generateMathQuestions() {
                 const mathProblems = JSON.parse(jsonText);
                 
                 if (Array.isArray(mathProblems) && mathProblems.length > 0) {
+                    console.log('🔍 DEBUG: Raw AI response (first solution):');
+                    console.log('Raw stepByStepSolution:', mathProblems[0]?.stepByStepSolution);
+                    console.log('Contains \\\\n:', mathProblems[0]?.stepByStepSolution?.includes('\\n'));
+                    console.log('Contains <br>:', mathProblems[0]?.stepByStepSolution?.includes('<br>'));
+                    
+                    // Clean up any HTML tags and standardize line breaks
+                    mathProblems.forEach((problem, index) => {
+                        if (problem.stepByStepSolution) {
+                            const original = problem.stepByStepSolution;
+                            
+                            problem.stepByStepSolution = problem.stepByStepSolution
+                                .replace(/<br\s*\/?>/gi, '\n')  // Convert <br> to actual newlines
+                                .replace(/<\/p>/gi, '\n')
+                                .replace(/<p>/gi, '')
+                                .replace(/<[^>]*>/g, '') // Remove any other HTML tags
+                                .replace(/\\n/g, '\n'); // Convert literal \\n to actual newlines
+                            
+                            if (index === 0) {
+                                console.log('🔍 DEBUG: After processing (first solution):');
+                                console.log('Original:', JSON.stringify(original));
+                                console.log('Processed:', JSON.stringify(problem.stepByStepSolution));
+                                console.log('Has actual newlines:', problem.stepByStepSolution.includes('\n'));
+                                console.log('Newline count:', (problem.stepByStepSolution.match(/\n/g) || []).length);
+                            }
+                            
+                            // Fix LaTeX commands that might get truncated by JSON processing
+                            problem.stepByStepSolution = problem.stepByStepSolution
+                                .replace(/([^\\])otin/g, '$1\\notin')
+                                .replace(/^otin/g, '\\notin')
+                                .replace(/([^\\])quad/g, '$1\\quad')
+                                .replace(/^quad/g, '\\quad')
+                                .replace(/([^\\])cdot/g, '$1\\cdot')
+                                .replace(/^cdot/g, '\\cdot')
+                                .replace(/([^\\])neq/g, '$1\\neq')
+                                .replace(/^neq/g, '\\neq');
+                        }
+                    });
+                    
                     // Phase 4: Cache the questions before displaying
                     QuestionCache.set(mathTopic, difficulty, mathProblems);
                     displayMathQuestions(mathProblems, false); // Pass false to indicate newly generated
@@ -653,6 +771,11 @@ async function generateMathQuestions() {
             updateLoadingMessage("Using offline fallback questions...");
             setTimeout(() => {
                 const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
+                console.log('🔍 DEBUG: Fallback questions (first solution):');
+                console.log('Fallback stepByStepSolution:', fallbackQuestions[0]?.stepByStepSolution);
+                console.log('Contains \\\\n:', fallbackQuestions[0]?.stepByStepSolution?.includes('\\n'));
+                console.log('Has actual newlines:', fallbackQuestions[0]?.stepByStepSolution?.includes('\n'));
+                console.log('Newline count:', (fallbackQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
                 displayMathQuestions(fallbackQuestions, false); // Fallback questions count as new
                 showNetworkMessage('📚 Showing sample questions (offline mode)', 'warning');
             }, 1000);
@@ -677,12 +800,27 @@ async function generateMathQuestions() {
 
 // Display generated math questions
 function displayMathQuestions(problems, isFromCache = false) {
+    console.log('🔍 DEBUG: displayMathQuestions called!');
+    console.log('Problems array:', problems);
+    console.log('Problems length:', problems?.length);
+    console.log('Is from cache:', isFromCache);
+    console.log('First problem has stepByStepSolution:', !!problems[0]?.stepByStepSolution);
+    console.log('First problem solution has newlines:', problems[0]?.stepByStepSolution?.includes('\n'));
+    
     const mathQuestionsList = document.getElementById('mathQuestionsList');
     const questionsContainer = document.getElementById('questionsContainer');
     const resetBtn = document.getElementById('resetBtn');
     const mathTopicInput = document.getElementById('mathTopic');
     const difficultySelect = document.getElementById('difficulty');
     const messageContainer = document.getElementById('messageContainer');
+    
+    console.log('🔍 DEBUG: DOM elements found:');
+    console.log('mathQuestionsList:', !!mathQuestionsList);
+    console.log('questionsContainer:', !!questionsContainer);
+    console.log('resetBtn:', !!resetBtn);
+    console.log('mathTopicInput:', !!mathTopicInput);
+    console.log('difficultySelect:', !!difficultySelect);
+    console.log('messageContainer:', !!messageContainer);
     
     if (mathQuestionsList) {
         mathQuestionsList.innerHTML = ''; // Clear previous questions
@@ -696,14 +834,34 @@ function displayMathQuestions(problems, isFromCache = false) {
         return;
     }
 
+    console.log('🔍 DEBUG: Starting to create question items...');
+    
     problems.forEach((problem, index) => {
-        const problemDiv = createQuestionItem(problem, index, mathTopicInput.value.trim());
+        console.log(`🔍 DEBUG: Processing problem ${index + 1}`);
+        console.log('Problem data:', {
+            hasQuestion: !!problem.question,
+            hasAnswer: !!problem.correctAnswer,
+            hasStepByStepSolution: !!problem.stepByStepSolution,
+            solutionLength: problem.stepByStepSolution?.length,
+            solutionHasNewlines: problem.stepByStepSolution?.includes('\n')
+        });
         
-        // Add answer reveal functionality
-        setupAnswerReveal(problemDiv, problemDiv.querySelector('.answer-content'));
-        
-        mathQuestionsList.appendChild(problemDiv);
+        try {
+            console.log('🔍 DEBUG: createQuestionItem function exists:', typeof createQuestionItem !== 'undefined');
+            const problemDiv = createQuestionItem(problem, index, mathTopicInput.value.trim());
+            console.log(`🔍 DEBUG: createQuestionItem returned:`, !!problemDiv);
+            
+            // Add answer reveal functionality
+            setupAnswerReveal(problemDiv, problemDiv.querySelector('.answer-content'));
+            
+            mathQuestionsList.appendChild(problemDiv);
+            console.log(`🔍 DEBUG: Problem ${index + 1} added to DOM`);
+        } catch (error) {
+            console.error(`🔍 DEBUG: Error creating problem ${index + 1}:`, error);
+        }
     });
+    
+    console.log('🔍 DEBUG: Finished creating question items');
 
     questionsContainer.classList.remove('hidden');
     resetBtn.classList.remove('hidden');

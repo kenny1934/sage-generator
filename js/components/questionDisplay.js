@@ -199,16 +199,55 @@ function replaceProblemInList(index, newProblem) {
                 processedSolution = preprocessMathContent(newProblem.stepByStepSolution);
             }
             
-            // Convert \n to line breaks
-            processedSolution = processedSolution.replace(/\\n/g, '<br>');
+            console.log('🔍 DEBUG: About to call sanitizeWithLineBreaks (similar question)');
+            console.log('Function exists:', typeof sanitizeWithLineBreaks !== 'undefined');
             
+            // Use safe function call with fallback
+            const safeRender = (content) => {
+                try {
+                    if (typeof sanitizeWithLineBreaks !== 'undefined') {
+                        return sanitizeWithLineBreaks(content);
+                    } else {
+                        console.error('sanitizeWithLineBreaks not defined, using fallback');
+                        return sanitizeString(content);
+                    }
+                } catch (error) {
+                    console.error('Error in sanitizeWithLineBreaks:', error);
+                    return sanitizeString(content);
+                }
+            };
+
+            // Update the similar question rendering to use proper sanitization functions
+            const safeRenderAnswerSimilar = (content) => {
+                try {
+                    return sanitizeString(content); // Answers should NOT have line breaks
+                } catch (error) {
+                    console.error('Error in sanitizeString for similar answer:', error);
+                    return content || '';
+                }
+            };
+            
+            const safeRenderSolutionSimilar = (content) => {
+                try {
+                    if (typeof sanitizeWithLineBreaks !== 'undefined') {
+                        return sanitizeWithLineBreaks(content); // Solutions SHOULD have line breaks
+                    } else {
+                        console.error('sanitizeWithLineBreaks not defined, using fallback');
+                        return sanitizeString(content);
+                    }
+                } catch (error) {
+                    console.error('Error in sanitizeWithLineBreaks for similar solution:', error);
+                    return sanitizeString(content);
+                }
+            };
+
             answerContentDiv.innerHTML = `<div class="mb-3 p-2 rounded text-xs" style="background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary);">
                                              <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
                                          </div>` +
-                                         `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${sanitizeString(processedAnswer)}</div>` +
-                                         `<div class="latex-view">${sanitizeString(newProblem.correctAnswer)}</div>` +
-                                         `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${sanitizeString(processedSolution)}</div>` +
-                                         `<div class="latex-view">${sanitizeString(newProblem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`;
+                                         `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${safeRenderAnswerSimilar(processedAnswer)}</div>` +
+                                         `<div class="latex-view">${safeRenderAnswerSimilar(newProblem.correctAnswer)}</div>` +
+                                         `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${safeRenderSolutionSimilar(processedSolution)}</div>` +
+                                         `<div class="latex-view">${safeRenderSolutionSimilar(newProblem.stepByStepSolution)}</div>`;
             
             // Hide the answer initially
             answerContentDiv.style.display = 'none';
@@ -237,7 +276,18 @@ function replaceProblemInList(index, newProblem) {
 
 // Create individual question item DOM element
 function createQuestionItem(problem, index, mathTopic) {
-    const problemDiv = document.createElement('div');
+    console.log(`🔍 DEBUG: createQuestionItem ENTRY for question ${index + 1} [VERSION 2.0]`);
+    
+    try {
+        console.log(`🔍 DEBUG: createQuestionItem called for question ${index + 1}`);
+        console.log('Problem data:', {
+            question: problem.question?.substring(0, 50) + '...',
+            hasStepByStepSolution: !!problem.stepByStepSolution,
+            solutionHasNewlines: problem.stepByStepSolution?.includes('\n')
+        });
+        
+        console.log('🔍 DEBUG: Creating problem div...');
+        const problemDiv = document.createElement('div');
     problemDiv.className = 'question-item';
     problemDiv.style.animationDelay = `${index * 0.1}s`; // Staggered animation
     problemDiv.setAttribute('role', 'listitem');
@@ -262,17 +312,22 @@ function createQuestionItem(problem, index, mathTopic) {
     questionRenderedDiv.className = 'text-lg mb-4 math-rendered';
     questionRenderedDiv.style.color = 'var(--text-primary)';
     
+    console.log('🔍 DEBUG: About to preprocess question content...');
+    
     // Always preprocess the content to ensure proper math handling
     try {
         console.log(`Question ${index + 1} raw content:`, problem.question.substring(0, 150) + '...');
+        console.log('🔍 DEBUG: Calling preprocessMathContent...');
         const processedQuestion = preprocessMathContent(problem.question);
+        console.log('🔍 DEBUG: Calling sanitizeString for question (questions should not have line breaks)...');
         setHTMLContent(questionRenderedDiv, sanitizeString(processedQuestion));
         console.log(`Question ${index + 1} after processing:`, processedQuestion.substring(0, 150) + '...');
         console.log(`Question ${index + 1} has dollar signs:`, processedQuestion.includes('$'));
     } catch (error) {
-        console.error(`Error processing question ${index + 1}:`, error);
+        console.error(`🔍 DEBUG: Error processing question ${index + 1}:`, error);
         setHTMLContent(questionRenderedDiv, sanitizeString(problem.question));
     }
+    console.log('🔍 DEBUG: Appending question div to problem div...');
     problemDiv.appendChild(questionRenderedDiv);
 
     // Container for raw LaTeX
@@ -281,15 +336,45 @@ function createQuestionItem(problem, index, mathTopic) {
     questionLatexDiv.textContent = problem.question;
     problemDiv.appendChild(questionLatexDiv);
 
+    console.log('🔍 DEBUG: About to create action buttons... [NEW CODE LOADED]');
     // Create action buttons
-    const buttonContainer = createQuestionButtons(problem, index);
-    problemDiv.appendChild(buttonContainer);
+    try {
+        const buttonContainer = createQuestionButtons(problem, index);
+        console.log('🔍 DEBUG: createQuestionButtons succeeded');
+        problemDiv.appendChild(buttonContainer);
+        console.log('🔍 DEBUG: Button container appended');
+    } catch (error) {
+        console.error('🔍 DEBUG: Error in createQuestionButtons:', error);
+        // Continue without buttons
+    }
 
+    console.log('🔍 DEBUG: About to call createAnswerContent...');
     // Create answer content div (hidden initially)
     const answerContentDiv = createAnswerContent(problem);
+    console.log('🔍 DEBUG: createAnswerContent returned:', !!answerContentDiv);
     problemDiv.appendChild(answerContentDiv);
 
-    return problemDiv;
+        console.log('🔍 DEBUG: createQuestionItem completed successfully');
+        return problemDiv;
+        
+    } catch (error) {
+        console.error(`🔍 DEBUG: FATAL ERROR in createQuestionItem for question ${index + 1}:`, error);
+        console.error('Error stack:', error.stack);
+        
+        // Create a fallback simple question div
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.className = 'question-item';
+        fallbackDiv.innerHTML = `
+            <div class="text-red-500 p-4 border border-red-500 rounded">
+                <h3>Error rendering question ${index + 1}</h3>
+                <p>Question: ${problem.question || 'No question'}</p>
+                <p>Answer: ${problem.correctAnswer || 'No answer'}</p>
+                <pre class="whitespace-pre-wrap mt-2">${problem.stepByStepSolution || 'No solution'}</pre>
+                <p class="text-xs mt-2">Error: ${error.message}</p>
+            </div>
+        `;
+        return fallbackDiv;
+    }
 }
 
 // Create action buttons for a question
@@ -330,6 +415,10 @@ function createQuestionButtons(problem, index) {
 
 // Create answer content section
 function createAnswerContent(problem) {
+    console.log('🔍 DEBUG: createAnswerContent called');
+    console.log('Problem stepByStepSolution:', JSON.stringify(problem.stepByStepSolution));
+    console.log('Has newlines:', problem.stepByStepSolution?.includes('\n'));
+    
     const answerContentDiv = document.createElement('div');
     answerContentDiv.className = 'answer-content text-gray-300';
     
@@ -346,16 +435,42 @@ function createAnswerContent(problem) {
         processedSolution = preprocessMathContent(problem.stepByStepSolution);
     }
     
-    // Convert \n to line breaks but preserve other formatting
-    processedSolution = processedSolution.replace(/\\n/g, '<br>');
+    console.log('🔍 DEBUG: About to call sanitizeWithLineBreaks');
+    console.log('Function exists:', typeof sanitizeWithLineBreaks !== 'undefined');
     
+    // Use safe function call with appropriate sanitization for each content type
+    const safeRenderAnswer = (content) => {
+        try {
+            // Answers should NOT have line breaks - use sanitizeString
+            return sanitizeString(content);
+        } catch (error) {
+            console.error('Error in sanitizeString for answer:', error);
+            return content || '';
+        }
+    };
+    
+    const safeRenderSolution = (content) => {
+        try {
+            // Solutions SHOULD have line breaks - use sanitizeWithLineBreaks
+            if (typeof sanitizeWithLineBreaks !== 'undefined') {
+                return sanitizeWithLineBreaks(content);
+            } else {
+                console.error('sanitizeWithLineBreaks not defined, using fallback');
+                return sanitizeString(content);
+            }
+        } catch (error) {
+            console.error('Error in sanitizeWithLineBreaks for solution:', error);
+            return sanitizeString(content);
+        }
+    };
+
     answerContentDiv.innerHTML = `<div class="mb-3 p-2 rounded text-xs" style="background: var(--button-bg); border: 1px solid var(--border-color); color: var(--text-secondary);">
                                      <span class="font-semibold">⚠️ AI Generated Content:</span> Please verify answers independently. AI responses may contain errors.
                                  </div>` +
-                                 `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${sanitizeString(processedAnswer)}</div>` +
-                                 `<div class="latex-view">${sanitizeString(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
-                                 `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${sanitizeString(processedSolution)}</div>` +
-                                 `<div class="latex-view">${sanitizeString(problem.stepByStepSolution.replace(/\\n/g, '<br>'))}</div>`; // Raw LaTeX for solution
+                                 `<p class="font-bold mb-2" style="color: var(--accent);">Correct Answer:</p><div class="mb-4 math-rendered" style="color: var(--text-primary);">${safeRenderAnswer(processedAnswer)}</div>` +
+                                 `<div class="latex-view">${safeRenderAnswer(problem.correctAnswer)}</div>` + // Raw LaTeX for answer
+                                 `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${safeRenderSolution(processedSolution)}</div>` +
+                                 `<div class="latex-view">${safeRenderSolution(problem.stepByStepSolution)}</div>`; // Raw LaTeX with preserved line breaks
     
     return answerContentDiv;
 }

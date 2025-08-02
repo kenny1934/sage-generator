@@ -165,6 +165,47 @@ function sanitizeString(str) {
     return div.innerHTML;
 }
 
+// Sanitize string but preserve line breaks for mathematical content
+function sanitizeWithLineBreaks(str) {
+    console.log('🔍 DEBUG: sanitizeWithLineBreaks called!');
+    if (!str) return '';
+    
+    // Debug logging for first few calls
+    if (typeof window !== 'undefined' && window.debugLineBreaks !== false) {
+        console.log('🔍 DEBUG: sanitizeWithLineBreaks input:', JSON.stringify(str));
+        console.log('Has actual newlines:', str.includes('\n'));
+        console.log('Newline count:', (str.match(/\n/g) || []).length);
+    }
+    
+    // Use placeholder approach to protect <br> tags during sanitization
+    const placeholder = '___LINEBREAK_PLACEHOLDER___';
+    
+    const result = str
+        .replace(/\n/g, placeholder)  // Replace newlines with placeholder first
+        .replace(/&/g, '&amp;')       // Escape ampersands
+        .replace(/</g, '&lt;')        // Escape less-than
+        .replace(/>/g, '&gt;')        // Escape greater-than
+        .replace(/"/g, '&quot;')      // Escape quotes
+        .replace(/'/g, '&#x27;')      // Escape single quotes
+        .replace(new RegExp(placeholder, 'g'), '<br>'); // Convert placeholders to <br> tags
+    
+    if (typeof window !== 'undefined' && window.debugLineBreaks !== false) {
+        console.log('🔍 DEBUG: sanitizeWithLineBreaks output:', JSON.stringify(result));
+        console.log('Contains <br>:', result.includes('<br>'));
+        console.log('<br> count:', (result.match(/<br>/g) || []).length);
+        // Disable further debug after first few calls to avoid spam
+        if (!window.debugCallCount) window.debugCallCount = 0;
+        window.debugCallCount++;
+        if (window.debugCallCount > 3) window.debugLineBreaks = false;
+    }
+    
+    return result;
+}
+
+// Log when this file loads
+console.log('🔍 DEBUG: validationUtils.js loaded');
+console.log('sanitizeWithLineBreaks function defined:', typeof sanitizeWithLineBreaks !== 'undefined');
+
 // Validate URL format
 function validateURL(url) {
     try {

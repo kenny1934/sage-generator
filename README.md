@@ -70,6 +70,7 @@ A powerful web-based mathematical problem generator designed for educators and s
 ### Advanced Math Rendering
 - **Intelligent LaTeX Processing**: Preserves text formatting while rendering math
 - **Selective Math Detection**: Only processes actual mathematical content
+- **Selective Line Break Processing**: Questions and answers display as single lines, while solutions preserve line breaks for readability
 - **Fallback Mechanisms**: Graceful degradation when rendering fails
 - **Caching System**: Optimized performance for repeated expressions
 
