@@ -194,7 +194,7 @@ function handleKeyboardNavigation(e) {
         document.querySelectorAll('.answer-content').forEach(content => {
             if (content.style.display === 'block') {
                 content.style.display = 'none';
-                const revealBtn = content.parentElement.querySelector('.action-btn:last-child');
+                const revealBtn = content.parentElement.querySelector('.action-btn:nth-child(2)'); // Second button (reveal)
                 if (revealBtn) {
                     revealBtn.textContent = 'Show Answer & Steps';
                     revealBtn.setAttribute('aria-expanded', 'false');
@@ -272,7 +272,7 @@ function handleKeyboardNavigation(e) {
             const questionIndex = parseInt(e.key) - 1;
             const questions = document.querySelectorAll('.question-item');
             if (questions[questionIndex]) {
-                const revealBtn = questions[questionIndex].querySelector('.action-btn:last-child');
+                const revealBtn = questions[questionIndex].querySelector('.action-btn:nth-child(2)'); // Second button (reveal)
                 if (revealBtn) {
                     revealBtn.click();
                 }
