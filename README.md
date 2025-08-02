@@ -55,7 +55,7 @@ A powerful web-based mathematical problem generator designed for educators and s
 - `Ctrl + E`: Export questions
 - `← →`: Navigate between questions
 - `1`, `2`, `3`: Show answers for specific questions
-- `F5`: Regenerate questions
+- `F5` or `Ctrl + R`: Regenerate questions
 - `Escape`: Close dialogs and answers
 - `?`: Show keyboard shortcuts help
 

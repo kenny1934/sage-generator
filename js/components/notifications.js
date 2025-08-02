@@ -82,11 +82,11 @@ function showKeyboardShortcuts() {
                 <div class="flex justify-between"><span class="text-gray-300">Focus Topic Input:</span><span class="text-red-400">Ctrl + K</span></div>
                 <div class="flex justify-between"><span class="text-gray-300">Export Questions:</span><span class="text-red-400">Ctrl + E</span></div>
                 <div class="flex justify-between"><span class="text-gray-300">Navigate Questions:</span><span class="text-red-400">← →</span></div>
-                <div class="flex justify-between"><span class="text-gray-300">Refresh/Regenerate:</span><span class="text-red-400">F5</span></div>
+                <div class="flex justify-between"><span class="text-gray-300">Refresh/Regenerate:</span><span class="text-red-400">F5, Ctrl + R</span></div>
                 <div class="flex justify-between"><span class="text-gray-300">Show Answer 1-3:</span><span class="text-red-400">1, 2, 3</span></div>
                 <div class="flex justify-between"><span class="text-gray-300">Show Favorites:</span><span class="text-red-400">Ctrl + F</span></div>
                 <div class="flex justify-between"><span class="text-gray-300">Close Dialogs:</span><span class="text-red-400">Escape</span></div>
-                <div class="flex justify-between"><span class="text-gray-300">Show This Help:</span><span class="text-red-400">?</span></div>
+                <div class="flex justify-between"><span class="text-gray-300">Show This Help:</span><span class="text-red-400">? or ❓ button</span></div>
             </div>
             <button class="mt-4 w-full action-btn bg-red-600 hover:bg-red-700" onclick="this.parentElement.parentElement.remove()">
                 Close (ESC)

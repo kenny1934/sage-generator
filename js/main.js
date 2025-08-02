@@ -221,6 +221,14 @@ function handleKeyboardNavigation(e) {
         }
     }
     
+    // Ctrl+Enter to generate new questions (if topic is filled)
+    if (e.ctrlKey && e.key === 'Enter' && mathTopicInput.value.trim()) {
+        e.preventDefault();
+        if (!generateQuestionsBtn.disabled) {
+            generateMathQuestions();
+        }
+    }
+    
     // Ctrl+K to focus on topic input
     if (e.ctrlKey && e.key === 'k') {
         e.preventDefault();
@@ -691,11 +699,9 @@ Ensure the LaTeX is correctly escaped for JSON strings.
         const forceNewQuestions = document.getElementById('forceNewQuestions')?.checked || false;
         
         // Phase 4: Check cache before making API call (unless forced to skip)
-        // TEMPORARY: Force fresh questions for debugging
-        const debugFreshQuestions = true; // Set to false to re-enable cache
         const debugForceFallback = false; // Set to true to test fallback questions
         
-        if (!forceNewQuestions && !debugFreshQuestions) {
+        if (!forceNewQuestions) {
             const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
             if (cachedQuestions) {
                 console.log('🔍 DEBUG: Using cached questions (first solution):');
