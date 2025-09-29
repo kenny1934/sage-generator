@@ -37,6 +37,7 @@
     <script src="js/classes/MathBackground.js"></script>
     <script src="js/classes/DataExportManager.js"></script>
     <script src="js/classes/TopicRecommendationEngine.js"></script>
+    <script src="js/classes/CostTracker.js"></script>
     <script src="js/utils/mathUtils.js"></script>
     <script src="js/utils/domUtils.js"></script>
     <script src="js/utils/apiUtils.js"></script>
@@ -46,6 +47,7 @@
     <script src="js/components/questionDisplay.js"></script>
     <script src="js/components/topicSuggestions.js"></script>
     <script src="js/components/notifications.js"></script>
+    <script src="js/components/usageAnalytics.js"></script>
     <script src="js/main.js"></script>
 </head>
 <body>
@@ -66,6 +68,9 @@
             
             <!-- Right: Help & Theme Toggle -->
             <div class="header-right">
+                <button class="theme-toggle" id="usageAnalyticsToggle" aria-label="Show usage analytics" onclick="showUsageAnalytics()">
+                    <span class="theme-icon">📊</span>
+                </button>
                 <button class="theme-toggle" id="helpToggle" aria-label="Show keyboard shortcuts" onclick="showKeyboardShortcuts()">
                     <span class="theme-icon">❓</span>
                 </button>
@@ -87,7 +92,7 @@
 
             <!-- API Key Configuration -->
             <div id="apiKeyContainer" class="api-key-container">
-                <label for="apiKeyInput" class="block text-sm font-semibold text-gray-200 mb-2">
+                <label for="apiKeyInput" class="block text-sm font-semibold text-primary mb-2">
                     Gemini API Key (required):
                 </label>
                 <div class="flex gap-2">
@@ -96,7 +101,7 @@
                         Save
                     </button>
                 </div>
-                <p class="text-xs text-gray-400 mt-1">
+                <p class="text-xs text-secondary mt-1">
                     Your API key is stored locally and never sent to our servers.
                 </p>
             </div>
@@ -106,7 +111,7 @@
 
                 <div>
                     <label for="mathTopic" class="block text-lg font-semibold mb-2">
-                        Maths Topic & Grade Level <span class="text-gray-400 text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
+                        Maths Topic & Grade Level <span class="text-secondary text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
                     </label>
                     <div class="autocomplete-container">
                         <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
@@ -126,6 +131,38 @@
                     </select>
                     <div id="difficultyDescription" class="difficulty-description">
                         Medium complexity with step-by-step explanations
+                    </div>
+                </div>
+
+                <!-- Model Selector -->
+                <div>
+                    <label for="modelSelector" class="block text-lg font-semibold mb-2">
+                        Gemini Model:
+                    </label>
+                    <select id="modelSelector" class="w-full p-3 shadow-sm" aria-label="Select Gemini Model">
+                        <option value="flash-lite">Gemini 2.5 Flash-Lite - Fastest & Most Cost-Effective</option>
+                        <option value="flash" selected>Gemini 2.5 Flash - Balanced Speed & Capability</option>
+                        <option value="pro">Gemini 2.5 Pro - Most Capable for Complex Problems</option>
+                    </select>
+                    <div id="modelDescription" class="model-description">
+                        Balanced speed and capability for most questions
+                    </div>
+                </div>
+
+                <!-- Cost Estimation Display -->
+                <div id="costEstimateContainer" class="cost-estimate-container">
+                    <div class="cost-estimate-header">
+                        <span class="cost-label">💰 Estimated Cost:</span>
+                        <span id="costEstimate" class="cost-value">$0.0000</span>
+                    </div>
+                    <div class="budget-info">
+                        <div class="budget-bar">
+                            <div id="budgetProgress" class="budget-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="budget-text">
+                            <span id="budgetStatus">Monthly Budget: $5.00 | Used: $0.00</span>
+                            <button id="budgetSettingsBtn" class="budget-settings-btn" onclick="showBudgetSettings()" aria-label="Budget Settings">⚙️</button>
+                        </div>
                     </div>
                 </div>
 
@@ -191,7 +228,7 @@
                 </div>
 
                 <div id="messageContainer" class="mt-8" role="alert" aria-live="polite">
-                    <p class="text-gray-400 text-center" id="initialMessage">Your generated maths questions will appear here.</p>
+                    <p class="text-secondary text-center" id="initialMessage">Your generated maths questions will appear here.</p>
                 </div>
 
             </div>
@@ -202,7 +239,7 @@
             <main class="questions-canvas main-container" id="questions-canvas">
                 <div class="questions-content">
                     <!-- Questions will be displayed here -->
-                    <p class="text-gray-400 text-center" id="questionsPlaceholder">Select a topic and generate questions to see them here.</p>
+                    <p class="text-secondary text-center" id="questionsPlaceholder">Select a topic and generate questions to see them here.</p>
                 </div>
             </main>
         </div>
