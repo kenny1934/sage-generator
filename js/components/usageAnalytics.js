@@ -4,13 +4,11 @@
  */
 
 function showUsageAnalytics() {
-    console.log('🔍 showUsageAnalytics() called');
     if (!window.costTracker) {
-        console.error('❌ window.costTracker is not available');
+        console.error('window.costTracker is not available');
         displayMessage("Cost tracking not available", "text-red-500");
         return;
     }
-    console.log('✅ window.costTracker is available:', window.costTracker);
 
     const stats = window.costTracker.getUsageStatistics();
     const budgetStatus = window.costTracker.getBudgetStatus();
@@ -39,7 +37,7 @@ function createAnalyticsModal(stats, budgetStatus) {
     });
 
     const title = createElementSafe('h2', {
-        textContent: '📊 Usage Analytics & Cost Tracking',
+        textContent: 'Usage Analytics & Cost Tracking',
         className: 'modal-title'
     });
 
@@ -104,7 +102,7 @@ function createOverviewSection(stats, budgetStatus) {
     });
 
     const sectionTitle = createElementSafe('h3', {
-        textContent: '📈 Overview',
+        textContent: 'Overview',
         className: 'section-title'
     });
 
@@ -138,7 +136,7 @@ function createBudgetSection(budgetStatus) {
     });
 
     const sectionTitle = createElementSafe('h3', {
-        textContent: '💰 Budget Status',
+        textContent: 'Budget Status',
         className: 'section-title'
     });
 
@@ -215,7 +213,7 @@ function createModelBreakdownSection(modelBreakdown) {
     });
 
     const sectionTitle = createElementSafe('h3', {
-        textContent: '🤖 Model Usage Breakdown',
+        textContent: 'Model Usage Breakdown',
         className: 'section-title'
     });
 
@@ -295,7 +293,7 @@ function createExportSection() {
     });
 
     const sectionTitle = createElementSafe('h3', {
-        textContent: '📤 Export Data',
+        textContent: 'Export Data',
         className: 'section-title'
     });
 

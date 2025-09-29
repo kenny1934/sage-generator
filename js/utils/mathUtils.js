@@ -14,28 +14,20 @@ function sanitizeHTML(str) {
 function preprocessMathContent(content) {
     if (!content) return content;
     
-    console.log('🔍 MATH PREPROCESSING DEBUG:');
-    console.log('Raw content:', content.substring(0, 150));
-    console.log('Content type:', typeof content);
-    console.log('Content length:', content.length);
     
     // SMART HANDLING: If content has math delimiters, validate and fix them
     if (content.includes('$') || content.includes('\\[') || content.includes('\\(')) {
-        console.log('📐 Content has math delimiters - performing smart validation');
         
         // Fix common issues with $$ \text{ patterns
         if (content.includes('$$ \\text{') || content.includes('$$\\text{')) {
-            console.log('🔧 Fixing $$ \\text{ pattern');
             let processed = content;
-            
+
             // Handle $$ \text{...} $$ patterns - extract text content
             processed = processed.replace(/\$\$\s*\\text\{([^}]*)\}\s*\$\$/g, '$1');
-            console.log('✅ Fixed $$ \\text{} pattern:', processed);
             return processed;
         }
         
         // For other math patterns, return as-is
-        console.log('✅ Valid math delimiters found - returning unchanged');
         return content;
     }
     
@@ -44,7 +36,6 @@ function preprocessMathContent(content) {
     const hasClearMathStructure = /\\frac\{.*\}.*\{.*\}|\\sqrt\{.*\}|\\int.*d[xyz]|\\sum.*=.*\^.*|\\lim.*\\to/.test(content);
     
     if (!hasClearMathStructure) {
-        console.log('✅ No clear math structure detected - returning as regular text');
         return content;
     }
     
@@ -53,11 +44,9 @@ function preprocessMathContent(content) {
     const hasRegularWords = /\b(the|and|or|in|on|at|to|for|of|with|by|from|about|into|through|during|before|after|above|below|up|down|out|off|over|under|again|further|then|once)\b/i.test(content);
     
     if (wordCount > 10 && hasRegularWords) {
-        console.log('✅ Detected regular sentence structure - returning as text');
         return content;
     }
     
-    console.log('📐 Processing mathematical content:', content.substring(0, 100));
     
     // Add proper math delimiters if content appears to be mathematical
     let processed = content;
@@ -67,7 +56,6 @@ function preprocessMathContent(content) {
         // Only wrap if content has LaTeX commands
         if (processed.includes('\\frac') || processed.includes('\\sqrt') || processed.includes('\\int') || processed.includes('\\sum')) {
             processed = `$${processed}$`;
-            console.log('🔧 Added math delimiters:', processed.substring(0, 100));
         }
     }
     
@@ -131,7 +119,6 @@ function retryMathRendering(element, maxRetries = 3, delay = 500) {
         if (isKaTeXLoaded) {
             renderMathContent(element);
         } else {
-            console.log(`Math rendering retry ${retries}/${maxRetries} - KaTeX not ready`);
             setTimeout(attemptRender, delay);
         }
     };
@@ -157,7 +144,6 @@ function toggleMathView() {
 function checkKaTeXLoaded() {
     if (typeof renderMathInElement === 'function' && typeof katex !== 'undefined') {
         isKaTeXLoaded = true;
-        console.log('KaTeX loaded successfully');
     } else {
         isKaTeXLoaded = false;
         displayMessage('Warning: Math rendering library failed to load. Math expressions may not display correctly.', 'text-amber-400');

@@ -208,7 +208,6 @@ function replaceProblemInList(index, newProblem) {
                     if (typeof sanitizeWithLineBreaks !== 'undefined') {
                         return sanitizeWithLineBreaks(content);
                     } else {
-                        console.error('sanitizeWithLineBreaks not defined, using fallback');
                         return sanitizeString(content);
                     }
                 } catch (error) {
@@ -455,7 +454,6 @@ function createAnswerContent(problem) {
             if (typeof sanitizeWithLineBreaks !== 'undefined') {
                 return sanitizeWithLineBreaks(content);
             } else {
-                console.error('sanitizeWithLineBreaks not defined, using fallback');
                 return sanitizeString(content);
             }
         } catch (error) {
