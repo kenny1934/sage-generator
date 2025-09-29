@@ -241,5 +241,19 @@ class CostTracker {
     }
 }
 
-// Global cost tracker instance
-window.costTracker = new CostTracker();
+// Global cost tracker instance with error handling
+try {
+    window.costTracker = new CostTracker();
+    console.log('✅ CostTracker initialized successfully');
+} catch (error) {
+    console.error('❌ Failed to initialize CostTracker:', error);
+    // Create a minimal fallback to prevent errors
+    window.costTracker = {
+        getBudgetStatus: () => ({ monthlyBudget: 5, monthlyCost: 0, remainingBudget: 5, percentUsed: 0, isOverBudget: false }),
+        getUsageStatistics: () => ({ totalRequests: 0, totalTokensInput: 0, totalTokensOutput: 0, totalCost: 0, monthlyCost: 0, modelBreakdown: {}, lastRequest: null }),
+        formatCurrency: (amount) => `$${amount.toFixed(4)}`,
+        updateBudget: () => {},
+        resetAllData: () => {},
+        exportUsageData: () => ({})
+    };
+}

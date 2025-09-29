@@ -4,10 +4,13 @@
  */
 
 function showUsageAnalytics() {
+    console.log('🔍 showUsageAnalytics() called');
     if (!window.costTracker) {
+        console.error('❌ window.costTracker is not available');
         displayMessage("Cost tracking not available", "text-red-500");
         return;
     }
+    console.log('✅ window.costTracker is available:', window.costTracker);
 
     const stats = window.costTracker.getUsageStatistics();
     const budgetStatus = window.costTracker.getBudgetStatus();
@@ -182,15 +185,17 @@ function createBudgetSection(budgetStatus) {
 
     const changeBudgetBtn = createElementSafe('button', {
         className: 'action-btn bg-blue-600 hover:bg-blue-700',
-        textContent: 'Change Budget',
-        onclick: () => {
-            showBudgetSettings();
-            // Refresh the modal
-            const modal = document.querySelector('.usage-analytics-modal');
-            if (modal) {
-                closeAnalyticsModal(modal);
-                setTimeout(showUsageAnalytics, 100);
-            }
+        textContent: 'Change Budget'
+    });
+
+    // Add event listener manually (createElementSafe doesn't support onclick for security)
+    changeBudgetBtn.addEventListener('click', () => {
+        showBudgetSettings();
+        // Refresh the modal
+        const modal = document.querySelector('.usage-analytics-modal');
+        if (modal) {
+            closeAnalyticsModal(modal);
+            setTimeout(showUsageAnalytics, 100);
         }
     });
 
@@ -300,15 +305,19 @@ function createExportSection() {
 
     const exportBtn = createElementSafe('button', {
         className: 'action-btn bg-green-600 hover:bg-green-700',
-        textContent: 'Export Usage Data',
-        onclick: exportUsageData
+        textContent: 'Export Usage Data'
     });
+
+    // Add event listener manually (createElementSafe doesn't support onclick for security)
+    exportBtn.addEventListener('click', exportUsageData);
 
     const resetBtn = createElementSafe('button', {
         className: 'action-btn bg-red-600 hover:bg-red-700',
-        textContent: 'Reset All Data',
-        onclick: resetUsageData
+        textContent: 'Reset All Data'
     });
+
+    // Add event listener manually (createElementSafe doesn't support onclick for security)
+    resetBtn.addEventListener('click', resetUsageData);
 
     exportActions.appendChild(exportBtn);
     exportActions.appendChild(resetBtn);

@@ -1277,6 +1277,13 @@ function updateCostDisplay() {
 }
 
 function showBudgetSettings() {
+    console.log('🔍 showBudgetSettings() called');
+    if (!window.costTracker) {
+        console.error('❌ window.costTracker is not available');
+        displayMessage("Cost tracking not available", "text-red-500");
+        return;
+    }
+    console.log('✅ window.costTracker is available for budget settings');
     const currentBudget = window.costTracker.getBudgetStatus().monthlyBudget;
     const newBudget = prompt(`Set your monthly budget (current: ${window.costTracker.formatCurrency(currentBudget)}):`, currentBudget.toString());
 
