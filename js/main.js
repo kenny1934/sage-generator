@@ -47,9 +47,21 @@ function initializeApp() {
     // Load saved API key first
     const apiKeyInput = document.getElementById('apiKeyInput');
     const apiKeyContainer = document.getElementById('apiKeyContainer');
-    
+
+    // Check for both encrypted and unencrypted API keys
+    const hasEncryptedKey = window.secureStorage && window.secureStorage.isApiKeyEncrypted();
     const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
-    if (savedApiKey && apiKeyInput && apiKeyContainer) {
+
+    if (hasEncryptedKey) {
+        // Show API key container but with different message for encrypted key
+        if (apiKeyContainer) {
+            apiKeyContainer.style.display = 'block';
+        }
+        if (apiKeyInput) {
+            apiKeyInput.placeholder = 'Enter password to unlock your encrypted API key';
+            apiKeyInput.type = 'password';
+        }
+    } else if (savedApiKey && apiKeyInput && apiKeyContainer) {
         apiKeyInput.value = savedApiKey;
         apiKeyContainer.style.display = 'none';
     }
@@ -359,22 +371,180 @@ function checkKaTeXLoaded() {
     tryLoadKaTeX();
 }
 
-// Save API key with validation
-function saveApiKey() {
+// Save API key with validation and encryption
+async function saveApiKey() {
     const apiKeyInput = document.getElementById('apiKeyInput');
     const apiKeyContainer = document.getElementById('apiKeyContainer');
-    const apiKey = apiKeyInput.value.trim();
-    
-    const validationError = validateApiKey(apiKey);
-    if (validationError) {
-        displayMessage(validationError, 'text-red-500');
-        apiKeyInput.focus();
-        return;
+    const inputValue = apiKeyInput.value.trim();
+
+    // Check if we're dealing with encrypted key unlock or new key storage
+    const hasEncryptedKey = window.secureStorage && window.secureStorage.isApiKeyEncrypted();
+
+    if (hasEncryptedKey) {
+        // This is a password to unlock encrypted key
+        try {
+            const decryptedKey = await window.secureStorage.getApiKey(inputValue);
+
+            // Temporarily store decrypted key for this session
+            sessionStorage.setItem('sage_current_api_key', decryptedKey);
+
+            apiKeyContainer.style.display = 'none';
+            displayMessage('API key unlocked successfully!', 'text-green-400');
+
+            // Clear the password input
+            apiKeyInput.value = '';
+        } catch (error) {
+            displayMessage('Incorrect password. Please try again.', 'text-red-500');
+            apiKeyInput.focus();
+            return;
+        }
+    } else {
+        // This is a new API key to be stored
+        const validationError = validateApiKey(inputValue);
+        if (validationError) {
+            displayMessage(validationError, 'text-red-500');
+            apiKeyInput.focus();
+            return;
+        }
+
+        // Ask user if they want to encrypt the API key
+        const useEncryption = await showEncryptionDialog();
+
+        if (useEncryption) {
+            const password = await showPasswordDialog();
+            if (password) {
+                try {
+                    await window.secureStorage.storeApiKey(inputValue, password);
+                    displayMessage('API key encrypted and saved successfully!', 'text-green-400');
+
+                    // Store decrypted key for this session
+                    sessionStorage.setItem('sage_current_api_key', inputValue);
+                } catch (error) {
+                    displayMessage('Failed to encrypt API key. Saving unencrypted.', 'text-orange-400');
+                    localStorage.setItem(CONFIG.STORAGE_KEY, inputValue);
+                }
+            } else {
+                // User cancelled password dialog, save unencrypted
+                localStorage.setItem(CONFIG.STORAGE_KEY, inputValue);
+                displayMessage('API key saved (unencrypted)!', 'text-green-400');
+            }
+        } else {
+            // Save unencrypted
+            localStorage.setItem(CONFIG.STORAGE_KEY, inputValue);
+            displayMessage('API key saved successfully!', 'text-green-400');
+        }
+
+        apiKeyContainer.style.display = 'none';
+        apiKeyInput.value = '';
     }
-    
-    localStorage.setItem(CONFIG.STORAGE_KEY, apiKey);
-    apiKeyContainer.style.display = 'none';
-    displayMessage('API key saved successfully!', 'text-green-400');
+}
+
+// Show encryption dialog
+async function showEncryptionDialog() {
+    return new Promise((resolve) => {
+        const modal = buildModalTemplate(
+            'Encrypt API Key?',
+            'Would you like to encrypt your API key for enhanced security? You will need to enter a password each time you use SAGE.',
+            [
+                {
+                    text: 'Yes, Encrypt',
+                    className: 'px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700',
+                    onClick: () => {
+                        modal.remove();
+                        resolve(true);
+                    }
+                },
+                {
+                    text: 'No, Save Unencrypted',
+                    className: 'px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700',
+                    onClick: () => {
+                        modal.remove();
+                        resolve(false);
+                    }
+                }
+            ]
+        );
+
+        document.body.appendChild(modal);
+    });
+}
+
+// Show password dialog
+async function showPasswordDialog() {
+    return new Promise((resolve) => {
+        const passwordInput = createElementSafe('input', {
+            type: 'password',
+            className: 'w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:border-red-500',
+            placeholder: 'Enter a secure password'
+        });
+
+        const strengthDiv = createElementSafe('div', {
+            className: 'mt-2 text-sm'
+        });
+
+        // Add password strength checker
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const strength = checkPasswordStrength(password);
+            strengthDiv.textContent = `Password strength: ${strength.level}`;
+            strengthDiv.className = `mt-2 text-sm text-${strength.color}-400`;
+        });
+
+        const contentDiv = createElementSafe('div', {}, [
+            createElementSafe('p', {
+                textContent: 'Enter a strong password to encrypt your API key:',
+                className: 'mb-3'
+            }),
+            passwordInput,
+            strengthDiv
+        ]);
+
+        const modal = buildModalTemplate(
+            'Set Encryption Password',
+            contentDiv,
+            [
+                {
+                    text: 'Encrypt',
+                    className: 'px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700',
+                    onClick: () => {
+                        const password = passwordInput.value;
+                        if (password.length < 8) {
+                            alert('Password must be at least 8 characters long');
+                            return;
+                        }
+                        modal.remove();
+                        resolve(password);
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    className: 'px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700',
+                    onClick: () => {
+                        modal.remove();
+                        resolve(null);
+                    }
+                }
+            ]
+        );
+
+        document.body.appendChild(modal);
+        passwordInput.focus();
+    });
+}
+
+// Check password strength
+function checkPasswordStrength(password) {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+
+    if (score < 3) return { level: 'Weak', color: 'red' };
+    if (score < 5) return { level: 'Medium', color: 'yellow' };
+    return { level: 'Strong', color: 'green' };
 }
 
 // Export questions to text file
@@ -539,7 +709,12 @@ async function generateMathQuestions() {
     
     const mathTopic = mathTopicInput.value.trim();
     const difficulty = difficultySelect.value;
-    const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+
+    // Get API key from session storage (if decrypted) or localStorage (if unencrypted)
+    let apiKey = sessionStorage.getItem('sage_current_api_key') || localStorage.getItem(CONFIG.STORAGE_KEY);
+
+    // Check if we have an encrypted key but no current session key
+    const hasEncryptedKey = window.secureStorage && window.secureStorage.isApiKeyEncrypted();
 
     // Validation
     if (!apiKey) {
@@ -547,7 +722,12 @@ async function generateMathQuestions() {
         if (apiKeyContainer) {
             apiKeyContainer.style.display = 'block';
         }
-        displayMessage("Please enter your Gemini API key first.", "text-red-500");
+
+        if (hasEncryptedKey) {
+            displayMessage("Please enter your password to unlock the encrypted API key.", "text-red-500");
+        } else {
+            displayMessage("Please enter your Gemini API key first.", "text-red-500");
+        }
         return;
     }
 
@@ -704,11 +884,6 @@ Ensure the LaTeX is correctly escaped for JSON strings.
         if (!forceNewQuestions) {
             const cachedQuestions = QuestionCache.get(mathTopic, difficulty);
             if (cachedQuestions) {
-                console.log('🔍 DEBUG: Using cached questions (first solution):');
-                console.log('Cached stepByStepSolution:', cachedQuestions[0]?.stepByStepSolution);
-                console.log('Contains \\\\n:', cachedQuestions[0]?.stepByStepSolution?.includes('\\n'));
-                console.log('Has actual newlines:', cachedQuestions[0]?.stepByStepSolution?.includes('\n'));
-                console.log('Newline count:', (cachedQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
                 displayMathQuestions(cachedQuestions, true); // Pass true to indicate cached
                 return;
             }
@@ -716,13 +891,7 @@ Ensure the LaTeX is correctly escaped for JSON strings.
 
         // TEMPORARY: Force fallback for testing
         if (debugForceFallback) {
-            console.log('🔍 DEBUG: Forcing fallback questions for testing');
             const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
-            console.log('🔍 DEBUG: Forced fallback questions (first solution):');
-            console.log('Fallback stepByStepSolution:', fallbackQuestions[0]?.stepByStepSolution);
-            console.log('Contains \\\\n:', fallbackQuestions[0]?.stepByStepSolution?.includes('\\n'));
-            console.log('Has actual newlines:', fallbackQuestions[0]?.stepByStepSolution?.includes('\n'));
-            console.log('Newline count:', (fallbackQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
             displayMathQuestions(fallbackQuestions, false);
             return;
         }
@@ -738,31 +907,16 @@ Ensure the LaTeX is correctly escaped for JSON strings.
                 const mathProblems = JSON.parse(jsonText);
                 
                 if (Array.isArray(mathProblems) && mathProblems.length > 0) {
-                    console.log('🔍 DEBUG: Raw AI response (first solution):');
-                    console.log('Raw stepByStepSolution:', mathProblems[0]?.stepByStepSolution);
-                    console.log('Contains \\\\n:', mathProblems[0]?.stepByStepSolution?.includes('\\n'));
-                    console.log('Contains <br>:', mathProblems[0]?.stepByStepSolution?.includes('<br>'));
-                    
                     // Clean up any HTML tags and standardize line breaks
-                    mathProblems.forEach((problem, index) => {
+                    mathProblems.forEach((problem) => {
                         if (problem.stepByStepSolution) {
-                            const original = problem.stepByStepSolution;
-                            
                             problem.stepByStepSolution = problem.stepByStepSolution
                                 .replace(/<br\s*\/?>/gi, '\n')  // Convert <br> to actual newlines
                                 .replace(/<\/p>/gi, '\n')
                                 .replace(/<p>/gi, '')
                                 .replace(/<[^>]*>/g, '') // Remove any other HTML tags
                                 .replace(/\\n/g, '\n'); // Convert literal \\n to actual newlines
-                            
-                            if (index === 0) {
-                                console.log('🔍 DEBUG: After processing (first solution):');
-                                console.log('Original:', JSON.stringify(original));
-                                console.log('Processed:', JSON.stringify(problem.stepByStepSolution));
-                                console.log('Has actual newlines:', problem.stepByStepSolution.includes('\n'));
-                                console.log('Newline count:', (problem.stepByStepSolution.match(/\n/g) || []).length);
-                            }
-                            
+
                             // Fix LaTeX commands that might get truncated by JSON processing
                             problem.stepByStepSolution = problem.stepByStepSolution
                                 .replace(/([^\\])otin/g, '$1\\notin')

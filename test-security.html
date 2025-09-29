@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGE Security Test Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e5e7eb;
+        }
+        .test-section {
+            background: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .test-pass {
+            background: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        .test-fail {
+            background: #7f1d1d;
+            border-left: 4px solid #ef4444;
+        }
+        .test-info {
+            background: #1e3a8a;
+            border-left: 4px solid #3b82f6;
+        }
+        input, textarea, button {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            background: #374151;
+            color: #e5e7eb;
+        }
+        button {
+            background: #dc2626;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #b91c1c;
+        }
+        .payload-test {
+            background: #374151;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔒 SAGE Security Test Suite</h1>
+
+    <div class="test-section">
+        <h2>1. Content Security Policy (CSP) Test</h2>
+        <div id="csp-results"></div>
+        <button onclick="testCSP()">Test CSP Headers</button>
+    </div>
+
+    <div class="test-section">
+        <h2>2. XSS Protection Test</h2>
+        <div id="xss-results"></div>
+        <input type="text" id="xss-input" placeholder="Enter test payload here">
+        <button onclick="testXSSProtection()">Test XSS Protection</button>
+        <button onclick="runAllXSSTests()">Run All XSS Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>3. API Key Encryption Test</h2>
+        <div id="encryption-results"></div>
+        <input type="text" id="test-api-key" placeholder="Test API Key" value="AIzaSyDemoKey12345">
+        <input type="password" id="test-password" placeholder="Test Password" value="TestPassword123!">
+        <button onclick="testEncryption()">Test Encryption</button>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Safe DOM Manipulation Test</h2>
+        <div id="dom-results"></div>
+        <textarea id="dom-input" placeholder="Enter HTML content to test">&lt;script&gt;alert('XSS')&lt;/script&gt;&lt;p&gt;Safe content&lt;/p&gt;</textarea>
+        <button onclick="testDOMSafety()">Test DOM Safety</button>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Overall Security Score</h2>
+        <div id="overall-results"></div>
+        <button onclick="runFullSecuritySuite()">Run Complete Test Suite</button>
+    </div>
+
+    <!-- Load SAGE scripts for testing -->
+    <script src="js/config.js"></script>
+    <script src="js/utils/validationUtils.js"></script>
+    <script src="js/utils/domUtils.js"></script>
+    <script src="js/utils/secureStorage.js"></script>
+
+    <script>
+        let testResults = [];
+
+        function logResult(test, passed, details, type = 'result') {
+            const result = {
+                test: test,
+                passed: passed,
+                details: details,
+                timestamp: new Date().toISOString()
+            };
+            testResults.push(result);
+
+            const className = passed ? 'test-pass' : 'test-fail';
+            const emoji = passed ? '✅' : '❌';
+
+            return `<div class="${className}">${emoji} ${test}: ${details}</div>`;
+        }
+
+        function logInfo(message) {
+            return `<div class="test-info">ℹ️ ${message}</div>`;
+        }
+
+        function testCSP() {
+            const results = document.getElementById('csp-results');
+            let output = '<h3>CSP Test Results:</h3>';
+
+            // Check if CSP meta tag exists
+            const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+            if (cspMeta) {
+                output += logResult('CSP Meta Tag', true, 'Content Security Policy header found');
+
+                const cspContent = cspMeta.getAttribute('content');
+                const requiredDirectives = ['default-src', 'script-src', 'style-src', 'connect-src', 'object-src'];
+
+                requiredDirectives.forEach(directive => {
+                    const hasDirective = cspContent.includes(directive);
+                    output += logResult(`CSP ${directive}`, hasDirective, hasDirective ? 'Directive present' : 'Directive missing');
+                });
+            } else {
+                output += logResult('CSP Meta Tag', false, 'Content Security Policy header not found');
+            }
+
+            // Check for other security headers
+            const securityHeaders = [
+                'X-Content-Type-Options',
+                'Referrer-Policy'
+            ];
+
+            securityHeaders.forEach(header => {
+                const meta = document.querySelector(`meta[http-equiv="${header}"]`);
+                output += logResult(header, !!meta, meta ? 'Header present' : 'Header missing');
+            });
+
+            results.innerHTML = output;
+        }
+
+        function testXSSProtection() {
+            const input = document.getElementById('xss-input');
+            const results = document.getElementById('xss-results');
+            const payload = input.value;
+
+            let output = `<h3>XSS Protection Test for: <div class="payload-test">${payload}</div></h3>`;
+
+            if (typeof validateInput === 'function') {
+                const validationResult = validateInput(payload);
+                const blocked = !!validationResult;
+
+                output += logResult('XSS Validation', blocked, blocked ? `Blocked: ${validationResult}` : 'Payload not blocked');
+            } else {
+                output += logResult('XSS Validation', false, 'validateInput function not found');
+            }
+
+            results.innerHTML = output;
+        }
+
+        function runAllXSSTests() {
+            const results = document.getElementById('xss-results');
+            let output = '<h3>Comprehensive XSS Protection Test:</h3>';
+
+            const xssPayloads = [
+                '<script>alert("XSS")</script>',
+                'javascript:alert("XSS")',
+                '<img src=x onerror=alert("XSS")>',
+                '"><script>alert("XSS")</script>',
+                '<iframe src="javascript:alert(\'XSS\')"></iframe>',
+                '<body onload=alert("XSS")>',
+                '<svg onload=alert("XSS")>',
+                'eval("alert(\\"XSS\\")")',
+                '{{constructor.constructor("alert(\\"XSS\\")")()}}',
+                '${alert("XSS")}',
+                'data:text/html,<script>alert("XSS")</script>',
+                '&#60;script&#62;alert("XSS")&#62;&#60;/script&#62;',
+                'onclick="alert(1)"',
+                'onmouseover="alert(1)"',
+                '<style>@import"javascript:alert(1)"</style>',
+                'expression(alert(1))',
+                'setTimeout("alert(1)",1)',
+                'document.write("<script>alert(1)</script>")'
+            ];
+
+            let passed = 0;
+            xssPayloads.forEach((payload, index) => {
+                if (typeof validateInput === 'function') {
+                    const blocked = !!validateInput(payload);
+                    if (blocked) passed++;
+
+                    output += `<div class="payload-test">Test ${index + 1}: ${payload}</div>`;
+                    output += logResult(`XSS Test ${index + 1}`, blocked, blocked ? 'Blocked' : 'Not blocked');
+                }
+            });
+
+            const successRate = ((passed / xssPayloads.length) * 100).toFixed(1);
+            output += logInfo(`Overall XSS Protection: ${passed}/${xssPayloads.length} payloads blocked (${successRate}%)`);
+
+            results.innerHTML = output;
+        }
+
+        async function testEncryption() {
+            const results = document.getElementById('encryption-results');
+            const apiKey = document.getElementById('test-api-key').value;
+            const password = document.getElementById('test-password').value;
+
+            let output = '<h3>Encryption Test Results:</h3>';
+
+            if (!window.secureStorage) {
+                output += logResult('SecureStorage', false, 'SecureStorage class not available');
+                results.innerHTML = output;
+                return;
+            }
+
+            try {
+                // Test encryption
+                const encrypted = await window.secureStorage.encrypt(apiKey, password);
+                output += logResult('Encryption Process', !!encrypted, encrypted ? 'Data encrypted successfully' : 'Encryption failed');
+
+                // Test decryption
+                const decrypted = await window.secureStorage.decrypt(encrypted, password);
+                const decryptionWorked = decrypted === apiKey;
+                output += logResult('Decryption Process', decryptionWorked, decryptionWorked ? 'Data decrypted correctly' : 'Decryption failed');
+
+                // Test wrong password
+                try {
+                    await window.secureStorage.decrypt(encrypted, 'WrongPassword');
+                    output += logResult('Wrong Password Protection', false, 'Decryption succeeded with wrong password');
+                } catch (error) {
+                    output += logResult('Wrong Password Protection', true, 'Correctly rejected wrong password');
+                }
+
+                // Test password strength
+                const strength = checkPasswordStrength ? checkPasswordStrength(password) : null;
+                if (strength) {
+                    output += logInfo(`Password Strength: ${strength.level} (${strength.color})`);
+                }
+
+            } catch (error) {
+                output += logResult('Encryption Test', false, `Error: ${error.message}`);
+            }
+
+            results.innerHTML = output;
+        }
+
+        function testDOMSafety() {
+            const results = document.getElementById('dom-results');
+            const input = document.getElementById('dom-input').value;
+
+            let output = '<h3>DOM Safety Test Results:</h3>';
+
+            try {
+                // Test safe element creation
+                if (typeof createElementSafe === 'function') {
+                    const safeElement = createElementSafe('div', {
+                        className: 'test-class',
+                        textContent: input
+                    });
+
+                    const hasXSS = safeElement.innerHTML.includes('<script>');
+                    output += logResult('Safe Element Creation', !hasXSS, hasXSS ? 'XSS content not escaped' : 'Content properly escaped');
+                } else {
+                    output += logResult('Safe Element Creation', false, 'createElementSafe function not found');
+                }
+
+                // Test HTML sanitization
+                if (typeof sanitizeHTML === 'function') {
+                    const sanitized = sanitizeHTML(input);
+                    const hasScript = sanitized.includes('<script>');
+                    output += logResult('HTML Sanitization', !hasScript, hasScript ? 'Script tags not removed' : 'Dangerous content sanitized');
+
+                    output += logInfo(`Sanitized result: ${sanitized}`);
+                } else {
+                    output += logResult('HTML Sanitization', false, 'sanitizeHTML function not found');
+                }
+
+            } catch (error) {
+                output += logResult('DOM Safety', false, `Error during DOM testing: ${error.message}`);
+            }
+
+            results.innerHTML = output;
+        }
+
+        async function runFullSecuritySuite() {
+            const results = document.getElementById('overall-results');
+            let output = '<h3>Complete Security Test Suite:</h3>';
+
+            testResults = []; // Reset results
+
+            // Run all tests
+            testCSP();
+            runAllXSSTests();
+            await testEncryption();
+            testDOMSafety();
+
+            // Calculate overall score
+            const total = testResults.length;
+            const passed = testResults.filter(r => r.passed).length;
+            const score = ((passed / total) * 100).toFixed(1);
+
+            output += logInfo(`Security Score: ${passed}/${total} tests passed (${score}%)`);
+
+            if (score >= 90) {
+                output += logResult('Overall Security Rating', true, 'EXCELLENT - High security level');
+            } else if (score >= 75) {
+                output += logResult('Overall Security Rating', true, 'GOOD - Adequate security level');
+            } else if (score >= 60) {
+                output += logResult('Overall Security Rating', false, 'FAIR - Some security improvements needed');
+            } else {
+                output += logResult('Overall Security Rating', false, 'POOR - Significant security improvements required');
+            }
+
+            // Show failed tests
+            const failed = testResults.filter(r => !r.passed);
+            if (failed.length > 0) {
+                output += '<h4>Failed Tests:</h4>';
+                failed.forEach(test => {
+                    output += logResult(test.test, false, test.details);
+                });
+            }
+
+            results.innerHTML = output;
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testCSP();
+                console.log('🔒 SAGE Security Test Suite loaded. Use the buttons to run tests.');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

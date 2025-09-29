@@ -12,16 +12,75 @@ function validateInput(topic) {
         return 'Maths topic is too long. Please keep it under 500 characters.';
     }
     
-    // Check for potentially harmful content
+    // Enhanced check for potentially harmful content
     const suspiciousPatterns = [
-        /<script/i,
+        // Script injection
+        /<script[^>]*>/i,
+        /<\/script>/i,
         /javascript:/i,
+        /vbscript:/i,
+        /data:text\/html/i,
+        /data:application\/x-javascript/i,
+
+        // Event handlers
         /on\w+\s*=/i,
-        /data:text\/html/i
+        /onload/i,
+        /onerror/i,
+        /onclick/i,
+        /onmouseover/i,
+
+        // HTML injection
+        /<iframe/i,
+        /<embed/i,
+        /<object/i,
+        /<applet/i,
+        /<meta/i,
+        /<link/i,
+        /<style/i,
+
+        // Expression evaluation
+        /expression\s*\(/i,
+        /eval\s*\(/i,
+        /setTimeout\s*\(/i,
+        /setInterval\s*\(/i,
+
+        // Data URIs and protocols
+        /data:image\/svg\+xml.*<script/i,
+        /data:.*,.*<script/i,
+        /file:/i,
+        /ftp:/i,
+
+        // Common XSS patterns
+        /alert\s*\(/i,
+        /confirm\s*\(/i,
+        /prompt\s*\(/i,
+        /document\.write/i,
+        /document\.createElement/i,
+        /window\.location/i,
+        /location\.href/i,
+
+        // Template injection
+        /\{\{.*\}\}/,
+        /\$\{.*\}/,
+        /<\?.*\?>/,
+        /<%.*%>/
     ];
-    
-    if (suspiciousPatterns.some(pattern => pattern.test(topic))) {
-        return 'Invalid characters detected in input. Please use only text and mathematical expressions.';
+
+    for (const pattern of suspiciousPatterns) {
+        if (pattern.test(topic)) {
+            return 'Invalid characters detected in input. Please use only text and mathematical expressions.';
+        }
+    }
+
+    // Check for excessive HTML-like content
+    const htmlTagCount = (topic.match(/</g) || []).length;
+    if (htmlTagCount > 2) {
+        return 'Too many HTML-like characters detected. Please use plain text for math topics.';
+    }
+
+    // Check for suspicious character sequences
+    if (topic.includes('&#') || topic.includes('%3C') || topic.includes('%3E')) {
+        return 'Encoded characters detected. Please use plain text only.';
     }
     
     return null;
@@ -167,19 +226,11 @@ function sanitizeString(str) {
 
 // Sanitize string but preserve line breaks for mathematical content
 function sanitizeWithLineBreaks(str) {
-    console.log('🔍 DEBUG: sanitizeWithLineBreaks called!');
     if (!str) return '';
-    
-    // Debug logging for first few calls
-    if (typeof window !== 'undefined' && window.debugLineBreaks !== false) {
-        console.log('🔍 DEBUG: sanitizeWithLineBreaks input:', JSON.stringify(str));
-        console.log('Has actual newlines:', str.includes('\n'));
-        console.log('Newline count:', (str.match(/\n/g) || []).length);
-    }
-    
+
     // Use placeholder approach to protect <br> tags during sanitization
     const placeholder = '___LINEBREAK_PLACEHOLDER___';
-    
+
     const result = str
         .replace(/\n/g, placeholder)  // Replace newlines with placeholder first
         .replace(/&/g, '&amp;')       // Escape ampersands
@@ -188,23 +239,9 @@ function sanitizeWithLineBreaks(str) {
         .replace(/"/g, '&quot;')      // Escape quotes
         .replace(/'/g, '&#x27;')      // Escape single quotes
         .replace(new RegExp(placeholder, 'g'), '<br>'); // Convert placeholders to <br> tags
-    
-    if (typeof window !== 'undefined' && window.debugLineBreaks !== false) {
-        console.log('🔍 DEBUG: sanitizeWithLineBreaks output:', JSON.stringify(result));
-        console.log('Contains <br>:', result.includes('<br>'));
-        console.log('<br> count:', (result.match(/<br>/g) || []).length);
-        // Disable further debug after first few calls to avoid spam
-        if (!window.debugCallCount) window.debugCallCount = 0;
-        window.debugCallCount++;
-        if (window.debugCallCount > 3) window.debugLineBreaks = false;
-    }
-    
+
     return result;
 }
-
-// Log when this file loads
-console.log('🔍 DEBUG: validationUtils.js loaded');
-console.log('sanitizeWithLineBreaks function defined:', typeof sanitizeWithLineBreaks !== 'undefined');
 
 // Validate URL format
 function validateURL(url) {
