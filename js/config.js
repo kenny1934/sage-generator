@@ -45,6 +45,9 @@ const GEMINI_MODELS = {
 
 // Configuration constants
 const CONFIG = {
+    // Version information
+    VERSION: '0.9.0-beta',
+    BUILD_DATE: '2025-09-30',
     // Default model (can be changed by user)
     DEFAULT_MODEL: 'flash',
     MAX_RETRIES: 3,

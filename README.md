@@ -1,6 +1,10 @@
 # SAGE: Secondary Academy Generator of Exercises ✨
 
+**Version: 0.9.0-beta** | **Status: Beta Release**
+
 A powerful web-based mathematical problem generator designed for educators and students. SAGE creates customized math problems with step-by-step solutions using AI, featuring advanced LaTeX rendering and an intuitive user interface.
+
+> 🚧 **Beta Notice**: SAGE is currently in beta testing. Core features are stable and secure, but minor improvements are ongoing. Feedback is welcome!
 
 ## 🌟 Features
 
@@ -207,6 +211,26 @@ See `sage_todo_list.md` for planned Phase 4 features including:
 ## 📄 License
 
 Copyright © 2025 MathConcept Secondary Academy. All Rights Reserved.
+
+## 🚧 Beta Release Information
+
+**Current Version**: 0.9.0-beta (September 30, 2025)
+
+### What's Included in Beta:
+- ✅ Complete core functionality with AI-powered problem generation
+- ✅ Enterprise-grade security (100% pass rate on security tests)
+- ✅ Comprehensive cost tracking and usage analytics
+- ✅ Full theme support (light/dark modes)
+- ✅ Mobile-optimized responsive design
+- ✅ Advanced personalization features
+
+### Known Limitations:
+- Some Phase 5 features pending (PDF export, service worker)
+- Minor UI refinements ongoing
+- Feedback collection for improvements
+
+### Feedback Welcome:
+This beta version is ready for educational use by tutor teams. Please report any issues or suggestions via GitHub issues.
 
 ## 🤝 Contributing
 

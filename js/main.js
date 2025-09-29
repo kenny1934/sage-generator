@@ -994,11 +994,7 @@ Ensure the LaTeX is correctly escaped for JSON strings.
             updateLoadingMessage("Using offline fallback questions...");
             setTimeout(() => {
                 const fallbackQuestions = getFallbackQuestions(mathTopic, difficulty);
-                console.log('🔍 DEBUG: Fallback questions (first solution):');
-                console.log('Fallback stepByStepSolution:', fallbackQuestions[0]?.stepByStepSolution);
-                console.log('Contains \\\\n:', fallbackQuestions[0]?.stepByStepSolution?.includes('\\n'));
-                console.log('Has actual newlines:', fallbackQuestions[0]?.stepByStepSolution?.includes('\n'));
-                console.log('Newline count:', (fallbackQuestions[0]?.stepByStepSolution?.match(/\n/g) || []).length);
+                // Debug logging disabled in beta version
                 displayMathQuestions(fallbackQuestions, false); // Fallback questions count as new
                 showNetworkMessage('📚 Showing sample questions (offline mode)', 'warning');
             }, 1000);
@@ -1023,12 +1019,7 @@ Ensure the LaTeX is correctly escaped for JSON strings.
 
 // Display generated math questions
 function displayMathQuestions(problems, isFromCache = false) {
-    console.log('🔍 DEBUG: displayMathQuestions called!');
-    console.log('Problems array:', problems);
-    console.log('Problems length:', problems?.length);
-    console.log('Is from cache:', isFromCache);
-    console.log('First problem has stepByStepSolution:', !!problems[0]?.stepByStepSolution);
-    console.log('First problem solution has newlines:', problems[0]?.stepByStepSolution?.includes('\n'));
+    // Debug logging disabled in beta version
     
     const mathQuestionsList = document.getElementById('mathQuestionsList');
     const questionsContainer = document.getElementById('questionsContainer');
@@ -1037,13 +1028,7 @@ function displayMathQuestions(problems, isFromCache = false) {
     const difficultySelect = document.getElementById('difficulty');
     const messageContainer = document.getElementById('messageContainer');
     
-    console.log('🔍 DEBUG: DOM elements found:');
-    console.log('mathQuestionsList:', !!mathQuestionsList);
-    console.log('questionsContainer:', !!questionsContainer);
-    console.log('resetBtn:', !!resetBtn);
-    console.log('mathTopicInput:', !!mathTopicInput);
-    console.log('difficultySelect:', !!difficultySelect);
-    console.log('messageContainer:', !!messageContainer);
+    // Debug logging disabled in beta version
     
     if (mathQuestionsList) {
         mathQuestionsList.innerHTML = ''; // Clear previous questions
@@ -1057,34 +1042,25 @@ function displayMathQuestions(problems, isFromCache = false) {
         return;
     }
 
-    console.log('🔍 DEBUG: Starting to create question items...');
+    // Creating question items...
     
     problems.forEach((problem, index) => {
-        console.log(`🔍 DEBUG: Processing problem ${index + 1}`);
-        console.log('Problem data:', {
-            hasQuestion: !!problem.question,
-            hasAnswer: !!problem.correctAnswer,
-            hasStepByStepSolution: !!problem.stepByStepSolution,
-            solutionLength: problem.stepByStepSolution?.length,
-            solutionHasNewlines: problem.stepByStepSolution?.includes('\n')
-        });
+        // Processing problem ${index + 1}
         
         try {
-            console.log('🔍 DEBUG: createQuestionItem function exists:', typeof createQuestionItem !== 'undefined');
             const problemDiv = createQuestionItem(problem, index, mathTopicInput.value.trim());
-            console.log(`🔍 DEBUG: createQuestionItem returned:`, !!problemDiv);
             
             // Add answer reveal functionality
             setupAnswerReveal(problemDiv, problemDiv.querySelector('.answer-content'));
             
             mathQuestionsList.appendChild(problemDiv);
-            console.log(`🔍 DEBUG: Problem ${index + 1} added to DOM`);
+            // Problem ${index + 1} added to DOM
         } catch (error) {
-            console.error(`🔍 DEBUG: Error creating problem ${index + 1}:`, error);
+            console.error(`Error creating problem ${index + 1}:`, error);
         }
     });
     
-    console.log('🔍 DEBUG: Finished creating question items');
+    // Finished creating question items
 
     questionsContainer.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
@@ -1277,13 +1253,13 @@ function updateCostDisplay() {
 }
 
 function showBudgetSettings() {
-    console.log('🔍 showBudgetSettings() called');
+    // showBudgetSettings() called
     if (!window.costTracker) {
-        console.error('❌ window.costTracker is not available');
+        console.error('window.costTracker is not available');
         displayMessage("Cost tracking not available", "text-red-500");
         return;
     }
-    console.log('✅ window.costTracker is available for budget settings');
+    // window.costTracker is available for budget settings
     const currentBudget = window.costTracker.getBudgetStatus().monthlyBudget;
     const newBudget = prompt(`Set your monthly budget (current: ${window.costTracker.formatCurrency(currentBudget)}):`, currentBudget.toString());
 
@@ -1326,6 +1302,7 @@ function initializeModelSelector() {
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log(`🚀 SAGE ${CONFIG.VERSION} loaded (${CONFIG.BUILD_DATE})`);
     initializeApp();
     initializeModelSelector();
 });
