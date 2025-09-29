@@ -700,15 +700,17 @@ function initializePersonalizationFeatures() {
 async function generateMathQuestions() {
     const mathTopicInput = document.getElementById('mathTopic');
     const difficultySelect = document.getElementById('difficulty');
-    
-    if (!mathTopicInput || !difficultySelect) {
+    const modelSelector = document.getElementById('modelSelector');
+
+    if (!mathTopicInput || !difficultySelect || !modelSelector) {
         console.error('Required input elements not found');
         displayMessage("Error: Required form elements not found.", "text-red-500");
         return;
     }
-    
+
     const mathTopic = mathTopicInput.value.trim();
     const difficulty = difficultySelect.value;
+    const selectedModel = modelSelector.value;
 
     // Get API key from session storage (if decrypted) or localStorage (if unencrypted)
     let apiKey = sessionStorage.getItem('sage_current_api_key') || localStorage.getItem(CONFIG.STORAGE_KEY);
@@ -896,7 +898,30 @@ Ensure the LaTeX is correctly escaped for JSON strings.
             return;
         }
 
-        const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
+        // Get the model configuration
+        const modelConfig = GEMINI_MODELS[selectedModel];
+        if (!modelConfig) {
+            displayMessage(`Error: Unknown model selected: ${selectedModel}`, "text-red-500");
+            return;
+        }
+
+        // Estimate cost before API call
+        const promptText = prompt;
+        const costEstimate = window.costTracker.estimateCost(promptText, selectedModel);
+        console.log(`Estimated cost for ${modelConfig.name}: ${window.costTracker.formatCurrency(costEstimate.totalCost)}`);
+
+        // Check budget before proceeding
+        const budgetStatus = window.costTracker.getBudgetStatus();
+        if (budgetStatus.isOverBudget) {
+            const proceed = confirm(`You are over your monthly budget of ${window.costTracker.formatCurrency(budgetStatus.monthlyBudget)}. Current usage: ${window.costTracker.formatCurrency(budgetStatus.monthlyCost)}. Do you want to proceed anyway?`);
+            if (!proceed) {
+                displayMessage("Request cancelled due to budget limit.", "text-yellow-500");
+                return;
+            }
+        }
+
+        // Use the selected model's endpoint
+        const apiUrl = `${modelConfig.endpoint}?key=${apiKey}`;
         const result = await makeAPICallWithRetry(apiUrl, payload);
 
         if (result.candidates && result.candidates.length > 0 &&
@@ -933,6 +958,20 @@ Ensure the LaTeX is correctly escaped for JSON strings.
                     // Phase 4: Cache the questions before displaying
                     QuestionCache.set(mathTopic, difficulty, mathProblems);
                     displayMathQuestions(mathProblems, false); // Pass false to indicate newly generated
+
+                    // Record actual usage for cost tracking
+                    const outputText = jsonText;
+                    const actualInputTokens = window.costTracker.estimateTokens(promptText);
+                    const actualOutputTokens = window.costTracker.estimateTokens(outputText);
+                    const actualCost = window.costTracker.recordUsage(selectedModel, actualInputTokens, actualOutputTokens);
+
+                    // Update cost display
+                    updateCostDisplay();
+
+                    console.log(`Actual cost: ${window.costTracker.formatCurrency(actualCost)} (${actualInputTokens} input + ${actualOutputTokens} output tokens)`);
+
+                    // Save selected model preference
+                    localStorage.setItem(CONFIG.SELECTED_MODEL_KEY, selectedModel);
                 } else {
                     console.error("Response is not a valid array:", mathProblems);
                     throw new Error('Invalid response format - not an array or empty');
@@ -1176,8 +1215,113 @@ function getFallbackQuestions(topic, difficulty) {
     return questions.map(q => ({ ...q }));
 }
 
+// Model selector and cost tracking functions
+function updateModelDescription() {
+    const modelSelector = document.getElementById('modelSelector');
+    const modelDescription = document.getElementById('modelDescription');
+
+    if (!modelSelector || !modelDescription) return;
+
+    const selectedModel = modelSelector.value;
+    const modelConfig = GEMINI_MODELS[selectedModel];
+
+    if (modelConfig) {
+        modelDescription.textContent = modelConfig.description;
+
+        // Update cost estimate when model changes
+        updateCostEstimate();
+    }
+}
+
+function updateCostEstimate() {
+    const mathTopicInput = document.getElementById('mathTopic');
+    const difficultySelect = document.getElementById('difficulty');
+    const modelSelector = document.getElementById('modelSelector');
+    const costEstimate = document.getElementById('costEstimate');
+
+    if (!mathTopicInput || !difficultySelect || !modelSelector || !costEstimate) return;
+
+    const inputText = mathTopicInput.value.trim();
+    const difficulty = difficultySelect.value;
+    const selectedModel = modelSelector.value;
+
+    if (inputText && window.costTracker) {
+        const estimate = window.costTracker.estimateCost(inputText, selectedModel);
+        costEstimate.textContent = window.costTracker.formatCurrency(estimate.totalCost);
+    } else {
+        costEstimate.textContent = '$0.0000';
+    }
+}
+
+function updateCostDisplay() {
+    if (!window.costTracker) return;
+
+    const budgetStatus = window.costTracker.getBudgetStatus();
+    const budgetStatusElement = document.getElementById('budgetStatus');
+    const budgetProgress = document.getElementById('budgetProgress');
+
+    if (budgetStatusElement) {
+        budgetStatusElement.textContent = `Monthly Budget: ${window.costTracker.formatCurrency(budgetStatus.monthlyBudget)} | Used: ${window.costTracker.formatCurrency(budgetStatus.monthlyCost)}`;
+    }
+
+    if (budgetProgress) {
+        const percentage = Math.min(budgetStatus.percentUsed, 100);
+        budgetProgress.style.width = `${percentage}%`;
+
+        if (budgetStatus.isOverBudget) {
+            budgetProgress.classList.add('over-budget');
+        } else {
+            budgetProgress.classList.remove('over-budget');
+        }
+    }
+}
+
+function showBudgetSettings() {
+    const currentBudget = window.costTracker.getBudgetStatus().monthlyBudget;
+    const newBudget = prompt(`Set your monthly budget (current: ${window.costTracker.formatCurrency(currentBudget)}):`, currentBudget.toString());
+
+    if (newBudget !== null && !isNaN(parseFloat(newBudget))) {
+        window.costTracker.updateBudget(parseFloat(newBudget));
+        updateCostDisplay();
+        displayMessage(`Monthly budget updated to ${window.costTracker.formatCurrency(parseFloat(newBudget))}`, "text-green-500");
+    }
+}
+
+function initializeModelSelector() {
+    const modelSelector = document.getElementById('modelSelector');
+    const mathTopicInput = document.getElementById('mathTopic');
+    const difficultySelect = document.getElementById('difficulty');
+
+    if (!modelSelector) return;
+
+    // Load saved model preference
+    const savedModel = localStorage.getItem(CONFIG.SELECTED_MODEL_KEY);
+    if (savedModel && GEMINI_MODELS[savedModel]) {
+        modelSelector.value = savedModel;
+    }
+
+    // Add event listeners
+    modelSelector.addEventListener('change', updateModelDescription);
+
+    if (mathTopicInput) {
+        mathTopicInput.addEventListener('input', updateCostEstimate);
+    }
+
+    if (difficultySelect) {
+        difficultySelect.addEventListener('change', updateCostEstimate);
+    }
+
+    // Initial updates
+    updateModelDescription();
+    updateCostEstimate();
+    updateCostDisplay();
+}
+
 // Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+    initializeModelSelector();
+});
 
 // Check KaTeX loading after a delay
 setTimeout(checkKaTeXLoaded, 1000);
