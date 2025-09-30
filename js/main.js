@@ -51,6 +51,7 @@ function initializeApp() {
     // Check for both encrypted and unencrypted API keys
     const hasEncryptedKey = window.secureStorage && window.secureStorage.isApiKeyEncrypted();
     const savedApiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
 
     if (hasEncryptedKey) {
         // Show API key container but with different message for encrypted key
@@ -60,6 +61,10 @@ function initializeApp() {
         if (apiKeyInput) {
             apiKeyInput.placeholder = 'Enter password to unlock your encrypted API key';
             apiKeyInput.type = 'password';
+        }
+        // Show forgot password button
+        if (forgotPasswordBtn) {
+            forgotPasswordBtn.style.display = 'inline-block';
         }
     } else if (savedApiKey && apiKeyInput && apiKeyContainer) {
         apiKeyInput.value = savedApiKey;
@@ -103,6 +108,7 @@ function attachEventListeners() {
     const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
     const exportQuestionsBtn = document.getElementById('exportQuestionsBtn');
     const apiKeyInput = document.getElementById('apiKeyInput');
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
     
     
     if (generateQuestionsBtn) {
@@ -138,6 +144,10 @@ function attachEventListeners() {
             }
         });
     } else {
+    }
+
+    if (forgotPasswordBtn) {
+        forgotPasswordBtn.addEventListener('click', handleForgotPassword);
     }
     
     if (prevQuestionBtn) {
@@ -417,8 +427,8 @@ async function saveApiKey() {
                     await window.secureStorage.storeApiKey(inputValue, password);
                     displayMessage('API key encrypted and saved successfully!', 'text-green-400');
 
-                    // Store decrypted key for this session
-                    sessionStorage.setItem('sage_current_api_key', inputValue);
+                    // DON'T store decrypted key - user must enter password on next use
+                    sessionStorage.removeItem('sage_current_api_key');
                 } catch (error) {
                     displayMessage('Failed to encrypt API key. Saving unencrypted.', 'text-orange-400');
                     localStorage.setItem(CONFIG.STORAGE_KEY, inputValue);
@@ -437,6 +447,56 @@ async function saveApiKey() {
         apiKeyContainer.style.display = 'none';
         apiKeyInput.value = '';
     }
+}
+
+// Handle forgot password - clear encrypted data and allow re-entry
+async function handleForgotPassword() {
+    const modal = buildModalTemplate(
+        'Forgot Password?',
+        'If you forgot your password, you\'ll need to delete the encrypted API key and re-enter it. This will clear your encrypted data permanently. You can get your API key from the Google AI Studio.',
+        [
+            {
+                text: 'Clear & Re-enter',
+                className: 'px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700',
+                onClick: () => {
+                    // Clear all encrypted data
+                    window.secureStorage.clearEncryptedData();
+                    sessionStorage.removeItem('sage_current_api_key');
+
+                    // Reset UI
+                    const apiKeyInput = document.getElementById('apiKeyInput');
+                    const apiKeyContainer = document.getElementById('apiKeyContainer');
+                    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+
+                    if (apiKeyInput) {
+                        apiKeyInput.placeholder = 'Enter your Gemini API key';
+                        apiKeyInput.type = 'password';
+                        apiKeyInput.value = '';
+                    }
+
+                    if (apiKeyContainer) {
+                        apiKeyContainer.style.display = 'block';
+                    }
+
+                    if (forgotPasswordBtn) {
+                        forgotPasswordBtn.style.display = 'none';
+                    }
+
+                    modal.remove();
+                    displayMessage('Encrypted key cleared. Please enter your API key again.', 'text-yellow-400');
+                }
+            },
+            {
+                text: 'Cancel',
+                className: 'px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700',
+                onClick: () => {
+                    modal.remove();
+                }
+            }
+        ]
+    );
+
+    document.body.appendChild(modal);
 }
 
 // Show encryption dialog
@@ -478,7 +538,17 @@ async function showPasswordDialog() {
             placeholder: 'Enter a secure password'
         });
 
+        const confirmPasswordInput = createElementSafe('input', {
+            type: 'password',
+            className: 'w-full p-2 border rounded bg-gray-700 text-white border-gray-600 focus:border-red-500 mt-3',
+            placeholder: 'Confirm your password'
+        });
+
         const strengthDiv = createElementSafe('div', {
+            className: 'mt-2 text-sm'
+        });
+
+        const matchDiv = createElementSafe('div', {
             className: 'mt-2 text-sm'
         });
 
@@ -488,7 +558,25 @@ async function showPasswordDialog() {
             const strength = checkPasswordStrength(password);
             strengthDiv.textContent = `Password strength: ${strength.level}`;
             strengthDiv.className = `mt-2 text-sm text-${strength.color}-400`;
+
+            // Check if passwords match
+            if (confirmPasswordInput.value) {
+                checkPasswordMatch();
+            }
         });
+
+        // Check password match on confirm input
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+            const match = passwordInput.value === confirmPasswordInput.value;
+            if (confirmPasswordInput.value.length > 0) {
+                matchDiv.textContent = match ? '✓ Passwords match' : '✗ Passwords do not match';
+                matchDiv.className = `mt-2 text-sm text-${match ? 'green' : 'red'}-400`;
+            } else {
+                matchDiv.textContent = '';
+            }
+        }
 
         const contentDiv = createElementSafe('div', {}, [
             createElementSafe('p', {
@@ -496,7 +584,9 @@ async function showPasswordDialog() {
                 className: 'mb-3'
             }),
             passwordInput,
-            strengthDiv
+            strengthDiv,
+            confirmPasswordInput,
+            matchDiv
         ]);
 
         const modal = buildModalTemplate(
@@ -508,10 +598,18 @@ async function showPasswordDialog() {
                     className: 'px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700',
                     onClick: () => {
                         const password = passwordInput.value;
+                        const confirmPassword = confirmPasswordInput.value;
+
                         if (password.length < 8) {
                             alert('Password must be at least 8 characters long');
                             return;
                         }
+
+                        if (password !== confirmPassword) {
+                            alert('Passwords do not match. Please try again.');
+                            return;
+                        }
+
                         modal.remove();
                         resolve(password);
                     }
@@ -604,9 +702,12 @@ function resetGenerator() {
     totalQuestions = 0;
     
     const questionNavigator = document.getElementById('questionNavigator');
+    const placeholder = document.getElementById('questionsPlaceholder');
+
     if (questionNavigator) questionNavigator.classList.add('hidden'); // Hide navigator
     if (questionsContainer) questionsContainer.classList.add('hidden');
     if (resetBtn) resetBtn.classList.add('hidden');
+    if (placeholder) placeholder.style.display = ''; // Show placeholder again
     if (initialMessage) initialMessage.classList.remove('hidden'); // Show initial message again
     if (messageContainer) messageContainer.innerHTML = ''; // Clear any messages
 }
@@ -712,8 +813,8 @@ async function generateMathQuestions() {
     const difficulty = difficultySelect.value;
     const selectedModel = modelSelector.value;
 
-    // Get API key from session storage (if decrypted) or localStorage (if unencrypted)
-    let apiKey = sessionStorage.getItem('sage_current_api_key') || localStorage.getItem(CONFIG.STORAGE_KEY);
+    // Get API key using centralized helper
+    let apiKey = getApiKey();
 
     // Check if we have an encrypted key but no current session key
     const hasEncryptedKey = window.secureStorage && window.secureStorage.isApiKeyEncrypted();
@@ -756,10 +857,12 @@ async function generateMathQuestions() {
     const generateQuestionsBtn = document.getElementById('generateQuestionsBtn');
     const mathQuestionsList = document.getElementById('mathQuestionsList');
     const messageContainer = document.getElementById('messageContainer');
-    
+    const placeholder = document.getElementById('questionsPlaceholder');
+
     if (initialMessage) initialMessage.classList.add('hidden');
     if (questionsContainer) questionsContainer.classList.add('hidden');
     if (resetBtn) resetBtn.classList.add('hidden');
+    if (placeholder) placeholder.style.display = ''; // Show placeholder during loading
     if (loadingIndicator) loadingIndicator.classList.remove('hidden');
     if (generateQuestionsBtn) generateQuestionsBtn.disabled = true;
     if (mathQuestionsList) mathQuestionsList.innerHTML = '';
@@ -1062,13 +1165,12 @@ function displayMathQuestions(problems, isFromCache = false) {
     
     // Finished creating question items
 
+    // Hide placeholder and show questions
+    const placeholder = document.getElementById('questionsPlaceholder');
+    if (placeholder) placeholder.style.display = 'none';
+
     questionsContainer.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
-    
-    // Phase 4: Move questions to canvas on desktop
-    if (window.layoutManager) {
-        window.layoutManager.moveQuestionsToCanvas();
-    }
     
     // Initialize question navigation
     if (totalQuestions > 1) {

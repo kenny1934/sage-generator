@@ -56,7 +56,7 @@
         <header class="app-header">
             <!-- Left: Logo & Branding -->
             <div class="header-left">
-                <img src="./images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
+                <img src="images/msa-logo.png" alt="MSA Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/100x100/ffffff/dc2626?text=Logo';">
                 <div class="header-text">
                     <div class="title-row">
                         <h1 class="sage-title">SAGE</h1>
@@ -89,159 +89,198 @@
             <!-- Left Config Panel -->
             <aside class="config-panel main-container">
                 <div class="config-content">
-                    <!-- Configuration sections will go here -->
 
-            
-
-            <!-- API Key Configuration -->
-            <div id="apiKeyContainer" class="api-key-container">
-                <label for="apiKeyInput" class="block text-sm font-semibold text-primary mb-2">
-                    Gemini API Key (required):
-                </label>
-                <div class="flex gap-2">
-                    <input type="password" id="apiKeyInput" class="flex-1" placeholder="Enter your Gemini API key" aria-label="Gemini API Key">
-                    <button id="saveApiKeyBtn" class="action-btn bg-red-600 hover:bg-red-700" aria-label="Save API Key">
-                        Save
-                    </button>
-                </div>
-                <p class="text-xs text-secondary mt-1">
-                    Your API key is stored locally and never sent to our servers.
-                </p>
-            </div>
-            
-
-            <div class="space-y-8">
-
-                <div>
-                    <label for="mathTopic" class="block text-lg font-semibold mb-2">
-                        Maths Topic & Grade Level <span class="text-secondary text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
-                    </label>
-                    <div class="autocomplete-container">
-                        <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
-                        <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <label for="difficulty" class="block text-lg font-semibold mb-2">
-                        Difficulty Level:
-                    </label>
-                    <select id="difficulty" class="w-full p-3 shadow-sm" aria-label="Difficulty Level">
-                        <option value="Easy">Easy</option>
-                        <option value="Medium" selected>Medium</option>
-                        <option value="Hard">Hard</option>
-                        <option value="Challenging">Challenging</option>
-                    </select>
-                    <div id="difficultyDescription" class="difficulty-description">
-                        Medium complexity with step-by-step explanations
-                    </div>
-                </div>
-
-                <!-- Model Selector -->
-                <div>
-                    <label for="modelSelector" class="block text-lg font-semibold mb-2">
-                        Gemini Model:
-                    </label>
-                    <select id="modelSelector" class="w-full p-3 shadow-sm" aria-label="Select Gemini Model">
-                        <option value="flash-lite">Gemini 2.5 Flash-Lite - Fastest & Most Cost-Effective</option>
-                        <option value="flash" selected>Gemini 2.5 Flash - Balanced Speed & Capability</option>
-                        <option value="pro">Gemini 2.5 Pro - Most Capable for Complex Problems</option>
-                    </select>
-                    <div id="modelDescription" class="model-description">
-                        Balanced speed and capability for most questions
-                    </div>
-                </div>
-
-                <!-- Cost Estimation Display -->
-                <div id="costEstimateContainer" class="cost-estimate-container">
-                    <div class="cost-estimate-header">
-                        <span class="cost-label">💰 Estimated Cost:</span>
-                        <span id="costEstimate" class="cost-value">$0.0000</span>
-                    </div>
-                    <div class="budget-info">
-                        <div class="budget-bar">
-                            <div id="budgetProgress" class="budget-progress" style="width: 0%"></div>
+                    <!-- Section 1: API Configuration (Collapsible) -->
+                    <details class="config-section collapsible-section" id="apiSection" open>
+                        <summary class="section-summary">
+                            <span class="section-summary-icon">🔑</span>
+                            <span class="section-summary-title">API Configuration</span>
+                            <span class="section-summary-chevron">▼</span>
+                        </summary>
+                        <div class="section-content">
+                            <div id="apiKeyContainer" class="api-key-container">
+                                <label for="apiKeyInput" class="block text-sm font-semibold text-primary mb-2">
+                                    Gemini API Key (required):
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="password" id="apiKeyInput" class="flex-1" placeholder="Enter your Gemini API key" aria-label="Gemini API Key">
+                                    <button id="saveApiKeyBtn" class="action-btn bg-red-600 hover:bg-red-700" aria-label="Save API Key">
+                                        Save
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between mt-1">
+                                    <p class="text-xs text-secondary">
+                                        Your API key is stored locally and never sent to our servers.
+                                    </p>
+                                    <button id="forgotPasswordBtn" class="text-xs text-red-400 hover:text-red-300 underline" style="display: none;">
+                                        Forgot Password?
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="budget-text">
-                            <span id="budgetStatus">Monthly Budget: $5.00 | Used: $0.00</span>
-                            <button id="budgetSettingsBtn" class="budget-settings-btn" onclick="showBudgetSettings()" aria-label="Budget Settings">⚙️</button>
+                    </details>
+
+                    <!-- Section 2: Question Setup (Primary) -->
+                    <section class="config-section config-section-primary" id="questionSetupSection">
+                        <h3 class="section-title">📝 Question Setup</h3>
+
+                        <div class="form-group">
+                            <label for="mathTopic" class="block text-base font-semibold mb-2">
+                                Maths Topic & Grade Level <span class="text-secondary text-sm">(e.g., "Algebra for Grade 7", "Trigonometry for Form 3")</span>:
+                            </label>
+                            <div class="autocomplete-container">
+                                <textarea id="mathTopic" rows="3" class="w-full p-3 shadow-sm" placeholder="e.g., 'Solving linear equations in one unknown for F1', 'Complex number problems for Form 4'" aria-label="Maths Topic and Grade Level"></textarea>
+                                <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="mb-4">
-                    <label class="force-new-label">
-                        <input type="checkbox" id="forceNewQuestions">
-                        <span>🔄 Generate fresh questions (ignore previous results)</span>
-                    </label>
-                </div>
-
-                <button id="generateQuestionsBtn" class="w-full bg-red-600 text-white font-extrabold py-4 px-6 rounded-xl hover:bg-red-700 transition-all duration-300 ease-in-out shadow-lg transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-400 flex items-center justify-center text-xl" aria-label="Generate Math Questions">
-                    Generate Maths Questions! ➕
-                </button>
-
-                <div id="loadingIndicator" class="hidden text-center mt-6" role="status" aria-live="polite">
-                    <div class="math-spinner justify-center">
-                        <span class="math-symbol">π</span>
-                        <span class="math-symbol">∑</span>
-                        <span class="math-symbol">∫</span>
-                        <span class="math-symbol">∞</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill"></div>
-                    </div>
-                    <div id="loadingMessage" class="loading-message">Initializing math generator...</div>
-                </div>
-
-                <div id="questionsContainer" class="hidden mt-10 border-t-2 border-gray-700 pt-10">
-                    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-                        <h2 class="text-3xl font-bold text-center sm:text-left flex-grow" style="color: var(--text-primary);">Your Generated Questions</h2>
-                        <div class="flex gap-2 flex-wrap">
-                            <button id="exportQuestionsBtn" class="action-btn bg-red-500 hover:bg-red-600 text-sm sm:text-base" aria-label="Export questions to text file">
-                                Export Questions
-                            </button>
-                            <button id="showFavoritesBtn" class="action-btn bg-yellow-600 hover:bg-yellow-700 text-sm sm:text-base" aria-label="View your favourite questions" onclick="showFavoritesPanel()">
-                                ⭐ Favourites
-                            </button>
-                            <button id="toggleMathViewBtn" class="action-btn bg-gray-500 hover:bg-gray-600 text-sm sm:text-base" aria-label="Toggle between rendered math and raw LaTeX view">
-                                Toggle Maths View (Rendered)
-                            </button>
+                        <div class="form-group">
+                            <label for="difficulty" class="block text-base font-semibold mb-2">
+                                Difficulty Level:
+                            </label>
+                            <select id="difficulty" class="w-full p-3 shadow-sm" aria-label="Difficulty Level">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Hard">Hard</option>
+                                <option value="Challenging">Challenging</option>
+                            </select>
+                            <div id="difficultyDescription" class="difficulty-description">
+                                Medium complexity with step-by-step explanations
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Question Navigator -->
-                    <div id="questionNavigator" class="question-navigator hidden">
-                        <button id="prevQuestionBtn" class="nav-button" aria-label="Previous question">
-                            ← Previous
+                    </section>
+
+                    <!-- Section 3: Advanced Settings (Collapsible) -->
+                    <details class="config-section collapsible-section" id="advancedSection">
+                        <summary class="section-summary">
+                            <span class="section-summary-icon">⚙️</span>
+                            <span class="section-summary-title">Advanced Settings</span>
+                            <span class="section-summary-chevron">▼</span>
+                        </summary>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="modelSelector" class="block text-base font-semibold mb-2">
+                                    Gemini Model:
+                                </label>
+                                <select id="modelSelector" class="w-full p-3 shadow-sm" aria-label="Select Gemini Model">
+                                    <option value="flash-lite">Gemini 2.5 Flash-Lite - Fastest & Most Cost-Effective</option>
+                                    <option value="flash" selected>Gemini 2.5 Flash - Balanced Speed & Capability</option>
+                                    <option value="pro">Gemini 2.5 Pro - Most Capable for Complex Problems</option>
+                                </select>
+                                <div id="modelDescription" class="model-description">
+                                    Balanced speed and capability for most questions
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Section 4: Cost & Budget Widget -->
+                    <section class="config-section config-section-compact" id="costSection">
+                        <div id="costEstimateContainer" class="cost-estimate-container">
+                            <div class="cost-estimate-header">
+                                <span class="cost-label">💰 Estimated Cost:</span>
+                                <span id="costEstimate" class="cost-value">$0.0000</span>
+                            </div>
+                            <div class="budget-info">
+                                <div class="budget-bar">
+                                    <div id="budgetProgress" class="budget-progress" style="width: 0%"></div>
+                                </div>
+                                <div class="budget-text">
+                                    <span id="budgetStatus">Monthly Budget: $5.00 | Used: $0.00</span>
+                                    <button id="budgetSettingsBtn" class="budget-settings-btn" onclick="showBudgetSettings()" aria-label="Budget Settings">⚙️</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Generate Button -->
+                    <div class="generate-button-container">
+                        <button id="generateQuestionsBtn" class="w-full bg-red-600 text-white font-extrabold py-4 px-6 rounded-xl hover:bg-red-700 transition-all duration-300 ease-in-out shadow-lg transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-400 flex items-center justify-center text-xl" aria-label="Generate Math Questions">
+                            Generate Maths Questions! ➕
                         </button>
-                        <div class="question-counter" id="questionCounter">
-                            Question 1 of 3
+
+                        <!-- Generate Fresh Questions Option -->
+                        <div class="form-group mt-3">
+                            <label class="force-new-label">
+                                <input type="checkbox" id="forceNewQuestions">
+                                <span>🔄 Generate fresh questions (ignore cache)</span>
+                            </label>
                         </div>
-                        <button id="nextQuestionBtn" class="nav-button" aria-label="Next question">
-                            Next →
-                        </button>
                     </div>
-                    
-                    <div id="mathQuestionsList" class="space-y-8" role="list">
-                        <!-- Math questions will be inserted here -->
+
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="hidden text-center mt-6" role="status" aria-live="polite">
+                        <div class="math-spinner justify-center">
+                            <span class="math-symbol">π</span>
+                            <span class="math-symbol">∑</span>
+                            <span class="math-symbol">∫</span>
+                            <span class="math-symbol">∞</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="progressFill" class="progress-fill"></div>
+                        </div>
+                        <div id="loadingMessage" class="loading-message">Initializing math generator...</div>
                     </div>
-                    <button id="resetBtn" class="hidden w-full bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-400 mt-8" aria-label="Generate New Questions">
-                        Generate New Questions
-                    </button>
-                </div>
 
-                <div id="messageContainer" class="mt-8" role="alert" aria-live="polite">
-                </div>
+                    <!-- Message Container -->
+                    <div id="messageContainer" class="mt-6" role="alert" aria-live="polite">
+                    </div>
 
-            </div>
                 </div>
             </aside>
 
             <!-- Right Questions Canvas -->
             <main class="questions-canvas main-container" id="questions-canvas">
                 <div class="questions-content">
-                    <!-- Questions will be displayed here -->
-                    <p class="text-secondary text-center" id="questionsPlaceholder">Select a topic and generate questions to see them here.</p>
+                    <!-- Empty State -->
+                    <div id="questionsPlaceholder" class="empty-state">
+                        <div class="empty-state-icon">📐</div>
+                        <h3 class="empty-state-title">Ready to Generate Questions!</h3>
+                        <p class="empty-state-text">
+                            Configure your topic and settings in the left panel, then click "Generate Maths Questions!"
+                        </p>
+                        <div class="empty-state-hint">
+                            <span class="hint-label">💡 Tip:</span> Use <kbd>Ctrl+Enter</kbd> to generate questions quickly
+                        </div>
+                    </div>
+
+                    <!-- Questions Container -->
+                    <div id="questionsContainer" class="hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                            <h2 class="text-3xl font-bold text-center sm:text-left flex-grow" style="color: var(--text-primary);">Your Generated Questions</h2>
+                            <div class="flex gap-2 flex-wrap">
+                                <button id="exportQuestionsBtn" class="action-btn bg-red-500 hover:bg-red-600 text-sm sm:text-base" aria-label="Export questions to text file">
+                                    Export Questions
+                                </button>
+                                <button id="showFavoritesBtn" class="action-btn bg-yellow-600 hover:bg-yellow-700 text-sm sm:text-base" aria-label="View your favourite questions" onclick="showFavoritesPanel()">
+                                    ⭐ Favourites
+                                </button>
+                                <button id="toggleMathViewBtn" class="action-btn bg-gray-500 hover:bg-gray-600 text-sm sm:text-base" aria-label="Toggle between rendered math and raw LaTeX view">
+                                    Toggle Maths View (Rendered)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Question Navigator -->
+                        <div id="questionNavigator" class="question-navigator hidden">
+                            <button id="prevQuestionBtn" class="nav-button" aria-label="Previous question">
+                                ← Previous
+                            </button>
+                            <div class="question-counter" id="questionCounter">
+                                Question 1 of 3
+                            </div>
+                            <button id="nextQuestionBtn" class="nav-button" aria-label="Next question">
+                                Next →
+                            </button>
+                        </div>
+
+                        <div id="mathQuestionsList" class="space-y-8" role="list">
+                            <!-- Math questions will be inserted here -->
+                        </div>
+                        <button id="resetBtn" class="hidden w-full bg-gray-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out shadow-lg transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-400 mt-8" aria-label="Generate New Questions">
+                            Generate New Questions
+                        </button>
+                    </div>
                 </div>
             </main>
         </div>

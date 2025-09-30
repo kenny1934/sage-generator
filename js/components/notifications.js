@@ -63,8 +63,18 @@ function showFavoritesPanel() {
 
 // Phase 3: Remove favorite
 function removeFavorite(favoriteId, buttonElement) {
+    // Get the favorite data before removing to get questionHash
+    const favorites = DataManager.loadFavorites();
+    const favorite = favorites.find(fav => fav.id === favoriteId);
+
     DataManager.removeFromFavorites(favoriteId);
     buttonElement.closest('.p-4').remove();
+
+    // Reset the favorite button in the questions display
+    if (favorite && favorite.questionHash && typeof resetFavoriteButton === 'function') {
+        resetFavoriteButton(favorite.questionHash);
+    }
+
     displayMessage('Favorite removed!', 'text-orange-400');
 }
 

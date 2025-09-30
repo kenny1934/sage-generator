@@ -167,8 +167,11 @@ class DataManager {
 
     static addToFavorites(question, answer, solution, topic, difficulty) {
         const favorites = this.loadFavorites();
+        const questionHash = typeof simpleHash === 'function' ? simpleHash(question) : question.substring(0, 50);
+
         const favorite = {
             id: Date.now(),
+            questionHash, // Add hash for tracking
             question,
             answer,
             solution,
@@ -181,6 +184,11 @@ class DataManager {
         favorites.unshift(favorite);
         this.saveFavorites(favorites);
         return favorites;
+    }
+
+    static isQuestionFavorited(questionHash) {
+        const favorites = this.loadFavorites();
+        return favorites.some(fav => fav.questionHash === questionHash);
     }
 
     static removeFromFavorites(favoriteId) {

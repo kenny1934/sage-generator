@@ -3,6 +3,14 @@
  * API call functions, retry logic, and loading management
  */
 
+// Centralized API key retrieval function
+function getApiKey() {
+    // Priority: sessionStorage (decrypted) > localStorage (unencrypted)
+    return sessionStorage.getItem('sage_current_api_key') ||
+           localStorage.getItem(CONFIG.STORAGE_KEY) ||
+           null;
+}
+
 // Enhanced API call with offline fallback
 async function makeAPICallWithRetry(url, payload, retries = CONFIG.MAX_RETRIES) {
     // Check if offline first

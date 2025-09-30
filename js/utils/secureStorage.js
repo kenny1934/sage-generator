@@ -105,8 +105,9 @@ class SecureStorage {
         localStorage.setItem('sage_api_key_encrypted', encrypted);
         localStorage.setItem('sage_api_key_protected', 'true');
 
-        // Clear any unencrypted key
+        // Clear any unencrypted key and session storage
         localStorage.removeItem('sage_api_key');
+        sessionStorage.removeItem('sage_current_api_key');
     }
 
     // Retrieve and decrypt API key

@@ -24,9 +24,7 @@
     box-shadow: 0 4px 16px rgba(60, 72, 88, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    z-index: 10;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    z-index: 50;
 }
 
 /* Restore solid header background */
@@ -108,14 +106,7 @@
     padding: 2rem;
     width: 100%;
     position: relative;
-    z-index: 10;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-/* Restore solid backgrounds - animations now above interface */
-.main-container {
-    background: var(--surface);
+    /* Removed z-index: 10 to fix button click issues */
 }
 
 /* Config Panel Styling */
@@ -128,6 +119,143 @@
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
     text-align: center;
+}
+
+/* Config Content Container */
+.config-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Config Section Cards */
+.config-section {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.config-section:hover {
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+/* Primary Section (Question Setup) */
+.config-section-primary {
+    border-color: rgba(248, 113, 113, 0.4);
+    box-shadow: 0 2px 8px rgba(248, 113, 113, 0.1);
+}
+
+/* Compact Section (Cost Widget) */
+.config-section-compact {
+    padding: 1rem;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Generate Button Container */
+.generate-button-container {
+    margin-top: 0.5rem;
+}
+
+/* Collapsible Section Styling */
+.collapsible-section {
+    cursor: default;
+}
+
+.collapsible-section summary {
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: -0.5rem -0.75rem 0 -0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+
+.collapsible-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-section summary:hover {
+    background: var(--button-hover);
+}
+
+.section-summary-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.section-summary-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.section-summary-chevron {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.collapsible-section[open] .section-summary-chevron {
+    transform: rotate(180deg);
+}
+
+.section-content {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Improved Label Sizing */
+.config-section label {
+    font-size: 0.9rem;
+}
+
+.config-section .text-lg {
+    font-size: 0.95rem;
+}
+
+.config-section .text-base {
+    font-size: 0.9rem;
 }
 
 /* Questions Canvas Styling */
@@ -144,10 +272,72 @@
     justify-content: flex-start;
 }
 
+/* Empty State Styling */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.empty-state-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 400px;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state-hint {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.hint-label {
+    font-weight: 600;
+    color: var(--accent);
+    margin-right: 0.5rem;
+}
+
+.empty-state-hint kbd {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
 #questionsPlaceholder {
     text-align: center;
-    margin-top: 2rem;
-    font-style: italic;
 }
 
 .sidebar {
@@ -357,12 +547,8 @@ input[type="checkbox"]:focus {
 }
 
 .api-key-container {
-    background: var(--surface-elevated) !important;
-    border: 1px solid #f87171;
-    padding: 0.7rem 1rem;
-    border-radius: 0.75rem;
-    margin-bottom: 1.2rem;
-    font-size: 0.98rem;
+    /* API key now styled by parent .config-section */
+    font-size: 0.95rem;
 }
 
 /* Question Cards */

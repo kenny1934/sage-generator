@@ -16,7 +16,7 @@ A powerful web-based mathematical problem generator designed for educators and s
 - **Export Functionality**: Download problems as text files
 
 ### 🚀 Advanced UX Features
-- **Smart Input Assistance**: 
+- **Smart Input Assistance**:
   - Autocomplete suggestions for 30+ common math topics
   - 12 clickable example topics organized by grade level
   - Difficulty descriptions with complexity explanations
@@ -25,6 +25,13 @@ A powerful web-based mathematical problem generator designed for educators and s
   - Question navigation with prev/next buttons and counter
   - Keyboard shortcuts for power users (press `?` for help)
   - Arrow key navigation between questions
+
+- **Organized UI**:
+  - Card-based layout with collapsible sections
+  - API Configuration (collapsible)
+  - Question Setup (primary, always visible)
+  - Advanced Settings (collapsible - model selection)
+  - Cost & Budget tracking widget
 
 ### 🎯 Personalization Features
 - **Smart Recommendations**:
@@ -41,6 +48,7 @@ A powerful web-based mathematical problem generator designed for educators and s
   - Automatic saving of preferred difficulty and topics
   - LocalStorage-based preference management
   - Question favorites and bookmarking system
+  - Generate Similar Questions feature for practice variations
 
 - **Intelligent Error Handling**:
   - User-friendly error messages with actionable suggestions
@@ -83,10 +91,17 @@ A powerful web-based mathematical problem generator designed for educators and s
 - **Progressive Enhancement**: Features work even with limited connectivity
 - **Retry Mechanisms**: Automatic recovery from temporary failures
 - **Optimized Loading**: Minimal resource usage and fast rendering
+- **Smart Caching**: Cache control with "Generate Fresh Questions" option
+
+### Security & Privacy
+- **API Key Encryption**: Optional password-protected encryption for API keys
+- **Double Password Confirmation**: Prevents typo-based lockouts
+- **Forgot Password Recovery**: Clear process to reset encrypted keys
+- **Local Storage Only**: API keys never sent to external servers
+- **Input Sanitization**: XSS protection and secure data handling
 
 ### Developer Features
 - **Clean Architecture**: Modular JavaScript with clear separation of concerns
-- **Security**: Input sanitization and XSS protection
 - **Accessibility**: Full keyboard navigation and screen reader support
 - **Error Logging**: Comprehensive debugging information
 
@@ -104,7 +119,8 @@ A powerful web-based mathematical problem generator designed for educators and s
 
 2. **Open SAGE**:
    - Load `index.html` in your web browser
-   - Enter your API key when prompted (stored locally)
+   - Enter your API key when prompted
+   - Optionally encrypt it with a password for added security
 
 3. **Generate Problems**:
    - Choose a math topic and grade level

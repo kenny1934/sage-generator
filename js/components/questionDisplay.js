@@ -47,9 +47,17 @@ function updateNavigationState() {
 
 // Phase 3: Add question to favourites
 function addToFavorites(problem, questionIndex, favoriteBtn) {
+    const questionHash = favoriteBtn.dataset.questionHash;
+
+    // Check if already favorited (prevent duplicates)
+    if (DataManager.isQuestionFavorited(questionHash)) {
+        displayMessage('Question already in favourites!', 'text-yellow-400');
+        return;
+    }
+
     const topic = mathTopicInput.value.trim();
     const difficulty = difficultySelect.value;
-    
+
     DataManager.addToFavorites(
         problem.question,
         problem.correctAnswer,
@@ -57,20 +65,35 @@ function addToFavorites(problem, questionIndex, favoriteBtn) {
         topic,
         difficulty
     );
-    
+
     // Update button state
     favoriteBtn.textContent = '✓ Favourited';
     favoriteBtn.disabled = true;
     favoriteBtn.className = 'action-btn bg-green-600 hover:bg-green-700';
-    
+    favoriteBtn.dataset.favorited = 'true';
+
     // Show success message
     displayMessage(`Question ${questionIndex + 1} added to favourites!`, 'text-green-400');
 }
 
+// Reset favorite button state (called when unfavorited from favorites panel)
+function resetFavoriteButton(questionHash) {
+    const allFavoriteButtons = document.querySelectorAll('[data-question-hash]');
+    allFavoriteButtons.forEach(btn => {
+        if (btn.dataset.questionHash === questionHash && btn.dataset.favorited === 'true') {
+            btn.textContent = '⭐ Favourite';
+            btn.disabled = false;
+            btn.className = 'action-btn bg-yellow-600 hover:bg-yellow-700';
+            btn.dataset.favorited = 'false';
+        }
+    });
+}
+
 // Generate similar question functionality
 async function generateSimilarQuestion(originalProblem, questionIndex) {
-    const apiKey = localStorage.getItem(CONFIG.STORAGE_KEY);
-    
+    // Get API key using centralized helper
+    let apiKey = getApiKey();
+
     if (!apiKey) {
         createNotification('API key required for generating similar questions', 'warning');
         return;
@@ -121,18 +144,19 @@ async function generateSimilarQuestion(originalProblem, questionIndex) {
                 }
             }
         };
-        
-        // Phase 4: Check cache for similar question
-        const similarCacheKey = `similar_${btoa(originalProblem.question).substring(0, 20)}`;
-        const cachedSimilar = QuestionCache.get(similarCacheKey, 'similar');
-        if (cachedSimilar && cachedSimilar.length > 0) {
-            console.log('Using cached similar question');
-            replaceProblemInList(questionIndex, cachedSimilar[0]);
-            createNotification('Similar question generated from cache!', 'success');
-            return;
-        }
 
-        const apiUrl = `${CONFIG.API_BASE_URL}?key=${apiKey}`;
+        // Always generate fresh similar questions - no cache check
+        // (Users want NEW similar questions each time, not cached ones)
+
+        // Get the selected model endpoint with fallback
+        const selectedModel = localStorage.getItem(CONFIG.SELECTED_MODEL_KEY) || 'flash';
+        const modelConfig = (window.GEMINI_MODELS && window.GEMINI_MODELS[selectedModel]) ||
+                            (window.GEMINI_MODELS && window.GEMINI_MODELS['flash']);
+
+        // Ultimate fallback endpoint if GEMINI_MODELS not loaded
+        const endpoint = modelConfig?.endpoint ||
+                        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+        const apiUrl = `${endpoint}?key=${apiKey}`;
         const result = await makeAPICallWithRetry(apiUrl, payload, 2); // Fewer retries for similar questions
         
         if (result.candidates && result.candidates.length > 0 &&
@@ -140,21 +164,23 @@ async function generateSimilarQuestion(originalProblem, questionIndex) {
             result.candidates[0].content.parts.length > 0) {
             const jsonText = result.candidates[0].content.parts[0].text;
             const newProblem = JSON.parse(jsonText);
-            
-            // Phase 4: Cache the similar question
-            QuestionCache.set(similarCacheKey, 'similar', [newProblem]);
-            
+
             // Replace the current question with the similar one
             replaceProblemInList(questionIndex, newProblem);
             createNotification('Similar question generated!', 'success');
+
+            // Reset button state on success and exit early
+            similarBtn.disabled = false;
+            similarBtn.textContent = originalText;
+            return;
         } else {
             throw new Error('Invalid response format');
         }
-        
+
     } catch (error) {
         console.error('Error generating similar question:', error);
         createNotification('Failed to generate similar question. Please try again.', 'warning');
-    } finally {
+        // Reset button state on error
         similarBtn.disabled = false;
         similarBtn.textContent = originalText;
     }
@@ -247,13 +273,13 @@ function replaceProblemInList(index, newProblem) {
                                          `<div class="latex-view">${safeRenderAnswerSimilar(newProblem.correctAnswer)}</div>` +
                                          `<p class="font-bold mb-2" style="color: var(--accent);">Step-by-Step Solution:</p><div class="math-rendered" style="color: var(--text-primary);">${safeRenderSolutionSimilar(processedSolution)}</div>` +
                                          `<div class="latex-view">${safeRenderSolutionSimilar(newProblem.stepByStepSolution)}</div>`;
-            
-            // Hide the answer initially
-            answerContentDiv.style.display = 'none';
+
+            // Always show the new answer immediately after generating similar question
+            answerContentDiv.style.display = 'block';
             const revealBtn = questionElement.querySelector('.action-btn:nth-child(2)'); // Second button (reveal)
             if (revealBtn) {
-                revealBtn.textContent = 'Show Answer & Steps';
-                revealBtn.setAttribute('aria-expanded', 'false');
+                revealBtn.textContent = 'Hide Answer & Steps';
+                revealBtn.setAttribute('aria-expanded', 'true');
             }
         }
         
@@ -403,8 +429,23 @@ function createQuestionButtons(problem, index) {
     
     // Phase 3: Add favourite button
     const favoriteBtn = document.createElement('button');
-    favoriteBtn.className = 'action-btn bg-yellow-600 hover:bg-yellow-700';
-    favoriteBtn.textContent = '⭐ Favourite';
+    const questionHash = typeof simpleHash === 'function' ? simpleHash(problem.question) : '';
+    const isFavorited = questionHash && DataManager.isQuestionFavorited(questionHash);
+
+    // Set initial state based on whether question is already favorited
+    if (isFavorited) {
+        favoriteBtn.className = 'action-btn bg-green-600 hover:bg-green-700';
+        favoriteBtn.textContent = '✓ Favourited';
+        favoriteBtn.disabled = true;
+        favoriteBtn.dataset.favorited = 'true';
+    } else {
+        favoriteBtn.className = 'action-btn bg-yellow-600 hover:bg-yellow-700';
+        favoriteBtn.textContent = '⭐ Favourite';
+        favoriteBtn.disabled = false;
+        favoriteBtn.dataset.favorited = 'false';
+    }
+
+    favoriteBtn.dataset.questionHash = questionHash;
     favoriteBtn.setAttribute('aria-label', `Add question ${index + 1} to favourites`);
     favoriteBtn.addEventListener('click', () => addToFavorites(problem, index, favoriteBtn));
     buttonContainer.appendChild(favoriteBtn);
