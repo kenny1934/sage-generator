@@ -1,6 +1,6 @@
 # SAGE: Secondary Academy Generator of Exercises ✨
 
-**Version: 0.9.0-beta** | **Status: Beta Release**
+**Version: 0.10.0-beta** | **Status: Beta Release**
 
 A powerful web-based mathematical problem generator designed for educators and students. SAGE creates customized math problems with step-by-step solutions using AI, featuring advanced LaTeX rendering and an intuitive user interface.
 
