@@ -1,0 +1,19 @@
+{
+  "name": "sage-oauth-worker",
+  "version": "1.0.0",
+  "description": "Google Workspace OAuth and API proxy for SAGE",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "oauth",
+    "google-workspace"
+  ],
+  "author": "SAGE Team",
+  "license": "MIT"
+}

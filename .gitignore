@@ -1,0 +1,25 @@
+# Environment files with secrets
+.env
+.dev.vars
+worker/.dev.vars
+
+# Cloudflare Worker build artifacts
+worker/.wrangler/
+worker/dist/
+worker/node_modules/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*

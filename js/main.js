@@ -12,22 +12,106 @@ let networkStatusIndicator;
 
 // Removed Google Drive integration
 
+// OAuth Initialization
+function initializeOAuth() {
+    const oauthContainer = document.getElementById('oauthContainer');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const userInfo = document.getElementById('userInfo');
+
+    if (!oauthContainer) return;
+
+    // Show OAuth container
+    oauthContainer.style.display = 'block';
+
+    // Initialize auth manager
+    window.authManager = initializeAuth(CONFIG.WORKER_URL);
+    if (!window.authManager) return;
+
+    // Set up auth state change listener
+    window.authManager.onAuthStateChanged = (user) => {
+        updateOAuthUI(user);
+    };
+
+    // Initialize auth state
+    window.authManager.initialize();
+
+    // Sign in button
+    if (googleSignInBtn) {
+        googleSignInBtn.addEventListener('click', async () => {
+            try {
+                googleSignInBtn.classList.add('loading');
+                await window.authManager.login();
+            } catch (error) {
+                console.error('Login failed:', error);
+                displayMessage(`Login failed: ${error.message}`, 'text-red-500');
+                googleSignInBtn.classList.remove('loading');
+            }
+        });
+    }
+
+    // Sign out button
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                await window.authManager.logout();
+                displayMessage('Signed out successfully', 'text-green-400');
+            } catch (error) {
+                console.error('Sign out failed:', error);
+            }
+        });
+    }
+}
+
+// Update OAuth UI based on auth state
+function updateOAuthUI(user) {
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const userInfo = document.getElementById('userInfo');
+    const userPhoto = document.getElementById('userPhoto');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const apiKeyRequiredLabel = document.getElementById('apiKeyRequiredLabel');
+
+    if (user) {
+        // User is signed in
+        if (googleSignInBtn) googleSignInBtn.style.display = 'none';
+        if (userInfo) userInfo.style.display = 'flex';
+        if (userPhoto) userPhoto.src = user.picture || '';
+        if (userName) userName.textContent = user.name || '';
+        if (userEmail) userEmail.textContent = user.email || '';
+        if (apiKeyRequiredLabel) apiKeyRequiredLabel.textContent = '(optional)';
+    } else {
+        // User is signed out
+        if (googleSignInBtn) {
+            googleSignInBtn.style.display = 'flex';
+            googleSignInBtn.classList.remove('loading');
+        }
+        if (userInfo) userInfo.style.display = 'none';
+        if (apiKeyRequiredLabel) apiKeyRequiredLabel.textContent = '(required)';
+    }
+}
+
 // Initialize the application
 function initializeApp() {
     // Initialize the main application
-    
+
     // Initialize DOM references from config.js
     initializeDOMReferences();
-    
+
+    // Initialize OAuth if enabled
+    if (CONFIG.OAUTH_ENABLED && CONFIG.WORKER_URL) {
+        initializeOAuth();
+    }
+
     // Attach event listeners after DOM references are initialized
     attachEventListeners();
-    
+
     // Phase 4: Initialize responsive layout manager
     window.layoutManager = new ResponsiveLayoutManager();
-    
+
     // Phase 4: Clean up expired cache entries on startup
     QuestionCache.cleanup();
-    
+
     // Phase 4: Initialize animated background
     try {
         window.mathBackground = new MathBackground();
@@ -35,11 +119,11 @@ function initializeApp() {
     } catch (error) {
         console.error('MathBackground initialization failed:', error);
     }
-    
+
     // Phase 4: Initialize swipe gestures for mobile navigation
     window.swipeHandler = new SwipeHandler();
     window.swipeHandler.init();
-    
+
     // Phase 4: Initialize celebration engine
     window.celebrationEngine = new CelebrationEngine();
     window.celebrationEngine.init();
@@ -1023,9 +1107,16 @@ Ensure the LaTeX is correctly escaped for JSON strings.
             }
         }
 
-        // Use the selected model's endpoint
-        const apiUrl = `${modelConfig.endpoint}?key=${apiKey}`;
-        const result = await makeAPICallWithRetry(apiUrl, payload);
+        // Route API call: Use OAuth worker if authenticated, otherwise direct API call
+        let result;
+        if (window.authManager && window.authManager.isAuthenticated()) {
+            // Use OAuth worker endpoint
+            result = await window.authManager.generateQuestions(selectedModel, payload);
+        } else {
+            // Direct API call with user's API key
+            const apiUrl = `${modelConfig.endpoint}?key=${apiKey}`;
+            result = await makeAPICallWithRetry(apiUrl, payload);
+        }
 
         if (result.candidates && result.candidates.length > 0 &&
             result.candidates[0].content && result.candidates[0].content.parts &&

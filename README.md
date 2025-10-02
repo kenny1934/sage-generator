@@ -94,10 +94,11 @@ A powerful web-based mathematical problem generator designed for educators and s
 - **Smart Caching**: Cache control with "Generate Fresh Questions" option
 
 ### Security & Privacy
+- **Google Workspace OAuth** (Optional): Enterprise SSO for teams - [Setup Guide](./OAUTH_QUICKSTART.md)
 - **API Key Encryption**: Optional password-protected encryption for API keys
 - **Double Password Confirmation**: Prevents typo-based lockouts
 - **Forgot Password Recovery**: Clear process to reset encrypted keys
-- **Local Storage Only**: API keys never sent to external servers
+- **Local Storage Only**: API keys never sent to external servers (when not using OAuth)
 - **Input Sanitization**: XSS protection and secure data handling
 
 ### Developer Features
@@ -110,9 +111,10 @@ A powerful web-based mathematical problem generator designed for educators and s
 ### Prerequisites
 - A modern web browser with JavaScript enabled
 - Internet connection for AI-generated problems
-- Google Gemini API key
+- **Option 1:** Google Gemini API key (individual use)
+- **Option 2:** Google Workspace account (team use with OAuth)
 
-### Quick Start
+### Quick Start - Individual Use
 1. **Get a Gemini API Key**:
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
    - Create a new API key for the Generative Language API
@@ -126,6 +128,27 @@ A powerful web-based mathematical problem generator designed for educators and s
    - Choose a math topic and grade level
    - Select difficulty level
    - Click "Generate Maths Questions!" or press `Ctrl + Enter`
+
+### Quick Start - Team Use (Google Workspace OAuth)
+**For teams who want colleagues to sign in with Google Workspace instead of sharing API keys:**
+
+1. **Deploy OAuth Worker** (30 minutes, one-time setup):
+   - See [OAuth Quick Start Guide](./OAUTH_QUICKSTART.md)
+   - Deploy Cloudflare Worker (free)
+   - Configure Google Workspace OAuth
+   - Enable in SAGE config
+
+2. **Colleagues Sign In**:
+   - Click "Sign in with Google Workspace"
+   - Authenticate with workspace account
+   - Start generating questions (no API key needed)
+
+**Benefits:**
+- ✅ No API key sharing
+- ✅ Domain-restricted authentication
+- ✅ Centralized cost management
+- ✅ 100% free (Cloudflare free tier)
+- ✅ Easy rollback to API key mode
 
 ### Example Topics
 - "Linear equations for Grade 9"

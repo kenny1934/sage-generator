@@ -1,0 +1,31 @@
+# Cloudflare Workers Configuration for SAGE OAuth Backend
+
+name = "sage-oauth-worker"
+main = "index.js"
+compatibility_date = "2024-09-01"
+
+# Worker type
+workers_dev = true
+
+# Environment variables (secrets set via CLI: wrangler secret put SECRET_NAME)
+[vars]
+# Replace with your actual values
+WORKSPACE_DOMAIN = "yourdomain.com"
+REDIRECT_URI = "https://sage-oauth-worker.your-subdomain.workers.dev/auth/callback"
+
+# Secrets (set these using: wrangler secret put SECRET_NAME)
+# - GOOGLE_CLIENT_ID: Your Google OAuth client ID
+# - GOOGLE_CLIENT_SECRET: Your Google OAuth client secret
+# - GEMINI_API_KEY: Your Gemini API key (shared for all users)
+# - JWT_SECRET: Random secret for signing session tokens (generate with: openssl rand -base64 32)
+
+# Example commands to set secrets:
+# wrangler secret put GOOGLE_CLIENT_ID
+# wrangler secret put GOOGLE_CLIENT_SECRET
+# wrangler secret put GEMINI_API_KEY
+# wrangler secret put JWT_SECRET
+
+# Routes (uncomment and configure for custom domain)
+# [[routes]]
+# pattern = "api.yourdomain.com/*"
+# zone_name = "yourdomain.com"

@@ -68,7 +68,10 @@ const CONFIG = {
     // Model and cost tracking
     SELECTED_MODEL_KEY: 'sage_selected_model',
     USAGE_STATS_KEY: 'sage_usage_stats',
-    COST_TRACKING_KEY: 'sage_cost_tracking'
+    COST_TRACKING_KEY: 'sage_cost_tracking',
+    // OAuth configuration
+    OAUTH_ENABLED: false, // Set to true when worker is deployed
+    WORKER_URL: '' // Set to your Cloudflare Worker URL (e.g., 'https://sage-oauth-worker.your-subdomain.workers.dev')
 };
 
 // Global DOM element references (initialized after DOM loads)
